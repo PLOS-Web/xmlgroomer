@@ -35,6 +35,16 @@ def remove_period_after_comment_end_tag(root):
             comment.tail = re.sub(r'^\.', r'', comment.tail)
     return root
 
+def move_provenance(root):
+    for prov in root.xpath("//author-notes//fn[@fn-type='other']"):
+        if prov.xpath("p/bold")[0].text == 'Provenance:':
+            fngroup = etree.Element('fn-group')
+            fngroup.append(prov)
+            reflist = root.xpath("//ref-list")[0]
+            parent = reflist.getparent()
+            parent.insert(parent.index(reflist) + 1, fngroup)
+    return root
+
 if __name__ == '__main__':
     if len(sys.argv) == 3:
         e = etree.parse(sys.argv[1])
