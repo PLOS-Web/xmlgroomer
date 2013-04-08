@@ -45,13 +45,14 @@ def move_provenance(root):
             parent.insert(parent.index(reflist) + 1, fngroup)
     return root
 
+groomers = [fix_url, change_Clinical_Trial_to_Research_Article, remove_period_after_comment_end_tag, move_provenance]
+
 if __name__ == '__main__':
     if len(sys.argv) == 3:
         e = etree.parse(sys.argv[1])
         root = e.getroot()
-        fix_url(root)
-        change_Clinical_Trial_to_Research_Article(root)
-        remove_period_after_comment_end_tag(root)
+        for groomer in groomers:
+            root = groomer(root)
         e.write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
         print 'done'
     else:
