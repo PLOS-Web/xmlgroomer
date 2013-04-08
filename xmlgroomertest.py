@@ -7,17 +7,16 @@ import lxml.etree as etree
 import xmlgroomer as x
 
 def verify(before, after, groomer):
-    # remove whitespace formatting in before and after strings
-    before = ''.join([line.strip() for line in before.split('\n')])
-    after = ''.join([line.strip() for line in after.split('\n')])
-    # normalize xml
-    goal = etree.tostring(etree.fromstring(after))
-    # apply groomer
-    result = etree.tostring(groomer(etree.fromstring(before)))
+    goal = normalize(after)
+    result = normalize(etree.tostring(groomer(etree.fromstring(before))))
     if goal != result:
-        print 'expected:\n', goal
-        print 'generated:\n', result
+        print 'goal:\n', goal
+        print 'result:\n', result
         assert False
+
+def normalize(string):
+    string = ''.join([line.strip() for line in string.split('\n')])
+    return etree.tostring(etree.fromstring(string))
 
 def test_fix_url():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
