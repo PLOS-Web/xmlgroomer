@@ -72,3 +72,8 @@ def test_move_provenance():
         <glossary></glossary>
         </article>'''
     verify(before, after, x.move_provenance)
+
+def test_remove_empty_element():
+    before = '<article><tag><title></title></tag><sec id="s1"></sec><p>Paragraph.</p><body/></article>'
+    after = '<article><tag/><sec id="s1"></sec><p>Paragraph.</p></article>'
+    verify(before, after, x.remove_empty_element)

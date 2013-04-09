@@ -38,6 +38,7 @@ def remove_period_after_comment_end_tag(root):
 def move_provenance(root):
     for prov in root.xpath("//author-notes//fn[@fn-type='other']"):
         if prov.xpath("p/bold")[0].text == 'Provenance:':
+            print 'moving provenance from author-notes to fn-group after references'
             fngroup = etree.Element('fn-group')
             fngroup.append(prov)
             reflist = root.xpath("//ref-list")[0]
@@ -45,7 +46,15 @@ def move_provenance(root):
             parent.insert(parent.index(reflist) + 1, fngroup)
     return root
 
-groomers = [fix_url, change_Clinical_Trial_to_Research_Article, remove_period_after_comment_end_tag, move_provenance]
+def remove_empty_element(root):
+    for element in root.iterdescendants():
+        if not element.text and not element.attrib and not element.getchildren():
+            print 'removing empty element', element.tag
+            element.getparent().remove(element)        
+    return root
+
+groomers = [fix_url, change_Clinical_Trial_to_Research_Article, remove_period_after_comment_end_tag, \
+            move_provenance, remove_empty_element]
 
 if __name__ == '__main__':
     if len(sys.argv) == 3:
