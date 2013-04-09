@@ -29,7 +29,7 @@ def test_fix_url():
         </article>'''
     verify(before, after, x.fix_url)
 
-def test_change_Clinical_Trial_to_Research_Article():
+def test_fix_article_type():
     before = '''<article>
         <article-categories>
         <subj-group subj-group-type="heading">
@@ -44,14 +44,14 @@ def test_change_Clinical_Trial_to_Research_Article():
         </subj-group>
         </article-categories>
         </article>'''
-    verify(before, after, x.change_Clinical_Trial_to_Research_Article)
+    verify(before, after, x.fix_article_type)
 
-def test_remove_period_after_comment_end_tag():
+def test_fix_comment():
     before = '<article><comment></comment>.</article>'
     after = '<article><comment></comment></article>'
-    verify(before, after, x.remove_period_after_comment_end_tag)
+    verify(before, after, x.fix_comment)
 
-def test_move_provenance():
+def test_fix_provenance():
     before = '''<article>
         <author-notes>
         <fn fn-type="other">
@@ -71,14 +71,14 @@ def test_move_provenance():
         </fn-group>
         <glossary></glossary>
         </article>'''
-    verify(before, after, x.move_provenance)
+    verify(before, after, x.fix_provenance)
 
-def test_remove_empty_element():
+def test_fix_empty_element():
     before = '<article><tag><title></title></tag><sec id="s1"></sec><p>Paragraph.</p><body/></article>'
     after = '<article><tag/><sec id="s1"></sec><p>Paragraph.</p></article>'
-    verify(before, after, x.remove_empty_element)
+    verify(before, after, x.fix_empty_element)
 
-def test_add_comment_tag_around_journal_ref():
+def test_fix_journal_ref():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <mixed-citation publication-type="journal" xlink:type="simple">
         <lpage>516</lpage>doi:
@@ -95,9 +95,9 @@ def test_add_comment_tag_around_journal_ref():
         </comment>
         </mixed-citation> 
         </article>'''
-    verify(before, after, x.add_comment_tag_around_journal_ref)
+    verify(before, after, x.fix_journal_ref)
 
-def test_use_EM_date():
+def test_fix_date():
     before = '<pub-date pub-type="epub"><day>4</day><month>1</month><year>2012</year></pub-date>'
     after = '<pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>'
-    verify(before, after, x.use_EM_date, '2013-03-13')
+    verify(before, after, x.fix_date, '2013-03-13')

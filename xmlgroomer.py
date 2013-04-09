@@ -21,21 +21,21 @@ def fix_url(root):
             link.attrib[h] = new_link
     return root
 
-def change_Clinical_Trial_to_Research_Article(root):
+def fix_article_type(root):
     for article_type in root.xpath("//article-categories//subj-group[@subj-group-type='heading']/subject"):
         if article_type.text == 'Clinical Trial':
             print 'changing article type from Clinical Trial to Research Article'
             article_type.text = 'Research Article'
     return root
 
-def remove_period_after_comment_end_tag(root):
+def fix_comment(root):
     for comment in root.xpath("//comment"):
         if comment.tail:
             print 'removing period after comment end tag'
             comment.tail = re.sub(r'^\.', r'', comment.tail)
     return root
 
-def move_provenance(root):
+def fix_provenance(root):
     for prov in root.xpath("//author-notes//fn[@fn-type='other']"):
         if prov.xpath("p/bold")[0].text == 'Provenance:':
             print 'moving provenance from author-notes to fn-group after references'
@@ -46,14 +46,14 @@ def move_provenance(root):
             parent.insert(parent.index(reflist) + 1, fngroup)
     return root
 
-def remove_empty_element(root):
+def fix_empty_element(root):
     for element in root.iterdescendants():
         if not element.text and not element.attrib and not element.getchildren():
             print 'removing empty element', element.tag
             element.getparent().remove(element)        
     return root
 
-def add_comment_tag_around_journal_ref(root):
+def fix_journal_ref(root):
     for link in root.xpath("//mixed-citation[@publication-type='journal']/ext-link"):
         print 'adding comment tag around journal reference link'
         parent = link.getparent()
@@ -67,7 +67,7 @@ def add_comment_tag_around_journal_ref(root):
         parent.insert(index, comment)
     return root
 
-def use_EM_date(root, pubdate):
+def fix_date(root, pubdate):
     for date in root.xpath("//pub-date[@pub-type='epub']"):
         em_year = pubdate[:4]
         em_month = pubdate[5:7]
@@ -86,18 +86,15 @@ def use_EM_date(root, pubdate):
             date.xpath("day")[0].text = str(int(em_day))
     return root
 
-groomers = [fix_url, change_Clinical_Trial_to_Research_Article, remove_period_after_comment_end_tag, \
-            move_provenance, remove_empty_element, add_comment_tag_around_journal_ref]
+groomers = [fix_url, fix_article_type, fix_comment, fix_provenance, fix_empty_element, fix_journal_ref]
 
 if __name__ == '__main__':
     if len(sys.argv) == 3:
-        before = sys.argv[1]
-        after = sys.argv[2]
-        e = etree.parse(before)
+        e = etree.parse(sys.argv[1])
         root = e.getroot()
         for groomer in groomers:
             root = groomer(root)
-        e.write(after, xml_declaration = True, encoding = 'UTF-8')
+        e.write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
         print 'done'
     else:
         print 'usage: xmlgroomer.py before.xml after.xml'
