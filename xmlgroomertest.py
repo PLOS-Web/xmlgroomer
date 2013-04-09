@@ -6,9 +6,9 @@ import re
 import lxml.etree as etree
 import xmlgroomer as x
 
-def verify(before, after, groomer):
+def verify(before, after, groomer, *args):
     goal = normalize(after)
-    result = normalize(etree.tostring(groomer(etree.fromstring(before))))
+    result = normalize(etree.tostring(groomer(etree.fromstring(before), *args)))
     if goal != result:
         print 'goal:\n', goal
         print 'result:\n', result
@@ -78,7 +78,7 @@ def test_remove_empty_element():
     after = '<article><tag/><sec id="s1"></sec><p>Paragraph.</p></article>'
     verify(before, after, x.remove_empty_element)
 
-def test_add_comment_tag_to_journal_ref():
+def test_add_comment_tag_around_journal_ref():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <mixed-citation publication-type="journal" xlink:type="simple">
         <lpage>516</lpage>doi:
@@ -95,4 +95,9 @@ def test_add_comment_tag_to_journal_ref():
         </comment>
         </mixed-citation> 
         </article>'''
-    verify(before, after, x.add_comment_tag_to_journal_ref)
+    verify(before, after, x.add_comment_tag_around_journal_ref)
+
+def test_use_EM_date():
+    before = '<pub-date pub-type="epub"><day>4</day><month>1</month><year>2012</year></pub-date>'
+    after = '<pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>'
+    verify(before, after, x.use_EM_date, '2013-03-13')

@@ -53,7 +53,7 @@ def remove_empty_element(root):
             element.getparent().remove(element)        
     return root
 
-def add_comment_tag_to_journal_ref(root):
+def add_comment_tag_around_journal_ref(root):
     for link in root.xpath("//mixed-citation[@publication-type='journal']/ext-link"):
         print 'adding comment tag around journal reference link'
         parent = link.getparent()
@@ -67,16 +67,37 @@ def add_comment_tag_to_journal_ref(root):
         parent.insert(index, comment)
     return root
 
+def use_EM_date(root, pubdate):
+    for date in root.xpath("//pub-date[@pub-type='epub']"):
+        em_year = pubdate[:4]
+        em_month = pubdate[5:7]
+        em_day = pubdate[8:]
+        xml_year = date.xpath("year")[0].text
+        xml_month = date.xpath("month")[0].text
+        xml_day = date.xpath("day")[0].text
+        if xml_year != em_year:
+            print 'changing pub year from', xml_year, 'to', em_year
+            date.xpath("year")[0].text = em_year
+        if xml_month != em_month:
+            print 'changing pub month from', xml_month, 'to', str(int(em_month))
+            date.xpath("month")[0].text = str(int(em_month))
+        if xml_day != em_day:
+            print 'changing pub day from', xml_day, 'to', str(int(em_day))
+            date.xpath("day")[0].text = str(int(em_day))
+    return root
+
 groomers = [fix_url, change_Clinical_Trial_to_Research_Article, remove_period_after_comment_end_tag, \
-            move_provenance, remove_empty_element, add_comment_tag_to_journal_ref]
+            move_provenance, remove_empty_element, add_comment_tag_around_journal_ref]
 
 if __name__ == '__main__':
     if len(sys.argv) == 3:
-        e = etree.parse(sys.argv[1])
+        before = sys.argv[1]
+        after = sys.argv[2]
+        e = etree.parse(before)
         root = e.getroot()
         for groomer in groomers:
             root = groomer(root)
-        e.write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
+        e.write(after, xml_declaration = True, encoding = 'UTF-8')
         print 'done'
     else:
         print 'usage: xmlgroomer.py before.xml after.xml'
