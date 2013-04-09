@@ -53,8 +53,22 @@ def remove_empty_element(root):
             element.getparent().remove(element)        
     return root
 
+def add_comment_tag_to_journal_ref(root):
+    for link in root.xpath("//mixed-citation[@publication-type='journal']/ext-link"):
+        print 'adding comment tag around journal reference link'
+        parent = link.getparent()
+        index = parent.index(link)
+        comment = etree.Element('comment')
+        comment.append(link)
+        previous = parent.getchildren()[index-1]
+        if previous.tail:
+            comment.text = previous.tail
+            previous.tail = ''
+        parent.insert(index, comment)
+    return root
+
 groomers = [fix_url, change_Clinical_Trial_to_Research_Article, remove_period_after_comment_end_tag, \
-            move_provenance, remove_empty_element]
+            move_provenance, remove_empty_element, add_comment_tag_to_journal_ref]
 
 if __name__ == '__main__':
     if len(sys.argv) == 3:

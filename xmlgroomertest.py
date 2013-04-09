@@ -77,3 +77,22 @@ def test_remove_empty_element():
     before = '<article><tag><title></title></tag><sec id="s1"></sec><p>Paragraph.</p><body/></article>'
     after = '<article><tag/><sec id="s1"></sec><p>Paragraph.</p></article>'
     verify(before, after, x.remove_empty_element)
+
+def test_add_comment_tag_to_journal_ref():
+    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <mixed-citation publication-type="journal" xlink:type="simple">
+        <lpage>516</lpage>doi:
+        <ext-link ext-link-type="uri" xlink:href="http://dx.doi.org/10.1038/nature03236" xlink:type="simple">
+        10.1038/nature03236</ext-link>
+        </mixed-citation> 
+        </article>'''
+    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <mixed-citation publication-type="journal" xlink:type="simple">
+        <lpage>516</lpage>
+        <comment>doi:
+        <ext-link ext-link-type="uri" xlink:href="http://dx.doi.org/10.1038/nature03236" xlink:type="simple">
+        10.1038/nature03236</ext-link>
+        </comment>
+        </mixed-citation> 
+        </article>'''
+    verify(before, after, x.add_comment_tag_to_journal_ref)
