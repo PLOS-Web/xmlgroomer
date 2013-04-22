@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # usage: nosetests xmlgroomertest.py
 
-import sys
-import re
 import lxml.etree as etree
 import xmlgroomer as x
 
@@ -17,17 +15,6 @@ def verify(before, after, groomer, *args):
 def normalize(string):
     string = ''.join([line.strip() for line in string.split('\n')])
     return etree.tostring(etree.fromstring(string))
-
-def test_fix_url():
-    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
-        <ext-link ext-link-type="uri" xlink:href="ht tp://10.1023/A:1020  830703012" xlink:type="simple">
-        </ext-link>
-        </article>'''
-    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
-        <ext-link ext-link-type="uri" xlink:href="http://dx.doi.org/10.1023/A:1020830703012" xlink:type="simple">
-        </ext-link>
-        </article>'''
-    verify(before, after, x.fix_url)
 
 def test_fix_article_type():
     before = '''<article>
@@ -45,6 +32,41 @@ def test_fix_article_type():
         </article-categories>
         </article>'''
     verify(before, after, x.fix_article_type)
+
+def test_fix_date():
+    before = '<pub-date pub-type="epub"><day>4</day><month>1</month><year>2012</year></pub-date>'
+    after = '<pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>'
+    verify(before, after, x.fix_date, '2013-03-13')
+
+def test_fix_journal_ref():
+    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <mixed-citation publication-type="journal" xlink:type="simple">
+        <lpage>516</lpage>doi:
+        <ext-link ext-link-type="uri" xlink:href="http://dx.doi.org/10.1038/nature03236" xlink:type="simple">
+        10.1038/nature03236</ext-link>
+        </mixed-citation> 
+        </article>'''
+    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <mixed-citation publication-type="journal" xlink:type="simple">
+        <lpage>516</lpage>
+        <comment>doi:
+        <ext-link ext-link-type="uri" xlink:href="http://dx.doi.org/10.1038/nature03236" xlink:type="simple">
+        10.1038/nature03236</ext-link>
+        </comment>
+        </mixed-citation> 
+        </article>'''
+    verify(before, after, x.fix_journal_ref)
+
+def test_fix_url():
+    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <ext-link ext-link-type="uri" xlink:href="ht tp://10.1023/A:1020  830703012" xlink:type="simple">
+        </ext-link>
+        </article>'''
+    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <ext-link ext-link-type="uri" xlink:href="http://dx.doi.org/10.1023/A:1020830703012" xlink:type="simple">
+        </ext-link>
+        </article>'''
+    verify(before, after, x.fix_url)
 
 def test_fix_comment():
     before = '<article><comment></comment>.</article>'
@@ -77,27 +99,3 @@ def test_fix_empty_element():
     before = '<article><tag><title></title></tag><sec id="s1"></sec><p>Paragraph.</p><body/></article>'
     after = '<article><tag/><sec id="s1"></sec><p>Paragraph.</p></article>'
     verify(before, after, x.fix_empty_element)
-
-def test_fix_journal_ref():
-    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
-        <mixed-citation publication-type="journal" xlink:type="simple">
-        <lpage>516</lpage>doi:
-        <ext-link ext-link-type="uri" xlink:href="http://dx.doi.org/10.1038/nature03236" xlink:type="simple">
-        10.1038/nature03236</ext-link>
-        </mixed-citation> 
-        </article>'''
-    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
-        <mixed-citation publication-type="journal" xlink:type="simple">
-        <lpage>516</lpage>
-        <comment>doi:
-        <ext-link ext-link-type="uri" xlink:href="http://dx.doi.org/10.1038/nature03236" xlink:type="simple">
-        10.1038/nature03236</ext-link>
-        </comment>
-        </mixed-citation> 
-        </article>'''
-    verify(before, after, x.fix_journal_ref)
-
-def test_fix_date():
-    before = '<pub-date pub-type="epub"><day>4</day><month>1</month><year>2012</year></pub-date>'
-    after = '<pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>'
-    verify(before, after, x.fix_date, '2013-03-13')
