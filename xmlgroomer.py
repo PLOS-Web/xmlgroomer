@@ -40,6 +40,19 @@ def fix_collection(root):
     return root
 groomers.append(fix_collection)
 
+def fix_volume(root):
+    year = root.xpath("//pub-date[@pub-type='epub']/year")[0].text
+    journal = root.xpath("//journal-id[@journal-id-type='pmc']")[0].text
+    volumes = {'plosbiol':2002, 'plosmed':2003, 'ploscomp':2004, 'plosgen':2004, 'plospath':2004,
+                'plosone':2005, 'plosntds':2006}
+    for volume in root.xpath("//article-meta/volume"):
+        correct_volume = str(int(year) - volumes[journal])
+        if volume.text != correct_volume:
+            print 'changing volume from', volume.text, 'to', correct_volume
+            volume.text = correct_volume
+    return root
+groomers.append(fix_volume)
+
 def fix_issue(root):
     month = root.xpath("//pub-date[@pub-type='epub']/month")[0].text
     for issue in root.xpath("//article-meta/issue"):
@@ -121,7 +134,7 @@ groomers.append(fix_empty_element)
 if __name__ == '__main__':
     if len(sys.argv) != 3:
         sys.exit('usage: xmlgroomer.py before.xml after.xml')
-    parser = etree.XMLParser(recover=True)
+    parser = etree.XMLParser(recover = True)
     e = etree.parse(sys.argv[1],parser)
     root = e.getroot()
     for groomer in groomers:

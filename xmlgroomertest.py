@@ -53,6 +53,23 @@ def test_fix_collection():
         </article-meta></article>'''
     verify(before, after, x.fix_collection)
 
+def test_fix_volume():
+    before = '''<article>
+        <journal-id journal-id-type="pmc">plosone</journal-id>
+        <article-meta>
+        <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
+        <volume>6</volume>
+        </article-meta>
+        </article>'''
+    after = '''<article>
+        <journal-id journal-id-type="pmc">plosone</journal-id>
+        <article-meta>
+        <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
+        <volume>8</volume>
+        </article-meta>
+        </article>'''
+    verify(before, after, x.fix_volume)
+
 def test_fix_issue():
     before = '''<article><article-meta>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
