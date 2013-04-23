@@ -16,10 +16,11 @@ def fix_article_type(root):
 groomers.append(fix_article_type)
 
 def fix_date(root, pubdate):
-    for date in root.xpath("//pub-date[@pub-type='epub']"):
-        em_year = pubdate[:4]
-        em_month = pubdate[5:7]
-        em_day = pubdate[8:]
+    em_year = pubdate[:4]
+    em_month = pubdate[5:7]
+    em_day = pubdate[8:]
+    # pubdate
+    for date in root.xpath("pub-date[@pub-type='epub']"):
         xml_year = date.xpath("year")[0].text
         xml_month = date.xpath("month")[0].text
         xml_day = date.xpath("day")[0].text
@@ -32,6 +33,16 @@ def fix_date(root, pubdate):
         if xml_day != em_day:
             print 'changing pub day from', xml_day, 'to', str(int(em_day))
             date.xpath("day")[0].text = str(int(em_day))
+    # collection month and year
+    for coll in root.xpath("//pub-date[@pub-type='collection']"):
+        coll_year = coll.xpath("year")[0].text
+        coll_month = coll.xpath("month")[0].text
+        if coll_year != em_year:
+            print 'changing collection year from', coll_year, 'to', em_year
+            coll.xpath("year")[0].text = em_year
+        if coll_month != em_month:
+            print 'changing collection month from', coll_month, 'to', str(int(em_month))
+            coll.xpath("month")[0].text = str(int(em_month))
     return root
 #groomers.append(fix_date)
 

@@ -34,8 +34,10 @@ def test_fix_article_type():
     verify(before, after, x.fix_article_type)
 
 def test_fix_date():
-    before = '<pub-date pub-type="epub"><day>4</day><month>1</month><year>2012</year></pub-date>'
-    after = '<pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>'
+    before = '''<article><pub-date pub-type="epub"><day>4</day><month>1</month><year>2012</year></pub-date>
+        <pub-date pub-type="collection"><month>1</month><year>2012</year></pub-date></article>'''
+    after = '''<article><pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
+        <pub-date pub-type="collection"><month>3</month><year>2013</year></pub-date></article>'''
     verify(before, after, x.fix_date, '2013-03-13')
 
 def test_fix_journal_ref():
