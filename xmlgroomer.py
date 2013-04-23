@@ -16,33 +16,21 @@ def fix_article_type(root):
 groomers.append(fix_article_type)
 
 def fix_date(root, pubdate):
-    em_year = pubdate[:4]
-    em_month = pubdate[5:7]
-    em_day = pubdate[8:]
+    em = {'year':pubdate[:4], 'month':pubdate[5:7], 'day':pubdate[8:]}
     # pubdate
-    for date in root.xpath("pub-date[@pub-type='epub']"):
-        xml_year = date.xpath("year")[0].text
-        xml_month = date.xpath("month")[0].text
-        xml_day = date.xpath("day")[0].text
-        if xml_year != em_year:
-            print 'changing pub year from', xml_year, 'to', em_year
-            date.xpath("year")[0].text = em_year
-        if xml_month != em_month:
-            print 'changing pub month from', xml_month, 'to', str(int(em_month))
-            date.xpath("month")[0].text = str(int(em_month))
-        if xml_day != em_day:
-            print 'changing pub day from', xml_day, 'to', str(int(em_day))
-            date.xpath("day")[0].text = str(int(em_day))
+    for date in root.xpath("//pub-date[@pub-type='epub']"):
+        for field in ['year','month','day']:
+            xml_val = date.xpath(field)[0].text
+            if xml_val != em[field]:
+                print 'changing pub', field, 'from', xml_val, 'to', str(int(em[field]))
+                date.xpath(field)[0].text = str(int(em[field]))
     # collection month and year
     for coll in root.xpath("//pub-date[@pub-type='collection']"):
-        coll_year = coll.xpath("year")[0].text
-        coll_month = coll.xpath("month")[0].text
-        if coll_year != em_year:
-            print 'changing collection year from', coll_year, 'to', em_year
-            coll.xpath("year")[0].text = em_year
-        if coll_month != em_month:
-            print 'changing collection month from', coll_month, 'to', str(int(em_month))
-            coll.xpath("month")[0].text = str(int(em_month))
+        for field in ['year','month']:
+            xml_val = coll.xpath(field)[0].text
+            if xml_val != em[field]:
+                print 'changing pub', field, 'from', xml_val, 'to', str(int(em[field]))
+                coll.xpath(field)[0].text = str(int(em[field]))
     return root
 #groomers.append(fix_date)
 
