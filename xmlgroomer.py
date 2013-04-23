@@ -29,7 +29,7 @@ def fix_date(root, pubdate):
         for field in ['year','month']:
             xml_val = coll.xpath(field)[0].text
             if xml_val != em[field]:
-                print 'changing pub', field, 'from', xml_val, 'to', str(int(em[field]))
+                print 'changing collection', field, 'from', xml_val, 'to', str(int(em[field]))
                 coll.xpath(field)[0].text = str(int(em[field]))
     return root
 #groomers.append(fix_date)
@@ -95,12 +95,12 @@ def fix_empty_element(root):
 groomers.append(fix_empty_element)
 
 if __name__ == '__main__':
-    if len(sys.argv) == 3:
-        e = etree.parse(sys.argv[1])
-        root = e.getroot()
-        for groomer in groomers:
-            root = groomer(root)
-        e.write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
-        print 'done'
-    else:
-        print 'usage: xmlgroomer.py before.xml after.xml'
+    if len(sys.argv) != 3:
+        sys.exit('usage: xmlgroomer.py before.xml after.xml')
+    parser = etree.XMLParser(recover=True)
+    e = etree.parse(sys.argv[1],parser)
+    root = e.getroot()
+    for groomer in groomers:
+        root = groomer(root)
+    e.write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
+    print 'done'
