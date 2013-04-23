@@ -15,24 +15,36 @@ def fix_article_type(root):
     return root
 groomers.append(fix_article_type)
 
-def fix_date(root, pubdate):
-    em = {'year':pubdate[:4], 'month':pubdate[5:7], 'day':pubdate[8:]}
-    # pubdate
+def fix_pubdate(root, pubdate):
+    em = {'year':pubdate[:4], 'month':str(int(pubdate[5:7])), 'day':str(int(pubdate[8:]))}
     for date in root.xpath("//pub-date[@pub-type='epub']"):
         for field in ['year','month','day']:
             xml_val = date.xpath(field)[0].text
             if xml_val != em[field]:
-                print 'changing pub', field, 'from', xml_val, 'to', str(int(em[field]))
-                date.xpath(field)[0].text = str(int(em[field]))
-    # collection month and year
+                print 'changing pub', field, 'from', xml_val, 'to', em[field]
+                date.xpath(field)[0].text = em[field]
+    return root
+# groomers.append(fix_pubdate)
+
+def fix_collection(root, pubdate):
+    em = {'year':pubdate[:4], 'month':str(int(pubdate[5:7]))}
     for coll in root.xpath("//pub-date[@pub-type='collection']"):
         for field in ['year','month']:
             xml_val = coll.xpath(field)[0].text
             if xml_val != em[field]:
-                print 'changing collection', field, 'from', xml_val, 'to', str(int(em[field]))
-                coll.xpath(field)[0].text = str(int(em[field]))
+                print 'changing collection', field, 'from', xml_val, 'to', em[field]
+                coll.xpath(field)[0].text = em[field]
     return root
-#groomers.append(fix_date)
+# groomers.append(fix_collection)
+
+def fix_issue(root, pubdate):
+    em_month = str(int(pubdate[5:7]))
+    for issue in root.xpath("//article-meta/issue"):
+        if issue.text != em_month:
+            print 'changing issue from', issue.text, 'to', em_month
+            issue.text = em_month
+    return root
+# groomers.append(fix_issue)
 
 def fix_journal_ref(root):
     for link in root.xpath("//mixed-citation[@publication-type='journal']/ext-link"):

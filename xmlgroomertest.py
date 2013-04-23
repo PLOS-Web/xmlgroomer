@@ -33,12 +33,28 @@ def test_fix_article_type():
         </article>'''
     verify(before, after, x.fix_article_type)
 
-def test_fix_date():
-    before = '''<article><pub-date pub-type="epub"><day>4</day><month>1</month><year>2012</year></pub-date>
-        <pub-date pub-type="collection"><month>1</month><year>2012</year></pub-date></article>'''
-    after = '''<article><pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
-        <pub-date pub-type="collection"><month>3</month><year>2013</year></pub-date></article>'''
-    verify(before, after, x.fix_date, '2013-03-13')
+def test_fix_pubdate():
+    before = '''<article><article-meta>
+        <pub-date pub-type="epub"><day>4</day><month>1</month><year>2012</year></pub-date>
+        </article-meta></article>'''
+    after = '''<article><article-meta>
+        <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
+        </article-meta></article>'''
+    verify(before, after, x.fix_pubdate, '2013-03-13')
+
+def test_fix_collection():
+    before = '''<article><article-meta>
+        <pub-date pub-type="collection"><month>5</month><year>2009</year></pub-date>
+        </article-meta></article>'''
+    after = '''<article><article-meta>
+        <pub-date pub-type="collection"><month>3</month><year>2013</year></pub-date>
+        </article-meta></article>'''
+    verify(before, after, x.fix_collection, '2013-03-13')
+
+def test_fix_issue():
+    before = '<article><article-meta><issue>6</issue></article-meta></article>'
+    after = '<article><article-meta><issue>3</issue></article-meta></article>'
+    verify(before, after, x.fix_issue, '2013-03-13')
 
 def test_fix_journal_ref():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
