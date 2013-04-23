@@ -46,6 +46,15 @@ def fix_issue(root, pubdate):
     return root
 # groomers.append(fix_issue)
 
+def fix_copyright(root, pubdate):
+    em_year = str(int(pubdate[:4]))
+    for copyright in root.xpath("//article-meta/copyright-year"):
+        if copyright.text != em_year:
+            print 'changing copyright year from', copyright.text, 'to', em_year
+            copyright.text = em_year
+    return root
+# groomers.append(fix_copyright)
+
 def fix_journal_ref(root):
     for link in root.xpath("//mixed-citation[@publication-type='journal']/ext-link"):
         print 'adding comment tag around journal reference link'

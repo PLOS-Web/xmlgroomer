@@ -56,6 +56,11 @@ def test_fix_issue():
     after = '<article><article-meta><issue>3</issue></article-meta></article>'
     verify(before, after, x.fix_issue, '2013-03-13')
 
+def test_fix_copyright():
+    before = '<article><article-meta><copyright-year>2008</copyright-year></article-meta></article>'
+    after = '<article><article-meta><copyright-year>2013</copyright-year></article-meta></article>'
+    verify(before, after, x.fix_copyright, '2013-03-13')
+
 def test_fix_journal_ref():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <mixed-citation publication-type="journal" xlink:type="simple">
