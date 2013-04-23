@@ -26,34 +26,37 @@ def fix_pubdate(root, pubdate):
     return root
 # groomers.append(fix_pubdate)
 
-def fix_collection(root, pubdate):
-    em = {'year':pubdate[:4], 'month':str(int(pubdate[5:7]))}
+def fix_collection(root):
+    pub = {}
+    pub['year'] = root.xpath("//pub-date[@pub-type='epub']/year")[0].text
+    pub['month'] = root.xpath("//pub-date[@pub-type='epub']/month")[0].text
     for coll in root.xpath("//pub-date[@pub-type='collection']"):
         for field in ['year','month']:
-            xml_val = coll.xpath(field)[0].text
-            if xml_val != em[field]:
-                print 'changing collection', field, 'from', xml_val, 'to', em[field]
-                coll.xpath(field)[0].text = em[field]
+            if coll.xpath(field):
+                xml_val = coll.xpath(field)[0].text
+                if xml_val != pub[field]:
+                    print 'changing collection', field, 'from', xml_val, 'to', pub[field]
+                    coll.xpath(field)[0].text = pub[field]
     return root
-# groomers.append(fix_collection)
+groomers.append(fix_collection)
 
-def fix_issue(root, pubdate):
-    em_month = str(int(pubdate[5:7]))
+def fix_issue(root):
+    month = root.xpath("//pub-date[@pub-type='epub']/month")[0].text
     for issue in root.xpath("//article-meta/issue"):
-        if issue.text != em_month:
-            print 'changing issue from', issue.text, 'to', em_month
-            issue.text = em_month
+        if issue.text != month:
+            print 'changing issue from', issue.text, 'to', month
+            issue.text = month
     return root
-# groomers.append(fix_issue)
+groomers.append(fix_issue)
 
-def fix_copyright(root, pubdate):
-    em_year = str(int(pubdate[:4]))
-    for copyright in root.xpath("//article-meta/copyright-year"):
-        if copyright.text != em_year:
-            print 'changing copyright year from', copyright.text, 'to', em_year
-            copyright.text = em_year
+def fix_copyright(root):
+    year = root.xpath("//pub-date[@pub-type='epub']/year")[0].text
+    for copyright in root.xpath("//article-meta//copyright-year"):
+        if copyright.text != year:
+            print 'changing copyright year from', copyright.text, 'to', year
+            copyright.text = year
     return root
-# groomers.append(fix_copyright)
+groomers.append(fix_copyright)
 
 def fix_journal_ref(root):
     for link in root.xpath("//mixed-citation[@publication-type='journal']/ext-link"):
