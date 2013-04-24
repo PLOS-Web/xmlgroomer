@@ -34,7 +34,7 @@ def test_fix_article_type():
     verify(before, after, x.fix_article_type)
 
 def test_fix_article_title():
-    before = '''<article><title-group><title>Bottle\rnose Dolp\nhins</title></title-group></article>'''
+    before = '<article><title-group><title>Bottle\rnose Dolp\nhins</title></title-group></article>'
     after = '<article><title-group><title>Bottlenose Dolphins</title></title-group></article>'
     verify(before, after, x.fix_article_title)
 
@@ -96,6 +96,13 @@ def test_fix_copyright():
         <copyright-year>2013</copyright-year>
         </article-meta></article>'''
     verify(before, after, x.fix_copyright)
+
+def test_fix_elocation():
+    before = '''<article><article-id pub-id-type="doi">10.1371/journal.pone.0058162</article-id>
+    		<elocation-id>e0058162</elocation-id></article>'''
+    after = '''<article><article-id pub-id-type="doi">10.1371/journal.pone.0058162</article-id>
+    		<elocation-id>e58162</elocation-id></article>'''
+    verify(before, after, x.fix_elocation)
 
 def test_fix_journal_ref():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">

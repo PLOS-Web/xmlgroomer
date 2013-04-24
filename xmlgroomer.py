@@ -80,6 +80,16 @@ def fix_copyright(root):
     return root
 groomers.append(fix_copyright)
 
+def fix_elocation(root):
+    doi = root.xpath("//article-id[@pub-id-type='doi']")[0].text
+    correct_eloc = 'e'+str(int(doi[-7:]))
+    for eloc in root.xpath("//elocation-id"):
+        if eloc.text != correct_eloc:
+            print 'changing elocation from', eloc.text, 'to', correct_eloc
+            eloc.text = correct_eloc
+    return root
+groomers.append(fix_elocation)
+
 def fix_journal_ref(root):
     for link in root.xpath("//mixed-citation[@publication-type='journal']/ext-link"):
         print 'adding comment tag around journal reference link'
