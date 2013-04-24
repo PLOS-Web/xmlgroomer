@@ -4,14 +4,15 @@
 import sys
 import re
 import lxml.etree as etree
+import mimetypes
 
 groomers = []
 
 def fix_article_type(root):
-    for article_type in root.xpath("//article-categories//subj-group[@subj-group-type='heading']/subject"):
-        if article_type.text == 'Clinical Trial':
+    for typ in root.xpath("//article-categories//subj-group[@subj-group-type='heading']/subject"):
+        if typ.text == 'Clinical Trial':
             print 'changing article type from Clinical Trial to Research Article'
-            article_type.text = 'Research Article'
+            typ.text = 'Research Article'
     return root
 groomers.append(fix_article_type)
 
@@ -36,16 +37,14 @@ def fix_pubdate(root, pubdate):
 # groomers.append(fix_pubdate)
 
 def fix_collection(root):
-    pub = {}
-    pub['year'] = root.xpath("//pub-date[@pub-type='epub']/year")[0].text
-    pub['month'] = root.xpath("//pub-date[@pub-type='epub']/month")[0].text
     for coll in root.xpath("//pub-date[@pub-type='collection']"):
         for field in ['year','month']:
             if coll.xpath(field):
+                pub_val = root.xpath("//pub-date[@pub-type='epub']/"+field)[0].text
                 xml_val = coll.xpath(field)[0].text
-                if xml_val != pub[field]:
-                    print 'changing collection', field, 'from', xml_val, 'to', pub[field]
-                    coll.xpath(field)[0].text = pub[field]
+                if xml_val != pub_val:
+                    print 'changing collection', field, 'from', xml_val, 'to', pub_val
+                    coll.xpath(field)[0].text = pub_val
     return root
 groomers.append(fix_collection)
 
@@ -142,11 +141,24 @@ def fix_provenance(root):
     return root
 groomers.append(fix_provenance)
 
+def fix_mimetype(root):
+    for sup in root.xpath("//supplementary-material"):
+        typ = sup.xpath("caption/p")[-1].text.strip('()')
+        mime, enc = mimetypes.guess_type('x.'+typ, False)
+        if not mime:
+            print 'could not find mimetype'
+            continue
+        if 'mimetype' not in sup.attrib or mime != sup.attrib['mimetype']:
+            print 'setting mimetype of', typ, 'to', mime
+            sup.attrib['mimetype'] = mime
+    return root
+groomers.append(fix_mimetype)
+
 def fix_empty_element(root):
     for element in root.iterdescendants():
         if not element.text and not element.attrib and not element.getchildren():
             print 'removing empty element', element.tag
-            element.getparent().remove(element)        
+            element.getparent().remove(element)
     return root
 groomers.append(fix_empty_element)
 

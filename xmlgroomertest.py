@@ -161,6 +161,19 @@ def test_fix_provenance():
         </article>'''
     verify(before, after, x.fix_provenance)
 
+def test_fix_mimetype():
+	before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+		<supplementary-material id="pone.0063011.s001" xlink:href="pone.0063011.s001.tiff">
+		<label>Figure S1</label>
+		<caption><p>(TIFF)</p></caption>
+		</supplementary-material></article>'''
+	after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+		<supplementary-material id="pone.0063011.s001" xlink:href="pone.0063011.s001.tiff" mimetype="image/tiff">
+		<label>Figure S1</label>
+		<caption><p>(TIFF)</p></caption>
+		</supplementary-material></article>'''
+	verify(before, after, x.fix_mimetype)
+
 def test_fix_empty_element():
     before = '<article><tag><title></title></tag><sec id="s1"></sec><p>Paragraph.</p><body/></article>'
     after = '<article><tag/><sec id="s1"></sec><p>Paragraph.</p></article>'
