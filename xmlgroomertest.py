@@ -176,5 +176,5 @@ def test_fix_mimetype():
 
 def test_fix_empty_element():
     before = '<article><tag><title></title></tag><sec id="s1"></sec><p>Paragraph.</p><body/></article>'
-    after = '<article><tag/><sec id="s1"></sec><p>Paragraph.</p></article>'
+    after = '<article><sec id="s1"></sec><p>Paragraph.</p></article>'
     verify(before, after, x.fix_empty_element)

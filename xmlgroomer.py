@@ -155,7 +155,8 @@ def fix_mimetype(root):
 groomers.append(fix_mimetype)
 
 def fix_empty_element(root):
-    for element in root.iterdescendants():
+    # starts from the leaves of the tree to remove nested empty elements
+    for element in reversed(list(root.iterdescendants())):
         if not element.text and not element.attrib and not element.getchildren():
             print 'removing empty element', element.tag
             element.getparent().remove(element)
