@@ -33,6 +33,11 @@ def test_fix_article_type():
         </article>'''
     verify(before, after, x.fix_article_type)
 
+def test_fix_article_title():
+    before = '''<article><title-group><title>Bottle\rnose Dolp\nhins</title></title-group></article>'''
+    after = '<article><title-group><title>Bottlenose Dolphins</title></title-group></article>'
+    verify(before, after, x.fix_article_title)
+
 def test_fix_pubdate():
     before = '''<article><article-meta>
         <pub-date pub-type="epub"><day>4</day><month>1</month><year>2012</year></pub-date>

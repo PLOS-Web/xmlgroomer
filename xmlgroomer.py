@@ -15,6 +15,15 @@ def fix_article_type(root):
     return root
 groomers.append(fix_article_type)
 
+def fix_article_title(root):
+    for title in root.xpath("//title-group/article-title"):
+        if re.search(r'[\t\n\r]', title.text):
+            new_title = re.sub(r'[\t\n\r]+', r'', title.text)
+            print 'changing article title from', title.text, 'to', new_title
+            title.text = new_title
+    return root
+groomers.append(fix_article_title)
+
 def fix_pubdate(root, pubdate):
     em = {'year':pubdate[:4], 'month':str(int(pubdate[5:7])), 'day':str(int(pubdate[8:]))}
     for date in root.xpath("//pub-date[@pub-type='epub']"):
