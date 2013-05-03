@@ -2,6 +2,7 @@
 # usage: xmlgroomer.py before.xml after.xml
 
 import sys
+import subprocess
 import re
 import lxml.etree as etree
 import mimetypes
@@ -25,7 +26,9 @@ def fix_article_title(root):
     return root
 groomers.append(fix_article_title)
 
-def fix_pubdate(root, pubdate):
+def fix_pubdate(root):
+    doi = root.xpath("//article-id[@pub-id-type='doi']")[0].text
+    pubdate = subprocess.check_output(['php', '/var/local/scripts/production/getPubdate.php', doi])
     em = {'year':pubdate[:4], 'month':str(int(pubdate[5:7])), 'day':str(int(pubdate[8:]))}
     for date in root.xpath("//pub-date[@pub-type='epub']"):
         for field in ['year','month','day']:
@@ -34,7 +37,7 @@ def fix_pubdate(root, pubdate):
                 print 'changing pub', field, 'from', xml_val, 'to', em[field]
                 date.xpath(field)[0].text = em[field]
     return root
-# groomers.append(fix_pubdate)
+groomers.append(fix_pubdate)
 
 def fix_collection(root):
     for coll in root.xpath("//pub-date[@pub-type='collection']"):
@@ -164,6 +167,7 @@ def fix_empty_element(root):
 groomers.append(fix_empty_element)
 
 if __name__ == '__main__':
+    print "start grooming..."
     if len(sys.argv) != 3:
         sys.exit('usage: xmlgroomer.py before.xml after.xml')
     parser = etree.XMLParser(recover = True)
@@ -172,4 +176,4 @@ if __name__ == '__main__':
     for groomer in groomers:
         root = groomer(root)
     e.write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
-    print 'done'
+    print 'grooming done'

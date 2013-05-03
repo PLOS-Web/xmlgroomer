@@ -40,12 +40,14 @@ def test_fix_article_title():
 
 def test_fix_pubdate():
     before = '''<article><article-meta>
+    	<article-id pub-id-type="doi">10.1371/journal.pone.0058162</article-id>
         <pub-date pub-type="epub"><day>4</day><month>1</month><year>2012</year></pub-date>
         </article-meta></article>'''
     after = '''<article><article-meta>
+    	<article-id pub-id-type="doi">10.1371/journal.pone.0058162</article-id>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
         </article-meta></article>'''
-    verify(before, after, x.fix_pubdate, '2013-03-13')
+    verify(before, after, x.fix_pubdate)
 
 def test_fix_collection():
     before = '''<article><article-meta>
