@@ -141,11 +141,11 @@ def fix_comment(root):
 groomers.append(fix_comment)
 
 def fix_provenance(root):
-    for prov in root.xpath("//author-notes//fn[@fn-type='other']"):
-        if prov.xpath("p/bold")[0].text == 'Provenance:':
+    for prov in root.xpath("//author-notes//fn[@fn-type='other']/p/bold"):
+        if prov.text == 'Provenance:':
             print 'moving provenance from author-notes to fn-group after references'
             fngroup = etree.Element('fn-group')
-            fngroup.append(prov)
+            fngroup.append(prov.getparent().getparent())
             reflist = root.xpath("//ref-list")[0]
             parent = reflist.getparent()
             parent.insert(parent.index(reflist) + 1, fngroup)
