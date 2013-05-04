@@ -100,10 +100,15 @@ def test_fix_copyright():
     verify(before, after, x.fix_copyright)
 
 def test_fix_elocation():
-    before = '''<article><article-id pub-id-type="doi">10.1371/journal.pone.0058162</article-id>
-    		<elocation-id>e0058162</elocation-id></article>'''
-    after = '''<article><article-id pub-id-type="doi">10.1371/journal.pone.0058162</article-id>
-    		<elocation-id>e58162</elocation-id></article>'''
+    before = '''<article><article-meta>
+    		<article-id pub-id-type="doi">10.1371/journal.pone.0058162</article-id>
+    		<issue>3</issue>
+    		</article-meta></article>'''
+    after = '''<article><article-meta>
+    		<article-id pub-id-type="doi">10.1371/journal.pone.0058162</article-id>
+    		<issue>3</issue>
+    		<elocation-id>e58162</elocation-id>
+   			</article-meta></article>'''
     verify(before, after, x.fix_elocation)
 
 def test_fix_journal_ref():

@@ -85,10 +85,18 @@ groomers.append(fix_copyright)
 def fix_elocation(root):
     doi = root.xpath("//article-id[@pub-id-type='doi']")[0].text
     correct_eloc = 'e'+str(int(doi[-7:]))
-    for eloc in root.xpath("//elocation-id"):
+    elocs = root.xpath("//elocation-id")
+    for eloc in elocs:
         if eloc.text != correct_eloc:
             print 'changing elocation from', eloc.text, 'to', correct_eloc
             eloc.text = correct_eloc
+    if not elocs:
+        eloc = etree.Element('elocation-id')
+        eloc.text = correct_eloc
+        issue = root.xpath("//article-meta/issue")[0]
+        parent = issue.getparent()
+        print 'adding missing elocation', correct_eloc
+        parent.insert(parent.index(issue) + 1, eloc)  
     return root
 groomers.append(fix_elocation)
 
