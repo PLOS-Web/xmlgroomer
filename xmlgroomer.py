@@ -172,11 +172,8 @@ def fix_mimetype(root):
     for sup in root.xpath("//supplementary-material"):
         typ = sup.xpath("caption/p")[-1].text.strip('()')
         mime, enc = mimetypes.guess_type('x.'+typ, False)
-        if not mime:
-            output += 'warning: could not find mimetype\n'
-            continue
         if 'mimetype' not in sup.attrib or mime != sup.attrib['mimetype']:
-            output += 'correction: set mimetype of '+typ+' to '+mime+'\n'
+            output += 'correction: set mimetype of '+typ+' to '+mime+' for '+sup.xpath("label")[0].text+'\n'
             sup.attrib['mimetype'] = mime
     return root
 groomers.append(fix_mimetype)
