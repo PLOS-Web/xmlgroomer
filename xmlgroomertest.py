@@ -113,20 +113,22 @@ def test_fix_elocation():
 
 def test_fix_journal_ref():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+    	<ref><label>16</label>
         <mixed-citation publication-type="journal" xlink:type="simple">
         <lpage>516</lpage>doi:
         <ext-link ext-link-type="uri" xlink:href="http://dx.doi.org/10.1038/nature03236" xlink:type="simple">
         10.1038/nature03236</ext-link>
-        </mixed-citation> 
+        </mixed-citation></ref>
         </article>'''
     after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+    	<ref><label>16</label>
         <mixed-citation publication-type="journal" xlink:type="simple">
         <lpage>516</lpage>
         <comment>doi:
         <ext-link ext-link-type="uri" xlink:href="http://dx.doi.org/10.1038/nature03236" xlink:type="simple">
         10.1038/nature03236</ext-link>
         </comment>
-        </mixed-citation> 
+        </mixed-citation></ref>
         </article>'''
     verify(before, after, x.fix_journal_ref)
 
@@ -142,8 +144,8 @@ def test_fix_url():
     verify(before, after, x.fix_url)
 
 def test_fix_comment():
-    before = '<article><comment></comment>.</article>'
-    after = '<article><comment></comment></article>'
+    before = '<article><ref><label>2</label><mixed-citation><comment></comment>.</mixed-citation></ref></article>'
+    after = '<article><ref><label>2</label><mixed-citation><comment></comment></mixed-citation></ref></article>'
     verify(before, after, x.fix_comment)
 
 def test_fix_provenance():

@@ -148,7 +148,8 @@ def fix_comment(root):
     global output
     for comment in root.xpath("//comment"):
         if comment.tail:
-            output += 'correction: removed period after comment end tag\n'
+            refnum = comment.getparent().getparent().xpath("label")[0].text
+            output += 'correction: removed period after comment end tag in journal reference '+refnum+'\n'
             comment.tail = re.sub(r'^\.', r'', comment.tail)
     return root
 groomers.append(fix_comment)
