@@ -112,8 +112,8 @@ groomers.append(fix_elocation)
 def fix_journal_ref(root):
     global output
     for link in root.xpath("//mixed-citation[@publication-type='journal']/ext-link"):
-        output += 'correction: added comment tag around journal reference link\n'
         parent = link.getparent()
+        refnum = parent.getparent().xpath("label")[0].text
         index = parent.index(link)
         comment = etree.Element('comment')
         comment.append(link)
@@ -121,6 +121,7 @@ def fix_journal_ref(root):
         if previous.tail:
             comment.text = previous.tail
             previous.tail = ''
+        output += 'correction: added comment tag around journal reference '+refnum+' link\n'
         parent.insert(index, comment)
     return root
 groomers.append(fix_journal_ref)
@@ -156,11 +157,11 @@ def fix_provenance(root):
     global output
     for prov in root.xpath("//author-notes//fn[@fn-type='other']/p/bold"):
         if prov.text == 'Provenance:':
-            output += 'correction: moved provenance from author-notes to fn-group after references\n'
             fngroup = etree.Element('fn-group')
             fngroup.append(prov.getparent().getparent())
             reflist = root.xpath("//ref-list")[0]
             parent = reflist.getparent()
+            output += 'correction: moved provenance from author-notes to fn-group after references\n'
             parent.insert(parent.index(reflist) + 1, fngroup)
     return root
 groomers.append(fix_provenance)
