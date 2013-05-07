@@ -174,7 +174,7 @@ def fix_mimetype(root):
             output += 'warning: could not find mimetype\n'
             continue
         if 'mimetype' not in sup.attrib or mime != sup.attrib['mimetype']:
-            output += 'correction: set mimetype of '+typ+' to '+mime
+            output += 'correction: set mimetype of '+typ+' to '+mime+'\n'
             sup.attrib['mimetype'] = mime
     return root
 groomers.append(fix_mimetype)
@@ -184,7 +184,7 @@ def fix_empty_element(root):
     # starts from the leaves of the tree to remove nested empty elements
     for element in reversed(list(root.iterdescendants())):
         if not element.text and not element.attrib and not element.getchildren():
-            output += 'correction: removed empty element '+element.tag+'\n'
+            output += 'correction: removed empty element '+element.tag+' at '+root.getroottree().getpath(element)+'\n'
             element.getparent().remove(element)
     return root
 groomers.append(fix_empty_element)
