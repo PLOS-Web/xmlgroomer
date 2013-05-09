@@ -22,8 +22,8 @@ groomers.append(fix_article_type)
 def fix_article_title(root):
     global output
     for title in root.xpath("//title-group/article-title"):
-        if re.search(r'[\t\n\r]', unicode(title.text)):
-            new_title = re.sub(r'[\t\n\r]+', r'', unicode(title.text))
+        if re.search(r'[\t\n\r]| {2,}', unicode(title.text)):
+            new_title = re.sub(r'[\t\n\r ]+', r' ', unicode(title.text))
             output += 'correction: changed article title from '+title.text+' to '+new_title+'\n'
             title.text = new_title
     return root
