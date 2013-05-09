@@ -10,6 +10,9 @@ import re
 groomers = []
 output = ''
 
+def get_doi(root):
+    return root.xpath("//article-id[@pub-id-type='doi']")[0].text
+
 def fix_article_type(root):
     global output
     for typ in root.xpath("//article-categories//subj-group[@subj-group-type='heading']/subject"):
@@ -31,7 +34,7 @@ groomers.append(fix_article_title)
 
 def fix_pubdate(root):
     global output
-    doi = root.xpath("//article-id[@pub-id-type='doi']")[0].text
+    doi = get_doi(root)
     proc = subprocess.Popen(['php', '/var/local/scripts/production/getPubdate.php', doi], shell=False, stdout=subprocess.PIPE)
     pubdate = proc.communicate()[0]
     em = {'year':pubdate[:4], 'month':str(int(pubdate[5:7])), 'day':str(int(pubdate[8:]))}
@@ -93,7 +96,7 @@ groomers.append(fix_copyright)
 
 def fix_elocation(root):
     global output
-    doi = root.xpath("//article-id[@pub-id-type='doi']")[0].text
+    doi = get_doi(root)
     correct_eloc = 'e'+str(int(doi[-7:]))
     elocs = root.xpath("//elocation-id")
     for eloc in elocs:
