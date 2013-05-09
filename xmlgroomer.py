@@ -32,7 +32,8 @@ groomers.append(fix_article_title)
 def fix_pubdate(root):
     global output
     doi = root.xpath("//article-id[@pub-id-type='doi']")[0].text
-    pubdate = subprocess.check_output(['php', '/var/local/scripts/production/getPubdate.php', doi])
+    proc = subprocess.Popen(['php', '/var/local/scripts/production/getPubdate.php', doi], shell=False, stdout=subprocess.PIPE)
+    pubdate = proc.communicate()[0]
     em = {'year':pubdate[:4], 'month':str(int(pubdate[5:7])), 'day':str(int(pubdate[8:]))}
     for date in root.xpath("//pub-date[@pub-type='epub']"):
         for field in ['year','month','day']:
