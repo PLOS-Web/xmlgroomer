@@ -2,6 +2,7 @@
 # usage: xmlgroomer.py before.xml after.xml
 
 import sys
+import time
 import subprocess
 import lxml.etree as etree
 import mimetypes
@@ -195,11 +196,14 @@ groomers.append(fix_empty_element)
 if __name__ == '__main__':
     if len(sys.argv) != 3:
         sys.exit('usage: xmlgroomer.py before.xml after.xml')
-    print 'start grooming...'
     parser = etree.XMLParser(recover = True)
     e = etree.parse(sys.argv[1],parser)
     root = e.getroot()
+    log = open('log', 'a')
+    log.write('-'*50 + '\n'+time.strftime("%Y-%m-%d %H:%M:%S   ")+get_doi(root)+'\n')
     for groomer in groomers:
         root = groomer(root)
     e.write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
-    print output, 'grooming done'
+    log.write(output)
+    log.close()
+    print output
