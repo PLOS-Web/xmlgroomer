@@ -200,7 +200,7 @@ groomers.append(fix_empty_element)
 if __name__ == '__main__':
     if len(sys.argv) != 3:
         sys.exit('usage: xmlgroomer.py before.xml after.xml')
-    log = open('/var/local/scripts/production/xmlgroomer/log', 'a')
+    log = open('/var/local/scripts/production/xmlgroomer/log/log', 'a')
     log.write('-'*50 + '\n'+time.strftime("%Y-%m-%d %H:%M:%S   "))
     try: 
         parser = etree.XMLParser(recover = True)
@@ -218,4 +218,4 @@ if __name__ == '__main__':
     e.write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
     log.write(output)
     log.close()
-    print output.strip()
+    print output
