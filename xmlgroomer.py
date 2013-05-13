@@ -18,8 +18,8 @@ def fix_article_type(root):
     global output
     for typ in root.xpath("//article-categories//subj-group[@subj-group-type='heading']/subject"):
         if typ.text == 'Clinical Trial':
-            output += 'correction: changed article type from Clinical Trial to Research Article\n'
             typ.text = 'Research Article'
+            output += 'correction: changed article type from Clinical Trial to Research Article\n'
     return root
 groomers.append(fix_article_type)
 
@@ -27,9 +27,9 @@ def fix_article_title(root):
     global output
     for title in root.xpath("//title-group/article-title"):
         if re.search(r'[\t\n\r]| {2,}', unicode(title.text)):
-            new_title = re.sub(r'[\t\n\r ]+', r' ', unicode(title.text))
-            output += 'correction: changed article title from '+title.text+' to '+new_title+'\n'
-            title.text = new_title
+            old_title = title.text
+            title.text = re.sub(r'[\t\n\r ]+', r' ', unicode(title.text))
+            output += 'correction: changed article title from '+old_title+' to '+title.text+'\n'
     return root
 groomers.append(fix_article_title)
 
@@ -43,8 +43,8 @@ def fix_pubdate(root):
         for field in ['year','month','day']:
             xml_val = date.xpath(field)[0].text
             if xml_val != em[field]:
-                output += 'correction: changed pub '+field+' from '+xml_val+' to '+em[field]+'\n'
                 date.xpath(field)[0].text = em[field]
+                output += 'correction: changed pub '+field+' from '+xml_val+' to '+em[field]+'\n'
     return root
 groomers.append(fix_pubdate)
 
@@ -56,8 +56,8 @@ def fix_collection(root):
                 pub_val = root.xpath("//pub-date[@pub-type='epub']/"+field)[0].text
                 xml_val = coll.xpath(field)[0].text
                 if xml_val != pub_val:
-                    output += 'correction: changed collection '+field+' from '+xml_val+' to '+pub_val+'\n'
                     coll.xpath(field)[0].text = pub_val
+                    output += 'correction: changed collection '+field+' from '+xml_val+' to '+pub_val+'\n'
     return root
 groomers.append(fix_collection)
 
@@ -70,8 +70,9 @@ def fix_volume(root):
     for volume in root.xpath("//article-meta/volume"):
         correct_volume = str(int(year) - volumes[journal])
         if volume.text != correct_volume:
-            output += 'correction: changed volume from '+volume.text+' to '+correct_volume+'\n'
+            old_volume = volume.text
             volume.text = correct_volume
+            output += 'correction: changed volume from '+old_volume+' to '+volume.text+'\n'
     return root
 groomers.append(fix_volume)
 
@@ -80,8 +81,9 @@ def fix_issue(root):
     month = root.xpath("//pub-date[@pub-type='epub']/month")[0].text
     for issue in root.xpath("//article-meta/issue"):
         if issue.text != month:
-            output += 'correction: changed issue from '+issue.text+' to '+month+'\n'
+            old_issue = issue.text
             issue.text = month
+            output += 'correction: changed issue from '+old_issue+' to '+issue.text+'\n'
     return root
 groomers.append(fix_issue)
 
@@ -90,8 +92,9 @@ def fix_copyright(root):
     year = root.xpath("//pub-date[@pub-type='epub']/year")[0].text
     for copyright in root.xpath("//article-meta//copyright-year"):
         if copyright.text != year:
-            output += 'correction: changed copyright year from '+copyright.text+' to '+year+'\n'
+            old_copyright = copyright.text
             copyright.text = year
+            output += 'correction: changed copyright year from '+old_copyright+' to '+copyright.text+'\n'
     return root
 groomers.append(fix_copyright)
 
@@ -102,15 +105,16 @@ def fix_elocation(root):
     elocs = root.xpath("//elocation-id")
     for eloc in elocs:
         if eloc.text != correct_eloc:
-            output += 'correction: changed elocation from '+eloc.text+' to '+correct_eloc+'\n'
+            old_eloc = eloc.text
             eloc.text = correct_eloc
+            output += 'correction: changed elocation from '+old_eloc+' to '+eloc.text+'\n'
     if not elocs:
         eloc = etree.Element('elocation-id')
         eloc.text = correct_eloc
         issue = root.xpath("//article-meta/issue")[0]
         parent = issue.getparent()
-        output += 'correction: added missing elocation '+correct_eloc+'\n'
-        parent.insert(parent.index(issue) + 1, eloc)  
+        parent.insert(parent.index(issue) + 1, eloc)
+        output += 'correction: added missing elocation '+eloc.text+'\n'
     return root
 groomers.append(fix_elocation)
 
@@ -126,8 +130,8 @@ def fix_journal_ref(root):
         if previous.tail:
             comment.text = previous.tail
             previous.tail = ''
-        output += 'correction: added comment tag around journal reference '+refnum+' link\n'
         parent.insert(index, comment)
+        output += 'correction: added comment tag around journal reference '+refnum+' link\n'
     return root
 groomers.append(fix_journal_ref)
 
@@ -138,14 +142,14 @@ def fix_url(root):
         assert h in link.attrib  # error: ext-link does not have href
         # remove whitespace
         if re.search(r'\s', link.attrib[h]):
-            new_link = re.sub(r'\s', r'', link.attrib[h])
-            output += 'correction: changed link from '+link.attrib[h]+' to '+new_link+'\n'
-            link.attrib[h] = new_link
+            old_link = link.attrib[h]
+            link.attrib[h] = re.sub(r'\s', r'', link.attrib[h])
+            output += 'correction: changed link from '+old_link+' to '+link.attrib[h]+'\n'
         # prepend dx.doi.org if url is only a doi
         if re.match(r'http://10.[0-9]{4}', link.attrib[h]):
-            new_link = link.attrib[h].replace('http://', 'http://dx.doi.org/')
-            output += 'correction: changed link from '+link.attrib[h]+' to '+new_link+'\n'
-            link.attrib[h] = new_link
+            old_link = link.attrib[h]
+            link.attrib[h] = link.attrib[h].replace('http://', 'http://dx.doi.org/')
+            output += 'correction: changed link from '+old_link+' to '+link.attrib[h]+'\n'
     return root
 groomers.append(fix_url)
 
@@ -154,8 +158,8 @@ def fix_comment(root):
     for comment in root.xpath("//comment"):
         if comment.tail:
             refnum = comment.getparent().getparent().xpath("label")[0].text
-            output += 'correction: removed period after comment end tag in journal reference '+refnum+'\n'
             comment.tail = re.sub(r'^\.', r'', comment.tail)
+            output += 'correction: removed period after comment end tag in journal reference '+refnum+'\n'
     return root
 groomers.append(fix_comment)
 
@@ -167,8 +171,8 @@ def fix_provenance(root):
             fngroup.append(prov.getparent().getparent())
             reflist = root.xpath("//ref-list")[0]
             parent = reflist.getparent()
-            output += 'correction: moved provenance from author-notes to fn-group after references\n'
             parent.insert(parent.index(reflist) + 1, fngroup)
+            output += 'correction: moved provenance from author-notes to fn-group after references\n'
     return root
 groomers.append(fix_provenance)
 
@@ -178,8 +182,8 @@ def fix_mimetype(root):
         typ = sup.xpath("caption/p")[-1].text.strip('()')
         mime, enc = mimetypes.guess_type('x.'+typ, False)
         if 'mimetype' not in sup.attrib or mime != sup.attrib['mimetype']:
-            output += 'correction: set mimetype of '+typ+' to '+mime+' for '+sup.xpath("label")[0].text+'\n'
             sup.attrib['mimetype'] = mime
+            output += 'correction: set mimetype of '+typ+' to '+mime+' for '+sup.xpath("label")[0].text+'\n'
     return root
 groomers.append(fix_mimetype)
 
