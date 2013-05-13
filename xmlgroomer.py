@@ -196,11 +196,16 @@ groomers.append(fix_empty_element)
 if __name__ == '__main__':
     if len(sys.argv) != 3:
         sys.exit('usage: xmlgroomer.py before.xml after.xml')
-    parser = etree.XMLParser(recover = True)
-    e = etree.parse(sys.argv[1],parser)
-    root = e.getroot()
     log = open('log', 'a')
     log.write('-'*50 + '\n'+time.strftime("%Y-%m-%d %H:%M:%S   "))
+    try: 
+        parser = etree.XMLParser(recover = True)
+        e = etree.parse(sys.argv[1],parser)
+        root = e.getroot()
+    except Exception as ee:
+        log.write('** error parsing: '+str(ee)+'\n')
+        log.close()
+        raise
     try: log.write(get_doi(root)+'\n')
     except: log.write('** error getting doi\n')
     for groomer in groomers:
