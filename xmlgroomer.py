@@ -191,7 +191,8 @@ def fix_empty_element(root):
     global output
     # starts from the leaves of the tree to remove nested empty elements
     for element in reversed(list(root.iterdescendants())):
-        if not element.text and not element.attrib and not element.getchildren():
+        if not element.text and not element.attrib and not element.getchildren() \
+            and not (element.tag == 'title' and 'abstract' in root.getroottree().getpath(element)):
             output += 'correction: removed empty element '+element.tag+' at '+root.getroottree().getpath(element)+'\n'
             element.getparent().remove(element)
     return root
