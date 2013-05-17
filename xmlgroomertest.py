@@ -111,6 +111,21 @@ def test_fix_elocation():
    			</article-meta></article>'''
     verify(before, after, x.fix_elocation)
 
+def test_fix_related_article():
+    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+            <related-article id="RA1" related-article-type="companion" ext-link-type="uri" \
+            vol="" page="e1001434" xlink:type="simple" xlink:href="info:doi/pmed.1001434">
+            <article-title>Grand Challenges in Global Mental Health</article-title>
+            </related-article>
+            </article>'''
+    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+            <related-article id="RA1" related-article-type="companion" ext-link-type="uri" \
+            vol="" page="e1001434" xlink:type="simple" xlink:href="info:doi/10.1371/journal.pmed.1001434">
+            <article-title>Grand Challenges in Global Mental Health</article-title>
+            </related-article>
+            </article>'''
+    verify(before, after, x.fix_related_article)
+
 def test_fix_journal_ref():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
     	<ref><label>16</label>

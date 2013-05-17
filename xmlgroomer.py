@@ -118,6 +118,18 @@ def fix_elocation(root):
     return root
 groomers.append(fix_elocation)
 
+def fix_related_article(root):
+    global output
+    h = '{http://www.w3.org/1999/xlink}href'
+    related = root.xpath("//related-article")
+    for link in related:
+        if re.match(r'info:doi/[a-z]{4}\.[0-9]{7}', link.attrib[h]):
+            old_link = link.attrib[h]
+            link.attrib[h] = link.attrib[h].replace('info:doi/', 'info:doi/10.1371/journal.')
+            output += 'correction: changed related article link from '+old_link+' to '+link.attrib[h]+'\n'
+    return root
+groomers.append(fix_related_article)
+
 def fix_journal_ref(root):
     global output
     for link in root.xpath("//mixed-citation[@publication-type='journal']/ext-link"):
@@ -137,16 +149,15 @@ groomers.append(fix_journal_ref)
 
 def fix_url(root):
     global output
+    h = '{http://www.w3.org/1999/xlink}href'
     for link in root.xpath("//ext-link"):
-        h = '{http://www.w3.org/1999/xlink}href'
-        assert h in link.attrib  # error: ext-link does not have href
         # remove whitespace
         if re.search(r'\s', link.attrib[h]):
             old_link = link.attrib[h]
             link.attrib[h] = re.sub(r'\s', r'', link.attrib[h])
             output += 'correction: changed link from '+old_link+' to '+link.attrib[h]+'\n'
         # prepend dx.doi.org if url is only a doi
-        if re.match(r'http://10.[0-9]{4}', link.attrib[h]):
+        if re.match(r'http://10\.[0-9]{4}', link.attrib[h]):
             old_link = link.attrib[h]
             link.attrib[h] = link.attrib[h].replace('http://', 'http://dx.doi.org/')
             output += 'correction: changed link from '+old_link+' to '+link.attrib[h]+'\n'
