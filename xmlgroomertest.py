@@ -199,7 +199,6 @@ def test_fix_mimetype():
 	verify(before, after, x.fix_mimetype)
 
 def test_fix_empty_element():
-    before = '''<article><abstract><title/></abstract><tag><title></title></tag>
-        <sec id="s1"></sec><p>Paragraph.</p><body/></article>'''
-    after = '<article><abstract><title/></abstract><sec id="s1"></sec><p>Paragraph.</p></article>'
+    before = '<article><title/><tag><label></label></tag><sec id="s1"></sec><p>Paragraph.</p><body/></article>'
+    after = '<article><title/><sec id="s1"></sec><p>Paragraph.</p></article>'
     verify(before, after, x.fix_empty_element)
