@@ -158,6 +158,21 @@ def test_fix_url():
         </article>'''
     verify(before, after, x.fix_url)
 
+def test_fix_merops_link():
+    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <ref><label>2</label><mixed-citation><comment>
+        <ext-link xlink:href="http://dx.doi.org/10.1126/science.1103538"></ext-link>
+        <ext-link ext-link-type="pmid" xlink:href="http://www.ncbi.nlm.nih.gov/pubmed/15486254"></ext-link>
+        </comment></mixed-citation></ref>
+        </article>'''
+    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <ref><label>2</label><mixed-citation><comment>
+        <ext-link xlink:href="http://dx.doi.org/10.1126/science.1103538" ext-link-type="uri" xlink:type="simple"></ext-link>
+        <ext-link ext-link-type="uri" xlink:href="http://www.ncbi.nlm.nih.gov/pubmed/15486254" xlink:type="simple"></ext-link>
+        </comment></mixed-citation></ref>
+        </article>'''
+    verify(before, after, x.fix_merops_link)
+
 def test_fix_comment():
     before = '<article><ref><label>2</label><mixed-citation><comment></comment>.</mixed-citation></ref></article>'
     after = '<article><ref><label>2</label><mixed-citation><comment></comment></mixed-citation></ref></article>'

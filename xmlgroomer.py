@@ -164,6 +164,16 @@ def fix_url(root):
     return root
 groomers.append(fix_url)
 
+def fix_merops_link(root):
+    global output
+    for link in root.xpath("//ext-link[@ext-link-type='doi' or @ext-link-type='pmid' or not(@ext-link-type)]"):
+        refnum = list(link.iterancestors("ref"))[0].xpath("label")[0].text
+        link.attrib['ext-link-type'] = 'uri'
+        link.attrib['{http://www.w3.org/1999/xlink}type'] = 'simple'
+        output += 'correction: set ext-link-type=uri and xlink:type=simple in journal reference '+refnum+'\n'
+    return root
+groomers.append(fix_merops_link)
+
 def fix_comment(root):
     global output
     for comment in root.xpath("//comment"):
@@ -215,7 +225,7 @@ if __name__ == '__main__':
     log.write('-'*50 + '\n'+time.strftime("%Y-%m-%d %H:%M:%S   "))
     try: 
         parser = etree.XMLParser(recover = True)
-        e = etree.parse(sys.argv[1],parser)
+        e = etree.parse(sys.argv[1], parser)
         root = e.getroot()
     except Exception as ee:
         log.write('** error parsing: '+str(ee)+'\n')
