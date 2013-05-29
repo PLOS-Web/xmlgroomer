@@ -134,7 +134,7 @@ def fix_journal_ref(root):
     global output
     for link in root.xpath("//mixed-citation[@publication-type='journal']/ext-link"):
         parent = link.getparent()
-        refnum = parent.getparent().xpath("label")[0].text
+        refnum = list(link.iterancestors("ref"))[0].xpath("label")[0].text
         index = parent.index(link)
         comment = etree.Element('comment')
         comment.append(link)
@@ -178,7 +178,7 @@ def fix_comment(root):
     global output
     for comment in root.xpath("//comment"):
         if comment.tail and comment.tail.startswith("."):
-            refnum = comment.getparent().getparent().xpath("label")[0].text
+            refnum = list(comment.iterancestors("ref"))[0].xpath("label")[0].text
             comment.tail = re.sub(r'^\.', r'', comment.tail)
             output += 'correction: removed period after comment end tag in journal reference '+refnum+'\n'
     return root
