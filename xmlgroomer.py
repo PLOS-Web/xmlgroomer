@@ -38,13 +38,14 @@ def fix_pubdate(root):
     doi = get_doi(root)
     proc = subprocess.Popen(['php', '/var/local/scripts/production/getPubdate.php', doi], shell=False, stdout=subprocess.PIPE)
     pubdate = proc.communicate()[0]
-    em = {'year':pubdate[:4], 'month':str(int(pubdate[5:7])), 'day':str(int(pubdate[8:]))}
-    for date in root.xpath("//pub-date[@pub-type='epub']"):
-        for field in ['year','month','day']:
-            xml_val = date.xpath(field)[0].text
-            if xml_val != em[field]:
-                date.xpath(field)[0].text = em[field]
-                output += 'correction: changed pub '+field+' from '+xml_val+' to '+em[field]+'\n'
+    if int(pubdate[:4]) > 2000:
+        em = {'year':pubdate[:4], 'month':str(int(pubdate[5:7])), 'day':str(int(pubdate[8:]))}
+        for date in root.xpath("//pub-date[@pub-type='epub']"):
+            for field in ['year','month','day']:
+                xml_val = date.xpath(field)[0].text
+                if xml_val != em[field]:
+                    date.xpath(field)[0].text = em[field]
+                    output += 'correction: changed pub '+field+' from '+xml_val+' to '+em[field]+'\n'
     return root
 groomers.append(fix_pubdate)
 
