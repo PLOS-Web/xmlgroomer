@@ -200,6 +200,19 @@ def test_fix_provenance():
         </article>'''
     verify(before, after, x.fix_provenance)
 
+def test_fix_extension():
+    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <supplementary-material id="pone.0063011.s001" xlink:href="pone.0063011.s001" mimetype="image/tiff">
+        <label>Figure S1</label>
+        <caption><p>(TIFF)</p></caption>
+        </supplementary-material></article>'''
+    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <supplementary-material id="pone.0063011.s001" xlink:href="pone.0063011.s001.tiff" mimetype="image/tiff">
+        <label>Figure S1</label>
+        <caption><p>(TIFF)</p></caption>
+        </supplementary-material></article>'''
+    verify(before, after, x.fix_extension)
+
 def test_fix_mimetype():
 	before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
 		<supplementary-material id="pone.0063011.s001" xlink:href="pone.0063011.s001.tiff">
