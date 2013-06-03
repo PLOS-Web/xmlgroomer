@@ -33,6 +33,16 @@ def fix_article_title(root):
     return root
 groomers.append(fix_article_title)
 
+def fix_affiliation(root):
+    global output
+    for aff in root.xpath("//contrib[@contrib-type='author']/xref[@ref-type='aff']"):
+        if aff.attrib['rid'] == 'aff':
+            aff.attrib['rid'] = 'aff1'
+            name = aff.getprevious().xpath("surname")[0].text
+            output += 'correction: set rid=aff1 for '+name+'\n'
+    return root
+groomers.append(fix_affiliation)
+
 def fix_pubdate(root):
     global output
     doi = get_doi(root)

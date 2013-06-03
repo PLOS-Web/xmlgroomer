@@ -38,6 +38,17 @@ def test_fix_article_title():
     after = '<article><title-group><title>Bottlenose Dolphins</title></title-group></article>'
     verify(before, after, x.fix_article_title)
 
+def test_fix_affiliation():
+    before = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <contrib xlink:type="simple" contrib-type="author">
+        <name name-style="western"><surname>Shaikhali</surname><given-names>Jehad</given-names></name>
+        <xref ref-type="aff" rid="aff"/></contrib></article>"""
+    after = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <contrib xlink:type="simple" contrib-type="author">
+        <name name-style="western"><surname>Shaikhali</surname><given-names>Jehad</given-names></name>
+        <xref ref-type="aff" rid="aff1"/></contrib></article>"""
+    verify(before, after, x.fix_affiliation)
+
 def test_fix_pubdate():
     before = '''<article><article-meta>
     	<article-id pub-id-type="doi">10.1371/journal.pone.0058162</article-id>
