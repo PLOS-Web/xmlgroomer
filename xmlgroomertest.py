@@ -160,12 +160,12 @@ def test_fix_journal_ref():
 
 def test_fix_url():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
-        <ext-link ext-link-type="uri" xlink:href="ht tp://10.1023/A:1020  830703012" xlink:type="simple">
-        </ext-link>
+        <ext-link ext-link-type="uri" xlink:href="10.1023/A:1020  830703012" xlink:type="simple"></ext-link>
+        <ext-link ext-link-type="uri" xlink:href="168240 16" xlink:type="simple">16824016</ext-link>
         </article>'''
     after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
-        <ext-link ext-link-type="uri" xlink:href="http://dx.doi.org/10.1023/A:1020830703012" xlink:type="simple">
-        </ext-link>
+        <ext-link ext-link-type="uri" xlink:href="http://dx.doi.org/10.1023/A:1020830703012" xlink:type="simple"></ext-link>
+        <ext-link ext-link-type="uri" xlink:href="http://www.ncbi.nlm.nih.gov/pubmed/16824016" xlink:type="simple">16824016</ext-link>
         </article>'''
     verify(before, after, x.fix_url)
 

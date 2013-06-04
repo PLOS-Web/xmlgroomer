@@ -162,16 +162,21 @@ def fix_url(root):
     global output
     h = '{http://www.w3.org/1999/xlink}href'
     for link in root.xpath("//ext-link"):
+        old_link = link.attrib[h]
         # remove whitespace
         if re.search(r'\s', link.attrib[h]):
-            old_link = link.attrib[h]
             link.attrib[h] = re.sub(r'\s', r'', link.attrib[h])
-            output += 'correction: changed link from '+old_link+' to '+link.attrib[h]+'\n'
-        # prepend dx.doi.org if url is only a doi
+        # prepend http:// if not there
+        if not link.attrib[h].startswith('http'):
+            link.attrib[h] = 'http://' + link.attrib[h]
+        # prepend dx.doi.org/ for doi
         if re.match(r'http://10\.[0-9]{4}', link.attrib[h]):
-            old_link = link.attrib[h]
             link.attrib[h] = link.attrib[h].replace('http://', 'http://dx.doi.org/')
-            output += 'correction: changed link from '+old_link+' to '+link.attrib[h]+'\n'
+        # prepend www.ncbi.nlm.nih.gov/pubmed/ for pmid
+        if re.match(r'http://[0-9]{8}$', link.attrib[h]):
+            link.attrib[h] = link.attrib[h].replace('http://', 'http://www.ncbi.nlm.nih.gov/pubmed/')
+        if old_link != link.attrib[h]:
+            output += 'correction: changed link from '+old_link+' to '+link.attrib[h]+'\n'        
     return root
 groomers.append(fix_url)
 
@@ -247,7 +252,7 @@ if __name__ == '__main__':
     if len(sys.argv) != 3:
         sys.exit('usage: xmlgroomer.py before.xml after.xml')
     log = open('/var/local/scripts/production/xmlgroomer/log/log', 'a')
-    log.write('-'*50 + '\n'+time.strftime("%Y-%m-%d %H:%M:%S   "))
+    log.write('-'*50 + '\n'+time.strftime("%Y-%m-%d %H:%M:%S"))
     try: 
         parser = etree.XMLParser(recover = True)
         e = etree.parse(sys.argv[1], parser)
