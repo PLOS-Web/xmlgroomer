@@ -35,10 +35,14 @@ groomers.append(fix_article_title)
 
 def fix_affiliation(root):
     global output
-    for aff in root.xpath("//contrib[@contrib-type='author']/xref[@ref-type='aff']"):
-        if aff.attrib['rid'] == 'aff':
-            aff.attrib['rid'] = 'aff1'
-            name = aff.getprevious().xpath("surname")[0].text
+    for author in root.xpath("//contrib[@contrib-type='author']"):
+        aff = author.xpath("xref[@ref-type='aff']")
+        name = author.xpath("name/surname")[0].text
+        if not aff:
+            author.insert(1, etree.fromstring("""<xref ref-type='aff' rid='aff1'/>"""))
+            output += 'correction: set rid=aff1 for '+name+'\n'
+        elif aff[0].attrib['rid'] == 'aff':
+            aff[0].attrib['rid'] = 'aff1'
             output += 'correction: set rid=aff1 for '+name+'\n'
     return root
 groomers.append(fix_affiliation)

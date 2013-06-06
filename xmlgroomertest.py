@@ -42,11 +42,17 @@ def test_fix_affiliation():
     before = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <contrib xlink:type="simple" contrib-type="author">
         <name name-style="western"><surname>Shaikhali</surname><given-names>Jehad</given-names></name>
-        <xref ref-type="aff" rid="aff"/></contrib></article>"""
+        <xref ref-type="aff" rid="aff"/></contrib>
+        <contrib xlink:type="simple" contrib-type="author">
+        <name><surname>Winawer</surname><given-names>Jonathan</given-names></name>
+        <xref ref-type="corresp" rid="cor1"/></contrib></article>"""
     after = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <contrib xlink:type="simple" contrib-type="author">
         <name name-style="western"><surname>Shaikhali</surname><given-names>Jehad</given-names></name>
-        <xref ref-type="aff" rid="aff1"/></contrib></article>"""
+        <xref ref-type="aff" rid="aff1"/></contrib>
+        <contrib xlink:type="simple" contrib-type="author">
+        <name><surname>Winawer</surname><given-names>Jonathan</given-names></name>
+        <xref ref-type="aff" rid="aff1"/><xref ref-type="corresp" rid="cor1"/></contrib></article>"""
     verify(before, after, x.fix_affiliation)
 
 def test_fix_pubdate():
