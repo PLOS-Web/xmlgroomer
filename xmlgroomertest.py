@@ -143,6 +143,13 @@ def test_fix_related_article():
             </article>'''
     verify(before, after, x.fix_related_article)
 
+def test_fix_bold():
+    before = '''<sec id="s3.6"><title><bold>PAPP5</bold> responds to the tetrapyrrole mediated plastid 
+        signal and acts as a negative regulator of <bold><italic>PhANG</italic></bold> expression</title></sec>'''
+    after = '''<sec id="s3.6"><title>PAPP5 responds to the tetrapyrrole mediated plastid 
+        signal and acts as a negative regulator of <italic>PhANG</italic> expression</title></sec>'''
+    verify(before, after, x.fix_bold)
+
 def test_fix_journal_ref():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
     	<ref><label>16</label>

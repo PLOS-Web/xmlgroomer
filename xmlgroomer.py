@@ -145,6 +145,16 @@ def fix_related_article(root):
     return root
 groomers.append(fix_related_article)
 
+def fix_bold(root):
+    global output
+    for title in root.xpath("//sec/title"):
+        if title.xpath("bold"):
+            sec = title.getparent()
+            sec.replace(title, etree.fromstring(etree.tostring(title).replace('<bold>','').replace('</bold>','')))
+            output += 'correction: removed bold tags from sec '+sec.attrib['id']+'\n'
+    return root
+groomers.append(fix_bold)
+
 def fix_journal_ref(root):
     global output
     for link in root.xpath("//mixed-citation[@publication-type='journal']/ext-link"):
@@ -256,7 +266,7 @@ if __name__ == '__main__':
     if len(sys.argv) != 3:
         sys.exit('usage: xmlgroomer.py before.xml after.xml')
     log = open('/var/local/scripts/production/xmlgroomer/log/log', 'a')
-    log.write('-'*50 + '\n'+time.strftime("%Y-%m-%d %H:%M:%S"))
+    log.write('-'*50 + '\n'+time.strftime("%Y-%m-%d %H:%M:%S   "))
     try: 
         parser = etree.XMLParser(recover = True)
         e = etree.parse(sys.argv[1], parser)
