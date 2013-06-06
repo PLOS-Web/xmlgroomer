@@ -143,12 +143,21 @@ def test_fix_related_article():
             </article>'''
     verify(before, after, x.fix_related_article)
 
-def test_fix_bold():
+def test_fix_bold_heading():
     before = '''<sec id="s3.6"><title><bold>PAPP5</bold> responds to the tetrapyrrole mediated plastid 
         signal and acts as a negative regulator of <bold><italic>PhANG</italic></bold> expression</title></sec>'''
     after = '''<sec id="s3.6"><title>PAPP5 responds to the tetrapyrrole mediated plastid 
         signal and acts as a negative regulator of <italic>PhANG</italic> expression</title></sec>'''
-    verify(before, after, x.fix_bold)
+    verify(before, after, x.fix_bold_heading)
+
+def test_fix_bold_caption():
+    before = '''<table-wrap id="tab1" position="float"><label>Table 1</label>
+        <caption><p><bold>Summary of border control and vaccination.</bold></p></caption>
+        <table/></table-wrap>'''
+    after = '''<table-wrap id="tab1" position="float"><label>Table 1</label>
+        <caption><title>Summary of border control and vaccination.</title></caption>
+        <table/></table-wrap>'''
+    verify(before, after, x.fix_bold_caption)
 
 def test_fix_journal_ref():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">

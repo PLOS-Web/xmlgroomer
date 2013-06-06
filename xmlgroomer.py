@@ -145,15 +145,26 @@ def fix_related_article(root):
     return root
 groomers.append(fix_related_article)
 
-def fix_bold(root):
+def fix_bold_heading(root):
     global output
     for title in root.xpath("//sec/title"):
         if title.xpath("bold"):
             sec = title.getparent()
-            sec.replace(title, etree.fromstring(etree.tostring(title).replace('<bold>','').replace('</bold>','')))
-            output += 'correction: removed bold tags from sec '+sec.attrib['id']+'\n'
+            sec.replace(title, etree.fromstring(re.sub(r'(<bold>|</bold>)', r'', etree.tostring(title))))
+            output += 'correction: removed bold tags from sec '+sec.attrib['id']+' title\n'
     return root
-groomers.append(fix_bold)
+groomers.append(fix_bold_heading)
+
+def fix_bold_caption(root):
+    global output
+    for caption in root.xpath("//table-wrap/caption"):
+        if caption.xpath("bold") or caption.xpath("p"):
+            table_wrap = caption.getparent()
+            new_caption = re.sub(r'(<bold>|</bold>)', r'', etree.tostring(caption)).replace('<p>','<title>').replace('</p>','</title>')
+            table_wrap.replace(caption, etree.fromstring(new_caption))
+            output += 'correction: removed bold tags from '+table_wrap.xpath("label")[0].text+' caption\n'
+    return root
+groomers.append(fix_bold_caption)
 
 def fix_journal_ref(root):
     global output
