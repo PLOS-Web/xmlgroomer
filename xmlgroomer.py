@@ -166,6 +166,18 @@ def fix_bold_caption(root):
     return root
 groomers.append(fix_bold_caption)
 
+def fix_formula(root):
+    global output
+    for formula in root.xpath("//fig//caption//disp-formula") + root.xpath("//table//disp-formula"):
+        formula.tag = 'inline-formula'
+        formula.attrib.pop('id')
+        graphic = formula.xpath("graphic")[0]
+        graphic.tag = 'inline-graphic'
+        graphic.attrib.pop('position')
+        output += 'correction: changed disp-formula to inline-formula for '+graphic.attrib['{http://www.w3.org/1999/xlink}href']+'\n'
+    return root
+groomers.append(fix_formula)
+
 def fix_journal_ref(root):
     global output
     for link in root.xpath("//mixed-citation[@publication-type='journal']/ext-link"):

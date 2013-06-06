@@ -159,6 +159,33 @@ def test_fix_bold_caption():
         <table/></table-wrap>'''
     verify(before, after, x.fix_bold_caption)
 
+def test_fix_formula():
+    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <fig><caption>
+        <disp-formula id ="pcbi.1003016.e001">
+        <graphic position="anchor" xlink:href="pcbi.1003016.e001.tif"></graphic>
+        </disp-formula>
+        </caption></fig>
+        <table>
+        <disp-formula id ="pcbi.1003016.e002">
+        <graphic position="anchor" xlink:href="pcbi.1003016.e002.tif"></graphic>
+        </disp-formula>
+        </table>
+        </article>'''
+    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <fig><caption>
+        <inline-formula>
+        <inline-graphic xlink:href="pcbi.1003016.e001.tif"></inline-graphic>
+        </inline-formula>
+        </caption></fig>
+        <table>
+        <inline-formula>
+        <inline-graphic xlink:href="pcbi.1003016.e002.tif"></inline-graphic>
+        </inline-formula>
+        </table>
+        </article>'''
+    verify(before, after, x.fix_formula)   
+
 def test_fix_journal_ref():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
     	<ref><label>16</label>
