@@ -178,6 +178,17 @@ def fix_formula(root):
     return root
 groomers.append(fix_formula)
 
+def fix_label(root):
+    global output
+    for label in root.xpath("//ref/label"):
+        if list(label.iterdescendants()):
+            text = next(s for s in [x.text for x in label.iterdescendants()] if s)
+            label.clear()
+            label.text = text
+            output += 'correction: removed tag(s) inside ref label '+text+'\n'
+    return root
+groomers.append(fix_label)
+
 def fix_journal_ref(root):
     global output
     refnums = ''

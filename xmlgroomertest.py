@@ -186,6 +186,11 @@ def test_fix_formula():
         </article>'''
     verify(before, after, x.fix_formula)   
 
+def test_fix_label():
+    before = '''<ref><label><italic>13</italic></label></ref>'''
+    after = '''<ref><label>13</label></ref>'''
+    verify(before, after, x.fix_label)
+
 def test_fix_journal_ref():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
     	<ref><label>16</label>
