@@ -169,6 +169,16 @@ def fix_xref(root):
     return root
 groomers.append(fix_xref)
 
+def fix_headed_title(root):
+    global output
+    for title in root.xpath("//sec[@sec-type='headed']/title"):
+        if re.search(r': $', title.text):
+            old_title = title.text
+            title.text = re.sub(r': $', r'', title.text)
+            output += 'correction: removed punctuation from headed title '+old_title+'\n'
+    return root
+groomers.append(fix_headed_title)
+
 def fix_bold_heading(root):
     global output
     for title in root.xpath("//sec/title"):

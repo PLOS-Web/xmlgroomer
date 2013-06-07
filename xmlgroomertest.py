@@ -164,6 +164,17 @@ def test_fix_xref():
         </article>'''
     verify(before, after, x.fix_xref)
 
+def test_fix_headed_title():
+    before = '''<sec sec-type="headed">
+        <title>Purpose: </title>
+        <p>To compare the efficacy of extracorporeal shock.</p>
+        </sec>'''
+    after = '''<sec sec-type="headed">
+        <title>Purpose</title>
+        <p>To compare the efficacy of extracorporeal shock.</p>
+        </sec>'''
+    verify(before, after, x.fix_headed_title)    
+
 def test_fix_bold_heading():
     before = '''<sec id="s3.6"><title><bold>PAPP5</bold> responds to the tetrapyrrole mediated plastid 
         signal and acts as a negative regulator of <bold><italic>PhANG</italic></bold> expression</title></sec>'''
