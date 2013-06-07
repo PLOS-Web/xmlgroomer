@@ -221,11 +221,13 @@ groomers.append(fix_url)
 
 def fix_merops_link(root):
     global output
+    refnums = ''
     for link in root.xpath("//ext-link[@ext-link-type='doi' or @ext-link-type='pmid' or not(@ext-link-type)]"):
-        refnum = list(link.iterancestors("ref"))[0].xpath("label")[0].text
         link.attrib['ext-link-type'] = 'uri'
         link.attrib['{http://www.w3.org/1999/xlink}type'] = 'simple'
-        output += 'correction: set ext-link-type=uri and xlink:type=simple in journal reference '+refnum+'\n'
+        refnums += list(link.iterancestors("ref"))[0].xpath("label")[0].text+' '
+    if refnums:
+        output += 'correction: set ext-link-type=uri and xlink:type=simple in journal references '+refnums+'\n'
     return root
 groomers.append(fix_merops_link)
 
