@@ -155,6 +155,20 @@ def fix_related_article(root):
     return root
 groomers.append(fix_related_article)
 
+def fix_xref(root):
+    global output
+    for xref in root.xpath("//xref[@ref-type='bibr']"):
+        if not xref.text:
+            rid = xref.attrib['rid']
+            if xref.getprevious() is not None:
+                xref.getprevious().tail += xref.tail
+            else:
+                xref.getparent().text += xref.tail
+            xref.getparent().remove(xref)
+            output += 'correction: removed closed xref bibr '+rid+'\n'
+    return root
+groomers.append(fix_xref)
+
 def fix_bold_heading(root):
     global output
     for title in root.xpath("//sec/title"):

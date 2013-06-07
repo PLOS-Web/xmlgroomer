@@ -152,6 +152,18 @@ def test_fix_related_article():
             </article>'''
     verify(before, after, x.fix_related_article)
 
+def test_fix_xref():
+    before = '''<article>
+        <xref ref-type="bibr" rid="B3">3</xref>
+        <xref ref-type="bibr" rid="B4"/>-
+        <xref ref-type="bibr" rid="B5">5</xref>
+        </article>'''
+    after = '''<article>
+        <xref ref-type="bibr" rid="B3">3</xref>-
+        <xref ref-type="bibr" rid="B5">5</xref>
+        </article>'''
+    verify(before, after, x.fix_xref)
+
 def test_fix_bold_heading():
     before = '''<sec id="s3.6"><title><bold>PAPP5</bold> responds to the tetrapyrrole mediated plastid 
         signal and acts as a negative regulator of <bold><italic>PhANG</italic></bold> expression</title></sec>'''
