@@ -160,10 +160,11 @@ def fix_xref(root):
     for xref in root.xpath("//xref[@ref-type='bibr']"):
         if not xref.text:
             rid = xref.attrib['rid']
-            if xref.getprevious() is not None:
-                xref.getprevious().tail += xref.tail
-            else:
-                xref.getparent().text += xref.tail
+            if xref.tail:
+                if xref.getprevious() is not None:
+                    xref.getprevious().tail = (xref.getprevious().tail or '') + xref.tail
+                else:
+                    xref.getparent().text = (xref.getparent().text or '') + xref.tail
             xref.getparent().remove(xref)
             output += 'correction: removed closed xref bibr '+rid+'\n'
     return root
