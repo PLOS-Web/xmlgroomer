@@ -191,27 +191,6 @@ def test_fix_label():
     after = '''<ref><label>13</label></ref>'''
     verify(before, after, x.fix_label)
 
-def test_fix_journal_ref():
-    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
-    	<ref><label>16</label>
-        <mixed-citation publication-type="journal" xlink:type="simple">
-        <lpage>516</lpage>doi:
-        <ext-link ext-link-type="uri" xlink:href="http://dx.doi.org/10.1038/nature03236" xlink:type="simple">
-        10.1038/nature03236</ext-link>
-        </mixed-citation></ref>
-        </article>'''
-    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
-    	<ref><label>16</label>
-        <mixed-citation publication-type="journal" xlink:type="simple">
-        <lpage>516</lpage>
-        <comment>doi:
-        <ext-link ext-link-type="uri" xlink:href="http://dx.doi.org/10.1038/nature03236" xlink:type="simple">
-        10.1038/nature03236</ext-link>
-        </comment>
-        </mixed-citation></ref>
-        </article>'''
-    verify(before, after, x.fix_journal_ref)
-
 def test_fix_url():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <ext-link ext-link-type="uri" xlink:href="10.1023/A:1020  830703012" xlink:type="simple"></ext-link>
