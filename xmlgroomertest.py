@@ -55,6 +55,15 @@ def test_fix_affiliation():
         <xref ref-type="aff" rid="aff1"/><xref ref-type="corresp" rid="cor1"/></contrib></article>"""
     verify(before, after, x.fix_affiliation)
 
+def test_fix_corresp():
+    before = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <corresp id="cor1"><label>*</label> E-mail: <email xlink:type="simple">jkurie@mdanderson.org</email></corresp>
+        </article>"""
+    after = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <corresp id="cor1">* E-mail: <email xlink:type="simple">jkurie@mdanderson.org</email></corresp>
+        </article>"""
+    verify(before, after, x.fix_corresp)
+
 def test_fix_pubdate():
     before = '''<article><article-meta>
     	<article-id pub-id-type="doi">10.1371/journal.pone.0058162</article-id>

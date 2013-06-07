@@ -47,6 +47,16 @@ def fix_affiliation(root):
     return root
 groomers.append(fix_affiliation)
 
+def fix_corresp(root):
+    global output
+    for corresp in root.xpath("//corresp"):
+        if corresp.xpath("label"):
+            author_notes = corresp.getparent()
+            author_notes.replace(corresp, etree.fromstring(re.sub(r'(<label>|</label>)', r'', etree.tostring(corresp))))
+            output += 'correction: removed label tag from corresp '+corresp.attrib['id']+'\n'
+    return root
+groomers.append(fix_corresp)
+
 def fix_pubdate(root):
     global output
     doi = get_doi(root)
