@@ -233,11 +233,13 @@ groomers.append(fix_merops_link)
 
 def fix_comment(root):
     global output
+    refnums = ''
     for comment in root.xpath("//comment"):
         if comment.tail and comment.tail.startswith("."):
-            refnum = list(comment.iterancestors("ref"))[0].xpath("label")[0].text
             comment.tail = re.sub(r'^\.', r'', comment.tail)
-            output += 'correction: removed period after comment end tag in journal reference '+refnum+'\n'
+            refnums += list(comment.iterancestors("ref"))[0].xpath("label")[0].text+' '
+    if refnums:
+        output += 'correction: removed period after comment end tag in journal references '+refnums+'\n'
     return root
 groomers.append(fix_comment)
 
