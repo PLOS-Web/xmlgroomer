@@ -180,9 +180,9 @@ groomers.append(fix_formula)
 
 def fix_journal_ref(root):
     global output
+    refnums = ''
     for link in root.xpath("//mixed-citation[@publication-type='journal']/ext-link"):
         parent = link.getparent()
-        refnum = list(link.iterancestors("ref"))[0].xpath("label")[0].text
         index = parent.index(link)
         comment = etree.Element('comment')
         comment.append(link)
@@ -191,7 +191,9 @@ def fix_journal_ref(root):
             comment.text = previous.tail
             previous.tail = ''
         parent.insert(index, comment)
-        output += 'correction: added comment tag around journal reference '+refnum+' link\n'
+        refnums += list(link.iterancestors("ref"))[0].xpath("label")[0].text+' '
+    if refnums:
+        output += 'correction: added comment tag around journal reference links '+refnums+'\n'
     return root
 groomers.append(fix_journal_ref)
 
