@@ -307,16 +307,6 @@ def fix_mimetype(root):
     return root
 groomers.append(fix_mimetype)
 
-def fix_empty_element(root):
-    global output
-    # starts from the leaves of the tree to remove nested empty elements
-    for element in reversed(list(root.iterdescendants())):
-        if not element.text and not element.attrib and not element.getchildren() and not element.tag == 'title':
-            output += 'correction: removed empty element '+element.tag+' at '+root.getroottree().getpath(element)+'\n'
-            element.getparent().remove(element)
-    return root
-groomers.append(fix_empty_element)
-
 if __name__ == '__main__':
     if len(sys.argv) != 3:
         sys.exit('usage: xmlgroomer.py before.xml after.xml')

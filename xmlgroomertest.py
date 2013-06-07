@@ -301,8 +301,3 @@ def test_fix_mimetype():
 		<caption><p>(TIFF)</p></caption>
 		</supplementary-material></article>'''
 	verify(before, after, x.fix_mimetype)
-
-def test_fix_empty_element():
-    before = '<article><title/><tag><label></label></tag><sec id="s1"></sec><p>Paragraph.</p><body/></article>'
-    after = '<article><title/><sec id="s1"></sec><p>Paragraph.</p></article>'
-    verify(before, after, x.fix_empty_element)
