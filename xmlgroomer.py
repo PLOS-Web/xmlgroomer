@@ -239,7 +239,7 @@ def fix_url(root):
         if re.match(r'http://10\.[0-9]{4}', link.attrib[h]):
             link.attrib[h] = link.attrib[h].replace('http://', 'http://dx.doi.org/')
         # prepend www.ncbi.nlm.nih.gov/pubmed/ for pmid
-        if re.match(r'http://[0-9]{8}$', link.attrib[h]):
+        if re.match(r'http://[0-9]{7,8}$', link.attrib[h]) or link.attrib['ext-link-type'] == 'pmid':
             link.attrib[h] = link.attrib[h].replace('http://', 'http://www.ncbi.nlm.nih.gov/pubmed/')
         if old_link != link.attrib[h]:
             output += 'correction: changed link from '+old_link+' to '+link.attrib[h]+'\n'        
