@@ -168,7 +168,7 @@ def fix_xref(root):
             xref.getparent().remove(xref)
             output += 'correction: removed closed xref bibr '+rid+'\n'
     return root
-groomers.append(fix_xref)
+# groomers.append(fix_xref)
 
 def fix_headed_title(root):
     global output
