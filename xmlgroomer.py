@@ -327,6 +327,6 @@ if __name__ == '__main__':
         try: root = groomer(root)
         except Exception as ee: log.write('** error in '+groomer.__name__+': '+str(ee)+'\n')
     e.write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
-    log.write(output)
+    log.write(output.encode('ascii','ignore'))
     log.close()
     print output
