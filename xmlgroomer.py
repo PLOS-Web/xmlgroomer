@@ -224,12 +224,15 @@ groomers.append(fix_formula)
 
 def fix_label(root):
     global output
+    refnums = ''
     for label in root.xpath("//ref/label"):
         if list(label.iterdescendants()):
             text = next(s for s in [x.text for x in label.iterdescendants()] if s)
+            refnums += text+' '
             label.clear()
             label.text = text
-            output += 'correction: removed tag(s) inside ref label '+text+'\n'
+    if refnums:
+        output += 'correction: removed tags inside reference labels '+refnums+'\n'
     return root
 groomers.append(fix_label)
 
