@@ -164,6 +164,11 @@ def test_fix_xref():
         </article>'''
     verify(before, after, x.fix_xref)
 
+def test_fix_title():
+    before = '''<title>Lipid storage in bulbils.  </title>'''
+    after = '''<title>Lipid storage in bulbils.</title>'''
+    verify(before, after, x.fix_title)    
+
 def test_fix_headed_title():
     before = '''<sec sec-type="headed">
         <title>Purpose: </title>
