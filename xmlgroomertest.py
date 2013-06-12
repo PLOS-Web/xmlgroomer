@@ -171,7 +171,7 @@ def test_fix_title():
 
 def test_fix_headed_title():
     before = '''<sec sec-type="headed">
-        <title>Purpose: </title>
+        <title>Purpose:</title>
         <p>To compare the efficacy of extracorporeal shock.</p>
         </sec>'''
     after = '''<sec sec-type="headed">

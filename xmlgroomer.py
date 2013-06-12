@@ -182,9 +182,9 @@ groomers.append(fix_title)
 def fix_headed_title(root):
     global output
     for title in root.xpath("//sec[@sec-type='headed']/title"):
-        if re.search(r': $', title.text):
+        if re.search(r':$', title.text):
             old_title = title.text
-            title.text = re.sub(r': $', r'', title.text)
+            title.text = re.sub(r':$', r'', title.text)
             output += 'correction: removed punctuation from headed title '+old_title+'\n'
     return root
 groomers.append(fix_headed_title)
