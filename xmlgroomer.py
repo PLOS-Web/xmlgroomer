@@ -299,10 +299,10 @@ def fix_extension(root):
     global output    
     for si in root.xpath("//supplementary-material"):
         typ = si.xpath("caption/p")[-1].text
-        if re.match(r'\(.*\)', typ):
+        if re.match(r'^\(.*\)$', typ):
             filename = si.attrib['{http://www.w3.org/1999/xlink}href']
             ext = typ.strip('()').lower()
-            if re.match(r's[0-9]', filename[-4:]):
+            if re.match(r's[0-9]{3}', filename[-4:]):
                 si.attrib['{http://www.w3.org/1999/xlink}href'] = filename+'.'+ext
                 output += 'correction: set extension of '+filename+' to '+ext+' for '+si.xpath("label")[0].text+'\n'
     return root
@@ -312,9 +312,9 @@ def fix_mimetype(root):
     global output
     for si in root.xpath("//supplementary-material"):
         typ = si.xpath("caption/p")[-1].text
-        if re.match(r'\(.*\)', typ):
-            mime, enc = mimetypes.guess_type('x.'+typ.strip('()'), False)
-            if 'mimetype' not in si.attrib or mime != si.attrib['mimetype']:
+        if re.match(r'^\(.*\)$', typ):
+            mime, enc = mimetypes.guess_type('x.'+typ.strip('()').lower(), False)
+            if mime and ('mimetype' not in si.attrib or mime != si.attrib['mimetype']):
                 si.attrib['mimetype'] = mime
                 output += 'correction: set mimetype of '+typ+' to '+mime+' for '+si.xpath("label")[0].text+'\n'
     return root
