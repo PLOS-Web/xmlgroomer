@@ -173,7 +173,7 @@ groomers.append(fix_xref)
 def fix_title(root):
     global output
     for title in root.xpath("//title"):
-        if re.search(r'\s$', title.text):
+        if title.text and re.search(r'\s$', title.text):
             title.text = title.text.strip()
             output += 'correction: removed whitespace from end of title '+title.text+'\n'
     return root
