@@ -281,6 +281,11 @@ def test_fix_provenance():
         </article>'''
     verify(before, after, x.fix_provenance)
 
+def test_fix_si_title():
+    before = '''<sec sec-type="supplementary-material"><title>Supporting Information Legends</title></sec>'''
+    after = '''<sec sec-type="supplementary-material"><title>Supporting Information</title></sec>'''
+    verify(before, after, x.fix_si_title)
+
 def test_fix_extension():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <supplementary-material id="pone.0063011.s001" xlink:href="pone.0063011.s001" mimetype="image/tiff">

@@ -299,6 +299,14 @@ def fix_provenance(root):
     return root
 groomers.append(fix_provenance)
 
+def fix_si_title(root):
+    global output
+    for si_title in root.xpath("//sec[@sec-type='supplementary-material']/title"):
+        si_title.text = 'Supporting Information'
+        output += 'correction: set supplementary material section title to Supporting Information\n'
+    return root
+groomers.append(fix_si_title)
+
 def fix_extension(root):
     global output    
     for si in root.xpath("//supplementary-material"):
