@@ -281,6 +281,13 @@ def test_fix_provenance():
         </article>'''
     verify(before, after, x.fix_provenance)
 
+def test_fix_suppressed_tags():
+    before = '''<article><award-group><award-id>45902</award-id></award-group>
+        <roman><italic>P</italic><italic>. troglodytes</italic></roman>_PARG</article>'''
+    after = '''<article>45902
+        <italic>P</italic><italic>. troglodytes</italic>_PARG</article>'''    
+    verify(before, after, x.fix_suppressed_tags)
+
 def test_fix_si_title():
     before = '''<sec sec-type="supplementary-material"><title>Supporting Information Legends</title></sec>'''
     after = '''<sec sec-type="supplementary-material"><title>Supporting Information</title></sec>'''

@@ -299,6 +299,13 @@ def fix_provenance(root):
     return root
 groomers.append(fix_provenance)
 
+def fix_suppressed_tags(root):
+    global output
+    etree.strip_tags(root, 'roman', 'award-id', 'award-group')
+    output += 'correction: removed suppressed tags (award-id, award-group, roman)\n' 
+    return root
+groomers.append(fix_suppressed_tags)
+
 def fix_si_title(root):
     global output
     for si_title in root.xpath("//sec[@sec-type='supplementary-material']/title"):
