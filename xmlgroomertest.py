@@ -165,8 +165,8 @@ def test_fix_xref():
     verify(before, after, x.fix_xref)
 
 def test_fix_title():
-    before = '''<title>Lipid storage in bulbils.  </title>'''
-    after = '''<title>Lipid storage in bulbils.</title>'''
+    before = '''<article><title>Lipid <title>storage</title> in bulbils.  </title></article>'''
+    after = '''<article><title>Lipid <title>storage</title> in bulbils.</title></article>'''
     verify(before, after, x.fix_title)    
 
 def test_fix_headed_title():
