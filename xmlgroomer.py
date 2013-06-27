@@ -237,6 +237,16 @@ def fix_formula(root):
     return root
 groomers.append(fix_formula)
 
+def fix_formula_label(root):
+    global output
+    for label in root.xpath("//disp-formula/label"):
+        old_label = label.text
+        label.text = re.sub(r'[^0-9]*([0-9]\w*|[A-Z]).*', r'(\1)', label.text)
+        if label.text != old_label:
+            output += 'correction: changed disp-formula label from '+old_label+' to '+label.text+'\n'
+    return root
+groomers.append(fix_formula_label)
+
 def fix_label(root):
     global output
     refnums = ''

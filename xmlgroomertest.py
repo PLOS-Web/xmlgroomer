@@ -236,6 +236,19 @@ def test_fix_formula():
         </article>'''
     verify(before, after, x.fix_formula)   
 
+def test_fix_formula_label():
+    before = '''<article>
+        <disp-formula id="eqn1"><label>[Equation 11b]</label></disp-formula>
+        <disp-formula id="eqn2"><label>Eq. A hello</label></disp-formula>
+        <disp-formula id="eqn3"><label>3 hello</label></disp-formula>
+        </article>'''
+    after = '''<article>
+        <disp-formula id="eqn1"><label>(11b)</label></disp-formula>
+        <disp-formula id="eqn2"><label>(A)</label></disp-formula>
+        <disp-formula id="eqn3"><label>(3)</label></disp-formula>
+        </article>'''
+    verify(before, after, x.fix_formula_label)
+
 def test_fix_label():
     before = '''<ref><label><italic>13</italic></label></ref>'''
     after = '''<ref><label>13</label></ref>'''
