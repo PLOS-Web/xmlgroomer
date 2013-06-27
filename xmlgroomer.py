@@ -251,7 +251,7 @@ def fix_url(root):
         if re.search(r'\s', link.attrib[h]):
             link.attrib[h] = re.sub(r'\s', r'', link.attrib[h])
         # prepend http:// if not there
-        if not link.attrib[h].startswith('http'):
+        if not link.attrib[h].startswith('http') and not link.attrib[h].startswith('ftp'):
             link.attrib[h] = 'http://' + link.attrib[h]
         # prepend dx.doi.org/ for doi
         if re.match(r'http://10\.[0-9]{4}', link.attrib[h]):
