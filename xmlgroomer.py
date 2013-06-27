@@ -301,8 +301,9 @@ groomers.append(fix_provenance)
 
 def fix_suppressed_tags(root):
     global output
-    etree.strip_tags(root, 'roman', 'award-id', 'award-group')
-    output += 'correction: removed suppressed tags (award-id, award-group, roman)\n' 
+    if root.xpath("//roman") or root.xpath("//award-id") or root.xpath("//award-group"):
+        etree.strip_tags(root, 'roman', 'award-id', 'award-group')
+        output += 'correction: removed suppressed tags (award-id, award-group, roman)\n' 
     return root
 groomers.append(fix_suppressed_tags)
 
