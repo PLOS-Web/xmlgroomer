@@ -38,6 +38,17 @@ def test_fix_article_title():
     after = '<article><title-group><title>Bottlenose Dolphins</title></title-group></article>'
     verify(before, after, x.fix_article_title)
 
+def test_fix_article_title_tags():
+    before = '''<article><meta><named-content>hello</named-content></meta><title-group>
+        <article-title>Identification of Immunity Related Genes to Study the<named-content content-type="genus-species">
+        <named-content content-type="genus"><italic>Physalis</italic></named-content><italic><named-content content-type="species">
+        peruviana</named-content></italic></named-content> - <italic><named-content content-type="genus-species">Fusarium oxysporum
+        </named-content></italic> pathosystem</article-title></title-group></article>'''
+    after = '''<article><meta><named-content>hello</named-content></meta><title-group>
+        <article-title>Identification of Immunity Related Genes to Study the<italic>Physalis</italic>
+        <italic>peruviana</italic> - <italic>Fusarium oxysporum</italic> pathosystem</article-title></title-group></article>'''
+    verify(before, after, x.fix_article_title_tags)
+
 def test_fix_affiliation():
     before = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <contrib xlink:type="simple" contrib-type="author">
