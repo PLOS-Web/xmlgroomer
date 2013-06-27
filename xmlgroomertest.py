@@ -45,14 +45,16 @@ def test_fix_affiliation():
         <xref ref-type="aff" rid="aff"/></contrib>
         <contrib xlink:type="simple" contrib-type="author">
         <name><surname>Winawer</surname><given-names>Jonathan</given-names></name>
-        <xref ref-type="corresp" rid="cor1"/></contrib></article>"""
+        <xref ref-type="corresp" rid="cor1"/></contrib>
+        <aff id="aff1"><label>1</label><addr-line>Institute</addr-line></aff></article>"""
     after = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <contrib xlink:type="simple" contrib-type="author">
         <name name-style="western"><surname>Shaikhali</surname><given-names>Jehad</given-names></name>
         <xref ref-type="aff" rid="aff1"/></contrib>
         <contrib xlink:type="simple" contrib-type="author">
         <name><surname>Winawer</surname><given-names>Jonathan</given-names></name>
-        <xref ref-type="aff" rid="aff1"/><xref ref-type="corresp" rid="cor1"/></contrib></article>"""
+        <xref ref-type="aff" rid="aff1"/><xref ref-type="corresp" rid="cor1"/></contrib>
+        <aff id="aff1"><label>1</label><addr-line>Institute</addr-line></aff></article>"""
     verify(before, after, x.fix_affiliation)
 
 def test_fix_corresp():

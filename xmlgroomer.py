@@ -38,9 +38,11 @@ def fix_affiliation(root):
     for author in root.xpath("//contrib[@contrib-type='author']"):
         aff = author.xpath("xref[@ref-type='aff']")
         name = author.xpath("name/surname")[0].text
+        aff_count = len(root.xpath("//aff[starts-with(@id, 'aff')]"))
         if not aff:
-            author.insert(1, etree.fromstring("""<xref ref-type='aff' rid='aff1'/>"""))
-            output += 'correction: set rid=aff1 for '+name+'\n'
+            if aff_count == 1:
+                author.insert(1, etree.fromstring("""<xref ref-type='aff' rid='aff1'/>"""))
+                output += 'correction: set rid=aff1 for '+name+'\n'
         elif aff[0].attrib['rid'] == 'aff':
             aff[0].attrib['rid'] = 'aff1'
             output += 'correction: set rid=aff1 for '+name+'\n'
