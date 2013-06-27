@@ -296,6 +296,11 @@ def test_fix_provenance():
         </article>'''
     verify(before, after, x.fix_provenance)
 
+def test_fix_fn_type():
+    before = '<fn id="fn1" fn-type="present-address"><label>a</label><p>Current address</p></fn>'
+    after = '<fn id="fn1" fn-type="current-aff"><label>a</label><p>Current address</p></fn>'
+    verify(before, after, x.fix_fn_type)
+
 def test_fix_suppressed_tags():
     before = '''<article><award-group><award-id>45902</award-id></award-group>
         <roman><italic>P</italic><italic>. troglodytes</italic></roman>_PARG</article>'''

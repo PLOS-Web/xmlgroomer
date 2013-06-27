@@ -310,6 +310,14 @@ def fix_provenance(root):
     return root
 groomers.append(fix_provenance)
 
+def fix_fn_type(root):
+    global output
+    for fn in root.xpath("//fn[@fn-type='present-address']"):
+        fn.attrib['fn-type'] = 'current-aff'
+        output += "correction: changed fn-type 'present address' to 'current-aff'\n"
+    return root
+groomers.append(fix_fn_type)
+
 def fix_suppressed_tags(root):
     global output
     if root.xpath("//roman") or root.xpath("//award-id") or root.xpath("//award-group"):
