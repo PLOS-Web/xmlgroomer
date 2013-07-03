@@ -209,6 +209,17 @@ def test_fix_bold_caption():
         <table/></table-wrap>'''
     verify(before, after, x.fix_bold_caption)
 
+def test_fix_fig_caption():
+    before = '''<fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
+        <caption><p><bold>Bony labyrinth of<italic>Kulbeckia kulbecke</italic>.</bold></p>
+        <p><bold>A</bold>, stereopair and labeled line drawing of digital endocast in anterior view.</p>
+        </caption></fig>'''
+    after = '''<fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
+        <caption><title>Bony labyrinth of<italic>Kulbeckia kulbecke</italic>.</title>
+        <p><bold>A</bold>, stereopair and labeled line drawing of digital endocast in anterior view.</p>
+        </caption></fig>'''
+    verify(before, after, x.fix_fig_caption)  
+
 def test_fix_formula():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <fig><caption>

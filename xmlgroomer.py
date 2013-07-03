@@ -225,6 +225,18 @@ def fix_bold_caption(root):
     return root
 groomers.append(fix_bold_caption)
 
+def fix_fig_caption(root):
+    global output
+    for caption in root.xpath("//fig/caption"):
+        if not caption.xpath("title") and caption.xpath("p/bold"):
+            title = caption.xpath("p/bold")[0].getparent()
+            title.tag = 'title'
+            etree.strip_tags(title, 'bold')
+            label = caption.getparent().xpath("label")[0].text
+            output += 'correction: changed caption p/bold to title for '+label+'\n'
+    return root
+groomers.append(fix_fig_caption)
+
 def fix_formula(root):
     global output
     for formula in root.xpath("//fig//caption//disp-formula") + root.xpath("//table//disp-formula"):
