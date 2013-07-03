@@ -307,6 +307,22 @@ def fix_merops_link(root):
     return root
 groomers.append(fix_merops_link)
 
+def fix_page_range(root):
+    global output
+    for ref in root.xpath("//ref/mixed-citation"):
+        fpages = ref.xpath("fpage")
+        lpages = ref.xpath("lpage")
+        if len(fpages) > 1 or len(lpages) > 1:
+            fpages[0].text = min([x.text for x in fpages])
+            lpages[0].text = max([x.text for x in lpages])
+            for page in fpages[1:] + lpages[1:]:
+                ref.remove(page)
+            lpages[0].tail = lpages[0].tail.replace(', ','.')
+            refnum = ref.getparent().xpath("label")[0].text
+            output += 'correction: consolidated multiple fpage-lpage in reference '+refnum+'\n'
+    return root
+groomers.append(fix_page_range)
+
 def fix_comment(root):
     global output
     refnums = ''

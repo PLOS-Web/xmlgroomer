@@ -293,6 +293,15 @@ def test_fix_merops_link():
         </article>'''
     verify(before, after, x.fix_merops_link)
 
+def test_fix_page_range():
+    before = '''<ref id="B1"><label>1</label>
+        <mixed-citation publication-type="book"><source>Radiobiology for radiobiologists</source>. 
+        pp. <fpage>129</fpage>-<lpage>134</lpage>, <fpage>303</fpage>-<lpage>326</lpage>.</mixed-citation></ref>'''
+    after = '''<ref id="B1"><label>1</label>
+        <mixed-citation publication-type="book"><source>Radiobiology for radiobiologists</source>. 
+        pp. <fpage>129</fpage>-<lpage>326</lpage>.</mixed-citation></ref>'''
+    verify(before, after, x.fix_page_range)
+
 def test_fix_comment():
     before = '<article><ref><label>2</label><mixed-citation><comment></comment>.</mixed-citation></ref></article>'
     after = '<article><ref><label>2</label><mixed-citation><comment></comment></mixed-citation></ref></article>'
