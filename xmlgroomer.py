@@ -262,11 +262,10 @@ def fix_label(root):
     global output
     refnums = ''
     for label in root.xpath("//ref/label"):
-        if list(label.iterdescendants()):
-            text = next(s for s in [x.text for x in label.iterdescendants()] if s)
-            refnums += text+' '
-            label.clear()
-            label.text = text
+        for item in list(label.iterdescendants()):
+            etree.strip_tags(label, item.tag)
+            if label.text:
+                refnums += label.text+' '
     if refnums:
         output += 'correction: removed tags inside reference labels '+refnums+'\n'
     return root
