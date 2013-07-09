@@ -227,6 +227,23 @@ def test_fix_bold():
         <table/></table-wrap></article>'''
     verify(before, after, x.fix_bold)
 
+def test_fix_italic():
+    before = '''<article><sec id="s3.6"><title><italic>PhANG</italic></title></sec>
+        <sec id="s3.6"><title><italic>tetrapyrrole</italic> mediated plastid <italic>PhANG</italic></title></sec>
+        <fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
+        <caption><title><italic>Bony labyrinth of Kulbeckia kulbecke</italic></title></caption></fig>
+        <table-wrap id="tab1" position="float"><label>Table 1</label>
+        <caption><title><italic>Summary of border control</italic> and vaccination.</title></caption>
+        <table/></table-wrap></article>'''
+    after = '''<article><sec id="s3.6"><title>PhANG</title></sec>
+        <sec id="s3.6"><title><italic>tetrapyrrole</italic> mediated plastid <italic>PhANG</italic></title></sec>
+        <fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
+        <caption><title>Bony labyrinth of Kulbeckia kulbecke</title></caption></fig>
+        <table-wrap id="tab1" position="float"><label>Table 1</label>
+        <caption><title><italic>Summary of border control</italic> and vaccination.</title></caption>
+        <table/></table-wrap></article>'''
+    verify(before, after, x.fix_italic)
+
 def test_fix_formula():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <fig><caption>

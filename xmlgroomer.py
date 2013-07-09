@@ -226,6 +226,19 @@ def fix_bold(root):
     return root
 groomers.append(fix_bold)
 
+def fix_italic(root):
+    global output
+    for title in root.xpath("//sec/title") + root.xpath("//fig/caption/title") + root.xpath("//table-wrap/caption/title"):
+        if not title.text and title.xpath("italic") and len(title.getchildren())==1 and title.xpath("italic")[0].tail in [None,'.',':','?']:
+            etree.strip_tags(title, 'italic')
+            if title.getparent().tag == 'sec':
+                label = title.getparent().attrib['id']
+            else:
+                label = title.getparent().getparent().xpath("label")[0].text
+            output += 'correction: removed italic tags from '+label+' title\n'
+    return root
+groomers.append(fix_italic)
+
 def fix_formula(root):
     global output
     for formula in root.xpath("//fig//caption//disp-formula") + root.xpath("//table//disp-formula"):
