@@ -200,22 +200,22 @@ def test_fix_sec_title():
         signal and acts as a negative regulator of <italic>PhANG</italic> expression</title></sec>'''
     verify(before, after, x.fix_sec_title)
 
-def test_fix_bold_caption():
+def test_fix_caption():
     before = '''<article><fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
         <caption><p><bold>Bony labyrinth of<italic>Kulbeckia kulbecke</italic>.</bold></p>
         <p><bold>A</bold>, stereopair and labeled line drawing of digital endocast in anterior view.</p>
         </caption></fig>
         <table-wrap id="tab1" position="float"><label>Table 1</label>
-        <caption><p><bold>Summary of border control and vaccination.</bold></p></caption>
+        <caption><p>Summary of border control and vaccination.</p></caption>
         <table/></table-wrap></article>'''
     after = '''<article><fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
-        <caption><title>Bony labyrinth of<italic>Kulbeckia kulbecke</italic>.</title>
+        <caption><title><bold>Bony labyrinth of<italic>Kulbeckia kulbecke</italic>.</bold></title>
         <p><bold>A</bold>, stereopair and labeled line drawing of digital endocast in anterior view.</p>
         </caption></fig>
         <table-wrap id="tab1" position="float"><label>Table 1</label>
         <caption><title>Summary of border control and vaccination.</title></caption>
         <table/></table-wrap></article>'''
-    verify(before, after, x.fix_bold_caption)
+    verify(before, after, x.fix_caption)
 
 def test_fix_formula():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
