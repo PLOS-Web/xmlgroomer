@@ -215,18 +215,7 @@ groomers.append(fix_bold_heading)
 
 def fix_bold_caption(root):
     global output
-    for caption in root.xpath("//table-wrap/caption"):
-        if caption.xpath("bold") or caption.xpath("p"):
-            table_wrap = caption.getparent()
-            new_caption = re.sub(r'(<bold>|</bold>)', r'', etree.tostring(caption)).replace('<p>','<title>').replace('</p>','</title>')
-            table_wrap.replace(caption, etree.fromstring(new_caption))
-            output += 'correction: removed bold tags from '+table_wrap.xpath("label")[0].text+' caption\n'
-    return root
-groomers.append(fix_bold_caption)
-
-def fix_fig_caption(root):
-    global output
-    for caption in root.xpath("//fig/caption"):
+    for caption in root.xpath("//fig/caption") + root.xpath("//table-wrap/caption"):
         if not caption.xpath("title") and caption.xpath("p/bold"):
             title = caption.xpath("p/bold")[0].getparent()
             title.tag = 'title'
@@ -234,7 +223,7 @@ def fix_fig_caption(root):
             label = caption.getparent().xpath("label")[0].text
             output += 'correction: changed caption p/bold to title for '+label+'\n'
     return root
-groomers.append(fix_fig_caption)
+groomers.append(fix_bold_caption)
 
 def fix_formula(root):
     global output
