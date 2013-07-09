@@ -193,13 +193,6 @@ def test_fix_headed_title():
         </sec>'''
     verify(before, after, x.fix_headed_title)    
 
-def test_fix_sec_title():
-    before = '''<sec id="s3.6"><title><bold>PAPP5</bold> responds to the tetrapyrrole mediated plastid 
-        signal and acts as a negative regulator of <bold><italic>PhANG</italic></bold> expression</title></sec>'''
-    after = '''<sec id="s3.6"><title>PAPP5 responds to the tetrapyrrole mediated plastid 
-        signal and acts as a negative regulator of <italic>PhANG</italic> expression</title></sec>'''
-    verify(before, after, x.fix_sec_title)
-
 def test_fix_caption():
     before = '''<article><fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
         <caption><p><bold>Bony labyrinth of<italic>Kulbeckia kulbecke</italic>.</bold></p>
@@ -216,6 +209,23 @@ def test_fix_caption():
         <caption><title>Summary of border control and vaccination.</title></caption>
         <table/></table-wrap></article>'''
     verify(before, after, x.fix_caption)
+
+def test_fix_bold():
+    before = '''<article><sec id="s3.6"><title><bold>PAPP5</bold> responds to the tetrapyrrole mediated plastid 
+        signal and acts as a negative regulator of <bold><italic>PhANG</italic></bold> expression</title></sec>
+        <fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
+        <caption><title><bold>Bony labyrinth of Kulbeckia kulbecke</bold></title></caption></fig>
+        <table-wrap id="tab1" position="float"><label>Table 1</label>
+        <caption><title>Summary of border control and <bold>vaccination</bold>.</title></caption>
+        <table/></table-wrap></article>'''
+    after = '''<article><sec id="s3.6"><title>PAPP5 responds to the tetrapyrrole mediated plastid 
+        signal and acts as a negative regulator of <italic>PhANG</italic> expression</title></sec>
+        <fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
+        <caption><title>Bony labyrinth of Kulbeckia kulbecke</title></caption></fig>
+        <table-wrap id="tab1" position="float"><label>Table 1</label>
+        <caption><title>Summary of border control and vaccination.</title></caption>
+        <table/></table-wrap></article>'''
+    verify(before, after, x.fix_bold)
 
 def test_fix_formula():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">

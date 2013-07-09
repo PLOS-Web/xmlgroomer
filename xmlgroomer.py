@@ -203,15 +203,6 @@ def fix_headed_title(root):
     return root
 groomers.append(fix_headed_title)
 
-def fix_sec_title(root):
-    global output
-    for title in root.xpath("//sec/title"):
-        if title.xpath("bold"):
-            etree.strip_tags(title, 'bold')
-            output += 'correction: removed bold tags from '+title.getparent().attrib['id']+' title\n'
-    return root
-groomers.append(fix_sec_title)
-
 def fix_caption(root):
     global output
     for caption in root.xpath("//fig/caption") + root.xpath("//table-wrap/caption"):
@@ -221,6 +212,19 @@ def fix_caption(root):
             output += 'correction: changed caption p to title for '+label+'\n'
     return root
 groomers.append(fix_caption)
+
+def fix_bold(root):
+    global output
+    for title in root.xpath("//sec/title") + root.xpath("//fig/caption/title") + root.xpath("//table-wrap/caption/title"):
+        if title.xpath("bold"):
+            etree.strip_tags(title, 'bold')
+            if title.getparent().tag == 'sec':
+                label = title.getparent().attrib['id']
+            else:
+                label = title.getparent().getparent().xpath("label")[0].text
+            output += 'correction: removed bold tags from '+label+' title\n'
+    return root
+groomers.append(fix_bold)
 
 def fix_formula(root):
     global output
