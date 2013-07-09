@@ -67,14 +67,14 @@ def fix_addrline(root):
     return root
 groomers.append(fix_addrline)
 
-def fix_corresp(root):
+def fix_corresp_label(root):
     global output
     for corresp in root.xpath("//corresp"):
         if corresp.xpath("label"):
             etree.strip_tags(corresp, 'label')
             output += 'correction: removed label tag from corresp '+corresp.attrib['id']+'\n'
     return root
-groomers.append(fix_corresp)
+groomers.append(fix_corresp_label)
 
 def fix_pubdate(root):
     global output

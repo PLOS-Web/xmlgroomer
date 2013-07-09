@@ -73,14 +73,14 @@ def test_fix_addrline():
     after = """<aff id="aff1"><label>1</label> <addr-line>Institute</addr-line></aff>"""
     verify(before, after, x.fix_addrline)
 
-def test_fix_corresp():
+def test_fix_corresp_label():
     before = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <corresp id="cor1"><label>*</label> E-mail: <email xlink:type="simple">jkurie@mdanderson.org</email></corresp>
         </article>"""
     after = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <corresp id="cor1">* E-mail: <email xlink:type="simple">jkurie@mdanderson.org</email></corresp>
         </article>"""
-    verify(before, after, x.fix_corresp)
+    verify(before, after, x.fix_corresp_label)
 
 def test_fix_pubdate():
     before = '''<article><article-meta>
