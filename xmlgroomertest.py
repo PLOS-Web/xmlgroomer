@@ -68,6 +68,11 @@ def test_fix_affiliation():
         <aff id="aff1"><label>1</label><addr-line>Institute</addr-line></aff></article>"""
     verify(before, after, x.fix_affiliation)
 
+def test_fix_addrline():
+    before = """<aff id="aff1"><label>1</label> <addr-line>Institute</addr-line>,</aff>"""
+    after = """<aff id="aff1"><label>1</label> <addr-line>Institute</addr-line></aff>"""
+    verify(before, after, x.fix_addrline)
+
 def test_fix_corresp():
     before = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <corresp id="cor1"><label>*</label> E-mail: <email xlink:type="simple">jkurie@mdanderson.org</email></corresp>

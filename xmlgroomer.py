@@ -58,6 +58,15 @@ def fix_affiliation(root):
     return root
 groomers.append(fix_affiliation)
 
+def fix_addrline(root):
+    global output
+    for addrline in root.xpath("//aff/addr-line"):
+        if addrline.tail in [',','.',':']:
+            addrline.tail = ''
+            output += 'correction: removed punctuation after addr-line in '+addrline.getparent().attrib['id']+'\n'
+    return root
+groomers.append(fix_addrline)
+
 def fix_corresp(root):
     global output
     for corresp in root.xpath("//corresp"):
