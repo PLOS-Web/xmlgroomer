@@ -193,12 +193,12 @@ def test_fix_headed_title():
         </sec>'''
     verify(before, after, x.fix_headed_title)    
 
-def test_fix_bold_heading():
+def test_fix_sec_title():
     before = '''<sec id="s3.6"><title><bold>PAPP5</bold> responds to the tetrapyrrole mediated plastid 
         signal and acts as a negative regulator of <bold><italic>PhANG</italic></bold> expression</title></sec>'''
     after = '''<sec id="s3.6"><title>PAPP5 responds to the tetrapyrrole mediated plastid 
         signal and acts as a negative regulator of <italic>PhANG</italic> expression</title></sec>'''
-    verify(before, after, x.fix_bold_heading)
+    verify(before, after, x.fix_sec_title)
 
 def test_fix_bold_caption():
     before = '''<article><fig id="pone-0066624-g006" position="float"><label>Figure 6</label>

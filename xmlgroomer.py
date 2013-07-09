@@ -203,15 +203,14 @@ def fix_headed_title(root):
     return root
 groomers.append(fix_headed_title)
 
-def fix_bold_heading(root):
+def fix_sec_title(root):
     global output
     for title in root.xpath("//sec/title"):
         if title.xpath("bold"):
-            sec = title.getparent()
-            sec.replace(title, etree.fromstring(re.sub(r'(<bold>|</bold>)', r'', etree.tostring(title))))
-            output += 'correction: removed bold tags from sec '+sec.attrib['id']+' title\n'
+            etree.strip_tags(title, 'bold')
+            output += 'correction: removed bold tags from '+title.getparent().attrib['id']+' title\n'
     return root
-groomers.append(fix_bold_heading)
+groomers.append(fix_sec_title)
 
 def fix_bold_caption(root):
     global output
