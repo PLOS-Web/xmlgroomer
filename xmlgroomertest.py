@@ -75,12 +75,21 @@ def test_fix_addrline():
 
 def test_fix_corresp_label():
     before = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
-        <corresp id="cor1"><label>*</label> E-mail: <email xlink:type="simple">jkurie@mdanderson.org</email></corresp>
+        <corresp id="cor1"><label>*</label> E-mail: <email xlink:type="simple">me@example.net</email></corresp>
         </article>"""
     after = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
-        <corresp id="cor1">* E-mail: <email xlink:type="simple">jkurie@mdanderson.org</email></corresp>
+        <corresp id="cor1">* E-mail: <email xlink:type="simple">me@example.net</email></corresp>
         </article>"""
     verify(before, after, x.fix_corresp_label)
+
+def test_fix_corresp_email():
+    before = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <corresp id="cor1">* E-mail: me@example.net (me)
+        you@example.org (you)</corresp></article>"""
+    after = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <corresp id="cor1">* E-mail: <email xlink:type="simple">me@example.net</email> (me)
+        <email xlink:type="simple">you@example.org</email> (you)</corresp></article>"""
+    verify(before, after, x.fix_corresp_email)
 
 def test_fix_pubdate():
     before = '''<article><article-meta>

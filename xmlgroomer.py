@@ -76,6 +76,19 @@ def fix_corresp_label(root):
     return root
 groomers.append(fix_corresp_label)
 
+def fix_corresp_email(root):
+    global output
+    for corresp in root.xpath("//corresp"):
+        if not corresp.getchildren():
+            email = re.sub(r'(\S+@\S+)', r'<email xlink:type="simple">\1</email>', corresp.text)
+            temp = etree.fromstring('<temp xmlns:xlink="http://www.w3.org/1999/xlink">'+email+'</temp>')
+            corresp.text = ''
+            corresp.append(temp)
+            etree.strip_tags(corresp, 'temp')
+            output += 'correction: activated email in corresp '+corresp.attrib['id']+'\n'
+    return root
+groomers.append(fix_corresp_email)
+
 def fix_pubdate(root):
     global output
     doi = get_doi(root)
