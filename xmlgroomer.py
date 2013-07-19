@@ -382,9 +382,13 @@ groomers.append(fix_fn_type)
 
 def fix_suppressed_tags(root):
     global output
-    if root.xpath("//roman") or root.xpath("//award-id") or root.xpath("//award-group"):
-        etree.strip_tags(root, 'roman', 'award-id', 'award-group')
-        output += 'correction: removed suppressed tags (award-id, award-group, roman)\n' 
+    for related in root.xpath("//related-object"):
+        for child in related.getchildren():
+            if not child.text and not child.getchildren():
+                related.remove(child)
+    if root.xpath("//roman") or root.xpath("//award-id") or root.xpath("//award-group") + root.xpath("//related-object"):
+        etree.strip_tags(root, 'roman', 'award-id', 'award-group', 'related-object')
+        output += 'correction: removed suppressed tags (award-id, award-group, roman, related-object)\n'
     return root
 groomers.append(fix_suppressed_tags)
 

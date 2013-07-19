@@ -389,9 +389,9 @@ def test_fix_fn_type():
     verify(before, after, x.fix_fn_type)
 
 def test_fix_suppressed_tags():
-    before = '''<article><award-group><award-id>45902</award-id></award-group>
+    before = '''<article><award-group><award-id>45902</award-id> </award-group><related-object>H<month/></related-object>
         <roman><italic>P</italic><italic>. troglodytes</italic></roman>_PARG</article>'''
-    after = '''<article>45902
+    after = '''<article>45902 H
         <italic>P</italic><italic>. troglodytes</italic>_PARG</article>'''    
     verify(before, after, x.fix_suppressed_tags)
 
