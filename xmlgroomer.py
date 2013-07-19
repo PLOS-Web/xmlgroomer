@@ -426,7 +426,7 @@ if __name__ == '__main__':
     log = open('/var/local/scripts/production/xmlgroomer/log/log', 'a')
     log.write('-'*50 + '\n'+time.strftime("%Y-%m-%d %H:%M:%S   "))
     try: 
-        parser = etree.XMLParser(dtd_validation = True, no_network = False)
+        parser = etree.XMLParser(recover = True)
         e = etree.parse(sys.argv[1], parser)
         root = e.getroot()
     except Exception as ee:
