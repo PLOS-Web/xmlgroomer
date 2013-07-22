@@ -208,7 +208,8 @@ def test_fix_headed_title():
     verify(before, after, x.fix_headed_title)    
 
 def test_fix_caption():
-    before = '''<article><fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
+    before = '''<article><ref id="B1"></ref>
+        <fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
         <caption><p><bold>Bony labyrinth of<italic>Kulbeckia kulbecke</italic>.</bold></p>
         <p><bold>A</bold>, stereopair and labeled line drawing of digital endocast in anterior view.</p>
         </caption></fig>
@@ -219,7 +220,8 @@ def test_fix_caption():
         <label>Figure S1</label>
         <caption><p><bold>Colocalization.</bold></p><p> Bars, 50.</p></caption>
         </supplementary-material></article>'''
-    after = '''<article><fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
+    after = '''<article><ref id="B1"></ref>
+        <fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
         <caption><title><bold>Bony labyrinth of<italic>Kulbeckia kulbecke</italic>.</bold></title>
         <p><bold>A</bold>, stereopair and labeled line drawing of digital endocast in anterior view.</p>
         </caption></fig>
@@ -233,7 +235,8 @@ def test_fix_caption():
     verify(before, after, x.fix_caption)
 
 def test_fix_bold():
-    before = '''<article><sec id="s3.6"><title><bold>PAPP5</bold> responds to the tetrapyrrole mediated plastid 
+    before = '''<article><ref id="B1"></ref>
+        <sec id="s3.6"><title><bold>PAPP5</bold> responds to the tetrapyrrole mediated plastid 
         signal and acts as a negative regulator of <bold><italic>PhANG</italic></bold> expression</title></sec>
         <fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
         <caption><title><bold>Bony labyrinth of Kulbeckia kulbecke</bold></title></caption></fig>
@@ -244,7 +247,8 @@ def test_fix_bold():
         <label>Figure S1</label>
         <caption><title><bold>Colocalization.</bold></title><p> Bars, 50.</p></caption>
         </supplementary-material></article>'''
-    after = '''<article><sec id="s3.6"><title>PAPP5 responds to the tetrapyrrole mediated plastid 
+    after = '''<article><ref id="B1"></ref>
+        <sec id="s3.6"><title>PAPP5 responds to the tetrapyrrole mediated plastid 
         signal and acts as a negative regulator of <italic>PhANG</italic> expression</title></sec>
         <fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
         <caption><title>Bony labyrinth of Kulbeckia kulbecke</title></caption></fig>
