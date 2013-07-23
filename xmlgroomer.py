@@ -399,6 +399,16 @@ def fix_si_title(root):
     return root
 groomers.append(fix_si_title)
 
+def fix_si_captions(root):
+    global output
+    for title in root.xpath("//supplementary-material/caption/title"):
+        label = title.getparent().getparent().xpath("label")[0].text
+        title.tag = 'bold'
+        title.getparent().replace(title, etree.fromstring('<p>'+etree.tostring(title)+'</p>'))
+        output += 'correction: changed title to p/bold for '+label+'\n'
+    return root
+groomers.append(fix_si_captions)
+
 def fix_extension(root):
     global output    
     for si in root.xpath("//supplementary-material"):

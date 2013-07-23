@@ -384,6 +384,15 @@ def test_fix_si_title():
     after = '''<sec sec-type="supplementary-material"><title>Supporting Information</title></sec>'''
     verify(before, after, x.fix_si_title)
 
+def test_fix_si_captions():
+    before = '''<article><supplementary-material position="float" id="pone.0047902.figs001">
+        <label>Figure S1</label><caption><title>Colocalization.</title><bold> Bars, 50.</bold></caption>
+        </supplementary-material></article>'''
+    after = '''<article><supplementary-material position="float" id="pone.0047902.figs001">
+        <label>Figure S1</label><caption><p><bold>Colocalization.</bold></p><bold> Bars, 50.</bold></caption>
+        </supplementary-material></article>'''
+    verify(before, after, x.fix_si_captions)
+
 def test_fix_extension():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <supplementary-material id="pone.0063011.s001" xlink:href="pone.0063011.s001" mimetype="image/tiff">
