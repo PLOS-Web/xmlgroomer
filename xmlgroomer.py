@@ -227,8 +227,7 @@ groomers.append(fix_headed_title)
 
 def fix_caption(root):
     global output
-    si = [] if root.xpath("//ref")[0].attrib['id'].startswith('p') else root.xpath("//supplementary-material/caption")
-    for caption in root.xpath("//fig/caption") + root.xpath("//table-wrap/caption") + si:
+    for caption in root.xpath("//fig/caption") + root.xpath("//table-wrap/caption") + root.xpath("//supplementary-material/caption"):
         if not caption.xpath("title") and caption.xpath("p"):
             caption.xpath("p")[0].tag = 'title'
             label = caption.getparent().xpath("label")[0].text
@@ -238,8 +237,8 @@ groomers.append(fix_caption)
 
 def fix_bold(root):
     global output
-    si = [] if root.xpath("//ref")[0].attrib['id'].startswith('p') else root.xpath("//supplementary-material/caption/title")
-    for title in root.xpath("//sec/title") + root.xpath("//fig/caption/title") + root.xpath("//table-wrap/caption/title") + si:
+    for title in root.xpath("//sec/title") + root.xpath("//fig/caption/title") + root.xpath("//table-wrap/caption/title") \
+    + root.xpath("//supplementary-material/caption/title"):
         if title.xpath("bold"):
             etree.strip_tags(title, 'bold')
             if title.getparent().tag == 'sec':
