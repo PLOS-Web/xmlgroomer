@@ -46,7 +46,7 @@ def fix_affiliation(root):
     global output
     for author in root.xpath("//contrib[@contrib-type='author']"):
         aff = author.xpath("xref[@ref-type='aff']")
-        name = author.xpath("name/surname")[0].text
+        name = author.xpath("name/surname")[0].text if author.xpath("name/surname") else author.xpath("collab")[0].text
         aff_count = len(root.xpath("//aff[starts-with(@id, 'aff')]"))
         if not aff:
             if aff_count == 1:
