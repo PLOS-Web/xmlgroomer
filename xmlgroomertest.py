@@ -308,6 +308,17 @@ def test_fix_null_footnote():
     after = '''<sup>3</sup>'''
     verify(before, after, x.fix_null_footnote)
 
+def test_fix_target_footnote():
+    before = '''<article><table><tbody><tr><td>0.022<xref rid="ngtab1.1">*</xref></td></tr></tbody></table>
+        <table-wrap-foot><fn>
+        <p>Test or <target id="ngtab1.1" target-type="fn">*</target> exact probability test. NS = not significant.</p>
+        </fn></table-wrap-foot></article>'''
+    after = '''<article><table><tbody><tr><td>0.022*</td></tr></tbody></table>
+        <table-wrap-foot><fn>
+        <p>Test or * exact probability test. NS = not significant.</p>
+        </fn></table-wrap-foot></article>'''
+    verify(before, after, x.fix_target_footnote)
+
 def test_fix_url():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <ext-link ext-link-type="uri" xlink:href="10.1023/A:1020  830703012" xlink:type="simple"></ext-link>

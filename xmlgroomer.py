@@ -291,6 +291,17 @@ def fix_null_footnote(root):
     return root
 groomers.append(fix_null_footnote)
 
+def fix_target_footnote(root):
+    global output
+    for target in root.xpath("//table-wrap-foot/fn/p/target"):
+        rid = target.attrib['id']
+        for xref in root.xpath("//xref[@rid='"+rid+"']"):
+            etree.strip_tags(xref.getparent(), 'xref')
+        etree.strip_tags(target.getparent(), 'target')
+        output += "correction: stripped target footnotes and corresponding xref\n"
+    return root
+groomers.append(fix_target_footnote)
+
 def fix_label(root):
     global output
     refnums = ''
