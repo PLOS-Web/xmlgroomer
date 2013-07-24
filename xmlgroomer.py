@@ -283,6 +283,14 @@ def fix_formula_label(root):
     return root
 groomers.append(fix_formula_label)
 
+def fix_null_footnote(root):
+    global output
+    for xref in root.xpath("//xref[@rid='ng']"):
+        etree.strip_tags(xref.getparent(), 'xref')
+        output += "correction: stripped null footnotes (xref rid='ng')\n"
+    return root
+groomers.append(fix_null_footnote)
+
 def fix_label(root):
     global output
     refnums = ''

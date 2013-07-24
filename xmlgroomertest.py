@@ -303,6 +303,11 @@ def test_fix_label():
     after = '''<ref><label>13</label></ref>'''
     verify(before, after, x.fix_label)
 
+def test_fix_null_footnote():
+    before = '''<sup><xref rid="ng">3</xref></sup>'''
+    after = '''<sup>3</sup>'''
+    verify(before, after, x.fix_null_footnote)
+
 def test_fix_url():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <ext-link ext-link-type="uri" xlink:href="10.1023/A:1020  830703012" xlink:type="simple"></ext-link>
