@@ -354,13 +354,17 @@ def fix_page_range(root):
     for ref in root.xpath("//ref/mixed-citation"):
         fpages = ref.xpath("fpage")
         lpages = ref.xpath("lpage")
-        if len(fpages) > 1 or len(lpages) > 1:
-            fpages[0].text = min([x.text for x in fpages])
-            lpages[0].text = max([x.text for x in lpages])
-            for page in fpages[1:] + lpages[1:]:
+        refnum = ref.getparent().xpath("label")[0].text if len(fpages) > 1 or len(lpages) > 1 else ''
+        if len(fpages) > 1:
+            fpages[0].text = min([x.text for x in fpages + lpages])
+            for page in fpages[1:]:
                 ref.remove(page)
-            lpages[0].tail = lpages[0].tail.replace(', ','.')
-            refnum = ref.getparent().xpath("label")[0].text
+        if len(lpages) > 1:
+            lpages[0].text = max([x.text for x in fpages + lpages])
+            for page in lpages[1:]:
+                ref.remove(page)
+            lpages[0].tail = lpages[0].tail.replace(',','.')
+        if refnum:
             output += 'correction: consolidated multiple fpage-lpage in reference '+refnum+'\n'
     return root
 groomers.append(fix_page_range)
