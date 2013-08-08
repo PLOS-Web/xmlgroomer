@@ -401,12 +401,26 @@ def test_fix_si_title():
     verify(before, after, x.fix_si_title)
 
 def test_fix_si_captions():
-    before = '''<article><supplementary-material position="float" id="pone.0047902.figs001">
-        <label>Figure S1</label><caption><title>Colocalization.</title><bold> Bars, 50.</bold></caption>
-        </supplementary-material></article>'''
-    after = '''<article><supplementary-material position="float" id="pone.0047902.figs001">
-        <label>Figure S1</label><caption><p><bold>Colocalization.</bold></p><bold> Bars, 50.</bold></caption>
-        </supplementary-material></article>'''
+    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML">
+        <supplementary-material xlink:type="simple"><label>Figure S1</label>
+        <caption><title>Colocalization.</title><p>Bars.</p><p>(PDF)</p></caption></supplementary-material>
+        <supplementary-material xlink:type="simple"><label>Figure S2</label>
+        <caption><title>Colocalization.</title><p>(PDF)</p></caption></supplementary-material>
+        <supplementary-material xlink:type="simple"><label>Figure S3</label>
+        <caption><title>Colocalization.</title><p>Bars.</p><p>Another.</p></caption></supplementary-material>
+        <supplementary-material xlink:type="simple"><label>Figure S4</label>
+        <caption><title>Colocalization.</title></caption></supplementary-material>
+        </article>'''
+    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML">
+        <supplementary-material xlink:type="simple"><label>Figure S1</label>
+        <caption><p><bold>Colocalization.</bold> Bars.</p><p>(PDF)</p></caption></supplementary-material>
+        <supplementary-material xlink:type="simple"><label>Figure S2</label>
+        <caption><p><bold>Colocalization.</bold></p><p>(PDF)</p></caption></supplementary-material>
+        <supplementary-material xlink:type="simple"><label>Figure S3</label>
+        <caption><p><bold>Colocalization.</bold> Bars.</p><p>Another.</p></caption></supplementary-material>
+        <supplementary-material xlink:type="simple"><label>Figure S4</label>
+        <caption><p><bold>Colocalization.</bold></p></caption></supplementary-material>
+        </article>'''
     verify(before, after, x.fix_si_captions)
 
 def test_fix_extension():

@@ -426,9 +426,16 @@ def fix_si_captions(root):
     global output
     for title in root.xpath("//supplementary-material/caption/title"):
         label = title.getparent().getparent().xpath("label")[0].text
+        paragraphs = title.getparent().xpath("p")
         title.tag = 'bold'
-        title.getparent().replace(title, etree.fromstring('<p>'+etree.tostring(title)+'</p>'))
-        output += 'correction: changed title to p/bold for '+label+'\n'
+        if not paragraphs or re.match(r'^\(.{1,10}\)$', paragraphs[0].text or ''):
+            title.getparent().replace(title, etree.fromstring('<p>'+etree.tostring(title)+'</p>'))
+        else:
+            ns = '''<p xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML">'''
+            new_paragraph = etree.fromstring(etree.tostring(paragraphs[0]).replace(ns, '<p>'+etree.tostring(title)+' '))
+            paragraphs[0].getparent().replace(paragraphs[0], new_paragraph)
+            title.getparent().remove(title)
+        output += 'correction: moved title inside p/bold for '+label+'\n'
     return root
 groomers.append(fix_si_captions)
 
