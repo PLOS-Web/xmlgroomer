@@ -298,7 +298,8 @@ def fix_target_footnote(root):
         rid = target.attrib['id']
         for xref in root.xpath("//xref[@rid='"+rid+"']"):
             etree.strip_tags(xref.getparent(), 'xref')
-        etree.strip_tags(target.getparent(), 'target')
+        if target.getparent() is not None:
+            etree.strip_tags(target.getparent(), 'target')
         output += "correction: stripped target footnotes and corresponding xref\n"
     return root
 groomers.append(fix_target_footnote)
