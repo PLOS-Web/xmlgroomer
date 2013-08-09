@@ -211,7 +211,8 @@ def fix_title(root):
         title_str = etree.tostring(title)
         if re.search(r'\s</title>', title_str):
             title.getparent().replace(title, etree.fromstring(re.sub(r'\s*</title>', r'</title>', title_str)))
-            output += 'correction: removed whitespace from end of title '+title.text+'\n'
+            text = title.text if title.text else title.getchildren()[0].text+title.getchildren()[0].tail
+            output += 'correction: removed whitespace from end of title '+text+'\n'
     return root
 groomers.append(fix_title)
 
