@@ -482,6 +482,18 @@ def check_article_type(root):
     return root
 groomers.append(check_article_type)
 
+def check_nlm_ta(root):
+    global output
+    nlm_tas = ["PLoS Biol", "PLoS Comput Biol", "PLoS Clin Trials", "PLoS Genet", "PLoS Med",
+               "PLoS Negl Trop Dis", "PLoS One", "PLoS ONE", "PLoS Pathog", "PLoS Curr"]
+    nlm_ta = root.xpath("//journal-meta/journal-id[@journal-id-type='nlm-ta']")
+    if not nlm_ta:
+        output += 'error: missing nlm-ta in metadata\n'
+    elif nlm_ta[0].text not in nlm_tas:
+        output += 'error: invalid nlm-ta in metadata: '+nlm_ta[0].text+'\n'
+    return root
+groomers.append(check_nlm_ta)
+
 if __name__ == '__main__':
     if len(sys.argv) not in [2,3]:
         sys.exit('usage: xmlgroomer.py before.xml after.xml\ndry run: xmlgroomer.py before.xml')

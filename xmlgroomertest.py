@@ -467,3 +467,8 @@ def test_check_article_type():
         </article>'''
     message = 'error: Romantic Comedy is not a valid article type'
     check(before, message, x.check_article_type)
+
+def test_check_nlm_ta():
+    before = '''<journal-meta><journal-id journal-id-type="nlm-ta">plosone</journal-id></journal-meta>'''
+    message = 'error: invalid nlm-ta in metadata: plosone'
+    check(before, message, x.check_nlm_ta)
