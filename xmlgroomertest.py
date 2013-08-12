@@ -12,6 +12,14 @@ def verify(before, after, groomer, *args):
         print 'result:\n', result
         assert False
 
+def check(before, message, groomer):
+    x.output = ''
+    groomer(etree.fromstring(before))
+    if x.output != message:
+        print 'goal:\n', message
+        print 'result:\n', x.output
+        assert False
+
 def normalize(string):
     string = ''.join([line.strip() for line in string.split('\n')])
     return etree.tostring(etree.fromstring(string))

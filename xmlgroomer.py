@@ -467,11 +467,11 @@ def fix_mimetype(root):
 groomers.append(fix_mimetype)
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        sys.exit('usage: xmlgroomer.py before.xml after.xml')
+    if len(sys.argv) not in [2,3]:
+        sys.exit('usage: xmlgroomer.py before.xml after.xml\ndry run: xmlgroomer.py before.xml')
     log = open('/var/local/scripts/production/xmlgroomer/log/log', 'a')
     log.write('-'*50 + '\n'+time.strftime("%Y-%m-%d %H:%M:%S   "))
-    try: 
+    try:
         parser = etree.XMLParser(recover = True)
         e = etree.parse(sys.argv[1], parser)
         root = e.getroot()
@@ -485,7 +485,10 @@ if __name__ == '__main__':
     for groomer in groomers:
         try: root = groomer(root)
         except Exception as ee: log.write('** error in '+groomer.__name__+': '+str(ee)+'\n')
-    e.write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
+    if len(sys.argv) == 3:
+        e.write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
+    else:
+        output = output.replace('correction:', 'suggested correction:')
     log.write(output.encode('ascii','ignore'))
     log.close()
     print output
