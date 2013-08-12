@@ -12,17 +12,17 @@ def verify(before, after, groomer, *args):
         print 'result:\n', result
         assert False
 
-def check(before, message, groomer):
-    x.output = ''
-    groomer(etree.fromstring(before))
-    if x.output != message:
-        print 'goal:\n', message
-        print 'result:\n', x.output
-        assert False
-
 def normalize(string):
     string = ''.join([line.strip() for line in string.split('\n')])
     return etree.tostring(etree.fromstring(string))
+
+def check(before, message, groomer):
+    x.output = ''
+    groomer(etree.fromstring(before))
+    if x.output.strip() != message:
+        print 'goal:\n', message
+        print 'result:\n', x.output
+        assert False
 
 def test_fix_article_type():
     before = '''<article>
@@ -456,3 +456,14 @@ def test_fix_mimetype():
 		<caption><p>(TIFF)</p></caption>
 		</supplementary-material></article>'''
 	verify(before, after, x.fix_mimetype)
+
+def test_check_article_type():
+    before = '''<article>
+        <article-categories>
+        <subj-group subj-group-type="heading">
+        <subject>Romantic Comedy</subject>
+        </subj-group>
+        </article-categories>
+        </article>'''
+    message = 'error: Romantic Comedy is not a valid article type'
+    check(before, message, x.check_article_type)

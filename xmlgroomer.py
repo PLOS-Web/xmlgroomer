@@ -466,6 +466,22 @@ def fix_mimetype(root):
     return root
 groomers.append(fix_mimetype)
 
+def check_article_type(root):
+    global output
+    article_types = ["Book Review","Book Review/Science in the Media","Community Page","Debate","Editorial",
+        "Education","Essay","Expert Commentary","Expression of Concern","Feature","From Innovation to Application",
+        "Guidelines and Guidance","Health in Action","Historical Profiles and Perspectives",
+        "Historical and Philosophical Perspectives","History/Profile","Interview","Journal Club","Learning Forum",
+        "Message from ISCB","Message from PLoS","Neglected Diseases","Obituary","Online Only: Editorial","Opinion",
+        "Overview","Perspective","Pearls","Photo Quiz","Policy Forum","Policy Platform","Primer","Reader Poll",
+        "Research Article","Research in Translation","Review","Special Report","Symposium","Synopsis",
+        "Technical Report","The PLoS Medicine Debate","Unsolved Mystery","Viewpoints"]
+    for typ in root.xpath("//article-categories//subj-group[@subj-group-type='heading']/subject"):
+        if typ.text not in article_types:
+            output += 'error: '+typ.text+' is not a valid article type\n'
+    return root
+groomers.append(check_article_type)
+
 if __name__ == '__main__':
     if len(sys.argv) not in [2,3]:
         sys.exit('usage: xmlgroomer.py before.xml after.xml\ndry run: xmlgroomer.py before.xml')
