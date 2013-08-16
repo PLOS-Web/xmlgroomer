@@ -454,6 +454,26 @@ def fix_mimetype(root):
     return root
 groomers.append(fix_mimetype)
 
+def remove_pua_set(char_stream):
+    global output
+    pua_set = ur'[\uE000-\uF8FF]'
+    
+    # form correction output
+    display_width = 20
+    for m in re.finditer(pua_set, char_stream):
+        start = m.start() - display_width
+        if (start < 0): start = 0
+        end = m.start() + display_width
+        if (end >= len(char_stream)): start = -1
+        output += "correction: removed bad character at index=%s (marked by ^): \"%s^%s\"\n" % (m.start(), char_stream[start:m.start()], char_stream[m.start():end])
+
+    # actually make the corrections
+    char_stream = re.sub(pua_set, '', char_stream)
+    
+    return char_stream
+
+char_stream_groomers.append(remove_pua_set)
+
 if __name__ == '__main__':
     if len(sys.argv) != 3:
         sys.exit('usage: xmlgroomer.py before.xml after.xml')
