@@ -43,6 +43,15 @@ def test_fix_article_type():
         </article>'''
     verify(before, after, x.fix_article_type)
 
+def test_fix_subject_category():
+    before = '''<article><subj-group subj-group-type="heading"><subject>Research Article</subject></subj-group>
+        <subj-group subj-group-type="Discipline-v2"><subject>Biology</subject>
+        <subj-group><subject>Neuroscience</subject></subj-group></subj-group>
+        <subj-group subj-group-type="Discipline-v2"><subject>Medicine</subject>
+        <subj-group><subject>Mental health</subject><subj-group><subject>Psychology</subject></subj-group></subj-group></subj-group></article>'''
+    after = '<article><subj-group subj-group-type="heading"><subject>Research Article</subject></subj-group></article>'
+    verify(before, after, x.fix_subject_category)
+
 def test_fix_article_title():
     before = '<article><title-group><title>Bottle\rnose Dolp\nhins</title></title-group></article>'
     after = '<article><title-group><title>Bottlenose Dolphins</title></title-group></article>'
