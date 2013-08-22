@@ -1,5 +1,7 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # usage: nosetests xmlgroomertest.py
+
 
 import lxml.etree as etree
 import xmlgroomer as x
@@ -7,6 +9,14 @@ import xmlgroomer as x
 def verify(before, after, groomer, *args):
     goal = normalize(after)
     result = normalize(etree.tostring(groomer(etree.fromstring(before), *args)))
+    if goal != result:
+        print 'goal:\n', goal
+        print 'result:\n', result
+        assert False
+
+def verify_char_stream(before, after, groomer, *args):
+    goal = normalize(after)
+    result = normalize(groomer(before), *args)
     if goal != result:
         print 'goal:\n', goal
         print 'result:\n', result
@@ -448,3 +458,10 @@ def test_fix_mimetype():
 		<caption><p>(TIFF)</p></caption>
 		</supplementary-material></article>'''
 	verify(before, after, x.fix_mimetype)
+
+def test_remove_pua_set():
+    before = u'''<p>estrogen stimuli </p>'''
+    after = u'''<p>estrogen stimuli </p>'''
+    verify_char_stream(before, after, x.remove_pua_set)
+
+
