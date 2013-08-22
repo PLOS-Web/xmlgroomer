@@ -402,37 +402,10 @@ def test_fix_si_title():
 
 def test_fix_si_captions():
     before = '''<article><supplementary-material position="float" id="pone.0047902.figs001">
-        <label>Figure S1</label><caption><title>Colocalization.</title><p>whiskerphetamines <em>are dangerous</em></p></caption>
+        <label>Figure S1</label><caption><title>Colocalization.</title><bold> Bars, 50.</bold></caption>
         </supplementary-material></article>'''
     after = '''<article><supplementary-material position="float" id="pone.0047902.figs001">
-        <label>Figure S1</label><caption><p><bold>Colocalization.</bold>whiskerphetamines <em>are dangerous</em></p></caption>
-        </supplementary-material></article>'''
-    verify(before, after, x.fix_si_captions)
-
-def test_fix_si_captions_w_extension():
-    before = '''<article><supplementary-material position="float" id="pone.0047902.figs001">
-        <label>Figure S1</label><caption><title>Colocalization.</title><p>whiskerphetamines <em>are dangerous</em></p><p>(LALALA)</p></caption>
-        </supplementary-material></article>'''
-    after = '''<article><supplementary-material position="float" id="pone.0047902.figs001">
-        <label>Figure S1</label><caption><p><bold>Colocalization.</bold>whiskerphetamines <em>are dangerous</em></p><p>(LALALA)</p></caption>
-        </supplementary-material></article>'''
-    verify(before, after, x.fix_si_captions)
-
-def test_fix_si_captions_w_only_extension():
-    before = '''<article><supplementary-material position="float" id="pone.0047902.figs001">
-        <label>Figure S1</label><caption><title>Colocalization.</title><p>(LALALA)</p></caption>
-        </supplementary-material></article>'''
-    after = '''<article><supplementary-material position="float" id="pone.0047902.figs001">
-        <label>Figure S1</label><caption><p><bold>Colocalization.</bold></p><p>(LALALA)</p></caption>
-        </supplementary-material></article>'''
-    verify(before, after, x.fix_si_captions)
-
-def test_fix_si_captions_w_nothing():
-    before = '''<article><supplementary-material position="float" id="pone.0047902.figs001">
-        <label>Figure S1</label><caption><title>Colocalization.</title></caption>
-        </supplementary-material></article>'''
-    after = '''<article><supplementary-material position="float" id="pone.0047902.figs001">
-        <label>Figure S1</label><caption><p><bold>Colocalization.</bold></p></caption>
+        <label>Figure S1</label><caption><p><bold>Colocalization.</bold></p><bold> Bars, 50.</bold></caption>
         </supplementary-material></article>'''
     verify(before, after, x.fix_si_captions)
 
@@ -449,7 +422,6 @@ def test_fix_extension():
         </supplementary-material></article>'''
     verify(before, after, x.fix_extension)
 
-
 def test_fix_mimetype():
 	before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
 		<supplementary-material id="pone.0063011.s001" xlink:href="pone.0063011.s001.tiff">
@@ -462,12 +434,3 @@ def test_fix_mimetype():
 		<caption><p>(TIFF)</p></caption>
 		</supplementary-material></article>'''
 	verify(before, after, x.fix_mimetype)
-
-def main():
-    test_fix_si_captions()
-    test_fix_si_captions_w_extension()
-    test_fix_si_captions_w_only_extension()
-    test_fix_si_captions_w_nothing()
-
-if __name__ == "__main__":
-    main()
