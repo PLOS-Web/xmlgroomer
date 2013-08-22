@@ -9,6 +9,7 @@ import mimetypes
 import re
 
 groomers = []
+char_stream_groomers = []
 output = ''
 
 def get_doi(root):
@@ -453,15 +454,48 @@ def fix_mimetype(root):
     return root
 groomers.append(fix_mimetype)
 
+def remove_pua_set(char_stream):
+    global output
+    pua_set = ur'[\uE000-\uF8FF]'
+    
+    # form correction output
+    display_width = 20
+    for m in re.finditer(pua_set, char_stream):
+        start = m.start() - display_width
+        if (start < 0): start = 0
+        end = m.start() + display_width
+        if (end >= len(char_stream)): start = -1
+        output += "correction: removed bad character at index=%s (marked by ^): \"%s^%s\"\n" % (m.start(), char_stream[start:m.start()], char_stream[m.start():end])
+
+    # actually make the corrections
+    char_stream = re.sub(pua_set, '', char_stream)
+    
+    return char_stream
+
+char_stream_groomers.append(remove_pua_set)
+
 if __name__ == '__main__':
     if len(sys.argv) != 3:
         sys.exit('usage: xmlgroomer.py before.xml after.xml')
     log = open('/var/local/scripts/production/xmlgroomer/log/log', 'a')
     log.write('-'*50 + '\n'+time.strftime("%Y-%m-%d %H:%M:%S   "))
+
+    try:
+        f = open(sys.argv[1], 'r')
+    except IOError, e:
+        log.write(e.message)
+        log.close()
+        sys.exit(e)
+
+    # Read file into a char stream and groom it
+    char_stream = f.read().decode('utf-8')#.decode('utf-8')
+    f.close()
+    for char_stream_groomer in char_stream_groomers:
+        char_stream = char_stream_groomer(char_stream)
+
     try: 
         parser = etree.XMLParser(recover = True)
-        e = etree.parse(sys.argv[1], parser)
-        root = e.getroot()
+        root = etree.fromstring(char_stream.encode('utf-8'), parser)
     except Exception as ee:
         print 'error parsing: '+str(ee)+'\n'
         log.write('** error parsing: '+str(ee)+'\n')
@@ -472,7 +506,7 @@ if __name__ == '__main__':
     for groomer in groomers:
         try: root = groomer(root)
         except Exception as ee: log.write('** error in '+groomer.__name__+': '+str(ee)+'\n')
-    e.write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
+    etree.ElementTree(root).write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
     log.write(output.encode('ascii','ignore'))
     log.close()
     print output
