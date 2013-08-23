@@ -7,6 +7,7 @@ import subprocess
 import lxml.etree as etree
 import mimetypes
 import re
+import traceback
 
 groomers = []
 char_stream_groomers = []
@@ -527,8 +528,11 @@ if __name__ == '__main__':
     try: log.write(get_doi(root)+'\n')
     except: log.write('** error getting doi\n')
     for groomer in groomers:
-        try: root = groomer(root)
-        except Exception as ee: log.write('** error in '+groomer.__name__+': '+str(ee)+'\n')
+        try: 
+			root = groomer(root)
+        except Exception as ee: 
+			traceback.print_exc()
+			log.write('** error in '+groomer.__name__+': '+str(ee)+'\n')
     etree.ElementTree(root).write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
     log.write(output.encode('ascii','ignore'))
     log.close()
