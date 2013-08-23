@@ -338,6 +338,15 @@ def test_fix_target_footnote():
         </fn></table-wrap-foot></article>'''
     verify(before, after, x.fix_target_footnote)
 
+def test_fix_footnote_attribute():
+    before = '''<table-wrap-foot><fn id="ngtab1.1" fn-type="footnote.other">
+        <label>a</label><p>Number of isolates characterized by sequencing the URR ± E6 region;</p>
+        </fn></table-wrap-foot>'''
+    after = '''<table-wrap-foot><fn id="ngtab1.1">
+        <label>a</label><p>Number of isolates characterized by sequencing the URR ± E6 region;</p>
+        </fn></table-wrap-foot>'''
+    verify(before, after, x.fix_footnote_attribute)
+
 def test_fix_url():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <ext-link ext-link-type="uri" xlink:href="10.1023/A:1020  830703012" xlink:type="simple"></ext-link>
