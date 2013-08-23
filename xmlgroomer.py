@@ -316,6 +316,17 @@ def fix_target_footnote(root):
     return root
 groomers.append(fix_target_footnote)
 
+def fix_footnote_attribute(root):
+    global output
+    for fn in root.xpath("//table-wrap-foot/fn"):
+        if 'fn-type' in fn.attrib:
+            fn.attrib.pop('fn-type')
+            changed = True
+    if changed == True:
+        output += "correction: stripped fn-type from table footnote\n"
+    return root
+groomers.append(fix_footnote_attribute)
+
 def fix_label(root):
     global output
     refnums = ''
