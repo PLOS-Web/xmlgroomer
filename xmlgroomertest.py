@@ -8,8 +8,8 @@ def verify(before, after, groomer, *args):
     goal = normalize(after)
     result = normalize(etree.tostring(groomer(etree.fromstring(before), *args)))
     if goal != result:
-        print 'goal:\n', goal
-        print 'result:\n', result
+        print 'goal: %r' % goal
+        print 'result: %r' % result
         assert False
 
 def normalize(string):
@@ -19,9 +19,9 @@ def normalize(string):
 def check(before, message, groomer):
     x.output = ''
     groomer(etree.fromstring(before))
-    if x.output.strip() != message:
-        print 'goal:\n', message
-        print 'result:\n', x.output
+    if x.output.strip() != message.strip():
+        print 'goal:   %r' % message
+        print 'result: %r' % x.output
         assert False
 
 def test_fix_article_type():
