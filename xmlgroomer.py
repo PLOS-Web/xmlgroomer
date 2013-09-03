@@ -316,8 +316,17 @@ def fix_target_footnote(root):
     return root
 groomers.append(fix_target_footnote)
 
+def fix_NCBI_ext_link(root):
+    global output
+    for link in root.xpath("//ext-link[@ext-link-type='NCBI:nucleotide']"):
+        etree.strip_tags(link.getparent(), 'ext-link')
+        output += "correction: stripped bad ext-link (ext-link-type='NCBI:nucleotide')\n"
+    return root
+groomers.append(fix_NCBI_ext_link)
+
 def fix_footnote_attribute(root):
     global output
+    changed = False
     for fn in root.xpath("//table-wrap-foot/fn"):
         if 'fn-type' in fn.attrib:
             fn.attrib.pop('fn-type')

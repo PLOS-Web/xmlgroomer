@@ -338,6 +338,12 @@ def test_fix_target_footnote():
         </fn></table-wrap-foot></article>'''
     verify(before, after, x.fix_target_footnote)
 
+def test_fix_NCBI_ext_link():
+    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <ext-link ext-link-type="NCBI:nucleotide" xlink:href="http://NCT01042860">NCT01042860</ext-link></article>'''
+    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">NCT01042860</article>'''
+    verify(before, after, x.fix_NCBI_ext_link)
+
 def test_fix_footnote_attribute():
     before = '''<table-wrap-foot><fn id="ngtab1.1" fn-type="footnote.other">
         <label>a</label><p>Number of isolates characterized by sequencing the URR ± E6 region;</p>
