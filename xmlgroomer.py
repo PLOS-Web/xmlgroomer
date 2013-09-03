@@ -123,7 +123,7 @@ def fix_volume(root):
     year = root.xpath("//pub-date[@pub-type='epub']/year")[0].text
     journal = root.xpath("//journal-id[@journal-id-type='pmc']")[0].text
     volumes = {'plosbiol':2002, 'plosmed':2003, 'ploscomp':2004, 'plosgen':2004, 'plospath':2004,
-                'plosone':2005, 'plosntds':2006}
+               'plosone':2005, 'plosntds':2006}
     for volume in root.xpath("//article-meta/volume"):
         correct_volume = str(int(year) - volumes[journal])
         if volume.text != correct_volume:
@@ -469,23 +469,46 @@ groomers.append(fix_mimetype)
 def check_article_type(root):
     global output
     article_types = ["Book Review","Book Review/Science in the Media","Community Page","Debate","Editorial",
-        "Education","Essay","Expert Commentary","Expression of Concern","Feature","From Innovation to Application",
-        "Guidelines and Guidance","Health in Action","Historical Profiles and Perspectives",
-        "Historical and Philosophical Perspectives","History/Profile","Interview","Journal Club","Learning Forum",
-        "Message from ISCB","Message from PLoS","Neglected Diseases","Obituary","Online Only: Editorial","Opinion",
-        "Overview","Perspective","Pearls","Photo Quiz","Policy Forum","Policy Platform","Primer","Reader Poll",
-        "Research Article","Research in Translation","Review","Special Report","Symposium","Synopsis",
-        "Technical Report","The PLoS Medicine Debate","Unsolved Mystery","Viewpoints"]
+                     "Education","Essay","Expert Commentary","Expression of Concern","Feature","From Innovation to Application",
+                     "Guidelines and Guidance","Health in Action","Historical Profiles and Perspectives",
+                     "Historical and Philosophical Perspectives","History/Profile","Interview","Journal Club","Learning Forum",
+                     "Message from ISCB","Message from PLoS","Neglected Diseases","Obituary","Online Only: Editorial","Opinion",
+                     "Overview","Perspective","Pearls","Photo Quiz","Policy Forum","Policy Platform","Primer","Reader Poll",
+                     "Research Article","Research in Translation","Review","Special Report","Symposium","Synopsis",
+                     "Technical Report","The PLoS Medicine Debate","Unsolved Mystery","Viewpoints"]
     for typ in root.xpath("//article-categories//subj-group[@subj-group-type='heading']/subject"):
         if typ.text not in article_types:
             output += 'error: '+typ.text+' is not a valid article type\n'
     return root
 groomers.append(check_article_type)
 
+def check_misplaced_pullquotes(root):
+    raise NotImplementedError("Not done yet.")
+
+def check_missing_blurbs(root):
+    raise NotImplementedError("Not done yet.")
+
+def check_SI_attributes(root):
+    raise NotImplementedError("Not done yet.")
+
+def check_lowercase_extensions(root):
+    raise NotImplementedError("Not done yet.")
+
+def check_collab_markup(root):
+    raise NotImplementedError("Not done yet.")
+
+def check_on_behalf_of_markup(root):
+    raise NotImplementedError("Not done yet.")
+
+def check_bad_sec_in_acknowledgment(root):
+    raise NotImplementedError("Not done yet.")
+
+def check_improper_children_in_funding_statement(root):
+    raise NotImplementedError("Not done yet.")
+
 def check_nlm_ta(root):
     global output
-    nlm_tas = ["PLoS Biol", "PLoS Comput Biol", "PLoS Clin Trials", "PLoS Genet", "PLoS Med",
-               "PLoS Negl Trop Dis", "PLoS One", "PLoS ONE", "PLoS Pathog", "PLoS Curr"]
+    nlm_tas = ["PLoS Biol", "PLoS Comput Biol", "PLoS Clin Trials", "PLoS Genet", "PLoS Med", "PLoS Negl Trop Dis", "PLoS One", "PLoS ONE", "PLoS Pathog", "PLoS Curr"]
     nlm_ta = root.xpath("//journal-meta/journal-id[@journal-id-type='nlm-ta']")
     if not nlm_ta:
         output += 'error: missing nlm-ta in metadata\n'
@@ -493,6 +516,9 @@ def check_nlm_ta(root):
         output += 'error: invalid nlm-ta in metadata: '+nlm_ta[0].text+'\n'
     return root
 groomers.append(check_nlm_ta)
+
+def check_valid_journal_title(root):
+    raise NotImplementedError("Not done yet.")
 
 if __name__ == '__main__':
     if len(sys.argv) not in [2,3]:
