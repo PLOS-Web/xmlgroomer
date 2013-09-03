@@ -483,7 +483,12 @@ def check_article_type(root):
 groomers.append(check_article_type)
 
 def check_misplaced_pullquotes(root):
-    raise NotImplementedError("Not done yet.")
+    global output
+    pull_quote_placed_last = root.xpath('//body/sec/p[last()]/named-content[@content-type="pullquote"]')
+    if (pull_quote_placed_last):
+        output += 'warning: pullquote appears as last element of a section\n'
+    return root
+groomers.append(check_misplaced_pullquotes)
 
 def check_missing_blurbs(root):
     raise NotImplementedError("Not done yet.")

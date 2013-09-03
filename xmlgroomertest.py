@@ -472,3 +472,18 @@ def test_check_nlm_ta():
     before = '''<journal-meta><journal-id journal-id-type="nlm-ta">plosone</journal-id></journal-meta>'''
     message = 'error: invalid nlm-ta in metadata: plosone'
     check(before, message, x.check_nlm_ta)
+
+def test_misplaced_pullquotes():
+    before = '''<body><sec><p><named-content content-type="pullquote">lalala</named-content></p></sec></body>'''
+    message = 'warning: pullquote appears as last element of a section\n'
+    check(before, message, x.check_misplaced_pullquotes)
+
+    before = '''<body><sec><p></p><p><named-content content-type="pullquote">lalala</named-content></p></sec></body>'''
+    message = 'warning: pullquote appears as last element of a section\n'
+    check(before, message, x.check_misplaced_pullquotes)
+
+    before = '''<body><sec><p><named-content content-type="pullquote">lalala</named-content></p><p></p></sec></body>'''
+    message = ''
+    check(before, message, x.check_misplaced_pullquotes)
+
+
