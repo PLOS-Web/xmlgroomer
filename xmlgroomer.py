@@ -503,7 +503,28 @@ def check_missing_blurb(root):
 groomers.append(check_missing_blurb)
 
 def check_SI_attributes(root):
-    raise NotImplementedError("Not done yet.")
+    global output
+    doi = get_doi(root)
+
+    for si in root.xpath("//article/body/sec/supplementary-material"):
+        mimetype = si.get("mimetype")
+        label = si.find("label")
+        si_id = si.get("id")
+        href = si.attrib['{http://www.w3.org/1999/xlink}href']
+        #TODO: was href hash built here.  Need replacement
+    
+        if not mimetype:
+            output += "error: mimetype missing: %s!\n" % si_id
+
+        good_href_pattern = re.compile(r'%s\.[a-z0-9]+' % si_id)
+        if not good_href_pattern.match(href):
+            output += "error: bad or missing file extension: %s\n" % href
+
+        doi_pattern = re.compile(r'%s' % doi)
+        if not doi_pattern.match(href) or not doi_pattern.match(si_id):
+            output += "error: supp info %s does not match doi: %s\n" % (href, doi)
+
+    return root
 
 def check_lowercase_extensions(root):
     raise NotImplementedError("Not done yet.")

@@ -527,3 +527,76 @@ def test_check_missing_blurbs():
 </article>'''
     message = "error: article xml is missing 'blurb'\n"
     check(before, message, x.check_missing_blurb)
+
+def test_check_SI_attributes():
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <article-meta>
+      <article-id pub-id-type='doi'>pone.0012345</article-id>
+    </article-meta>
+  </front>
+  <body>
+    <sec>
+      <supplementary-material mimetype='mime/test' id='pone.0012345.s001' xlink:href='pone.0012345.s001.docx'>
+        <label></label>
+      </supplementary-material>
+    </sec>
+  </body>
+</article>'''
+    message = ''
+    check(before, message, x.check_SI_attributes)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <article-meta>
+      <article-id pub-id-type='doi'>pone.0012345</article-id>
+    </article-meta>
+  </front>
+  <body>
+    <sec>
+      <supplementary-material id='pone.0012345.s001' xlink:href='pone.0012345.s001.docx'>
+        <label></label>
+      </supplementary-material>
+    </sec>
+  </body>
+</article>'''
+    message = 'error: mimetype missing: pone.0012345.s001!'
+    check(before, message, x.check_SI_attributes)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <article-meta>
+      <article-id pub-id-type='doi'>pone.0012345</article-id>
+    </article-meta>
+  </front>
+  <body>
+    <sec>
+      <supplementary-material mimetype='mime/test' id='pone.0012345.s001' xlink:href='pone.0012345.s001.'>
+        <label></label>
+      </supplementary-material>
+    </sec>
+  </body>
+</article>'''
+    message = 'error: bad or missing file extension: pone.0012345.s001.\n'
+    check(before, message, x.check_SI_attributes)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <article-meta>
+      <article-id pub-id-type='doi'>pone.0012345</article-id>
+    </article-meta>
+  </front>
+  <body>
+    <sec>
+      <supplementary-material mimetype='mime/test' id='pone.0011111.s001' xlink:href='pone.0011111.s001.docx'>
+        <label></label>
+      </supplementary-material>
+    </sec>
+  </body>
+</article>'''
+    message = 'error: supp info pone.0011111.s001.docx does not match doi: pone.0012345\n'
+    check(before, message, x.check_SI_attributes)
