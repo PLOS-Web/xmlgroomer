@@ -473,7 +473,7 @@ def test_check_nlm_ta():
     message = 'error: invalid nlm-ta in metadata: plosone'
     check(before, message, x.check_nlm_ta)
 
-def test_misplaced_pullquotes():
+def test_check_misplaced_pullquotes():
     before = '''<body><sec><p><named-content content-type="pullquote">lalala</named-content></p></sec></body>'''
     message = 'warning: pullquote appears as last element of a section\n'
     check(before, message, x.check_misplaced_pullquotes)
@@ -486,4 +486,44 @@ def test_misplaced_pullquotes():
     message = ''
     check(before, message, x.check_misplaced_pullquotes)
 
+def test_check_missing_blurbs():
+    before = '''
+<article>
+  <front>
+    <journal-meta>
+      <journal-id journal-id-type="pmc">plosmed</journal-id>
+    </journal-meta>
+    <article-meta>
+      <abstract abstract-type="toc"></abstract>
+    </article-meta>
+  </front>
+</article>'''
+    message = "error: article xml is missing 'blurb'\n"
+    check(before, message, x.check_missing_blurb)
 
+    before = '''
+<article>
+  <front>
+    <journal-meta>
+      <journal-id journal-id-type="pmc">plosmed</journal-id>
+    </journal-meta>
+    <article-meta>
+      <abstract abstract-type="toc">lalala</abstract>
+    </article-meta>
+  </front>
+</article>'''
+    message = ""
+    check(before, message, x.check_missing_blurb)
+
+    before = '''
+<article>
+  <front>
+    <journal-meta>
+      <journal-id journal-id-type="pmc">plosmed</journal-id>
+    </journal-meta>
+    <article-meta>
+    </article-meta>
+  </front>
+</article>'''
+    message = "error: article xml is missing 'blurb'\n"
+    check(before, message, x.check_missing_blurb)

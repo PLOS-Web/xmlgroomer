@@ -490,8 +490,17 @@ def check_misplaced_pullquotes(root):
     return root
 groomers.append(check_misplaced_pullquotes)
 
-def check_missing_blurbs(root):
-    raise NotImplementedError("Not done yet.")
+def check_missing_blurb(root):
+    global output
+    journal = root.xpath("//journal-id[@journal-id-type='pmc']")[0].text
+
+    blurb_journals = ['plosmed', 'plosbio']
+    if journal in blurb_journals:
+        abstract_toc = root.xpath('//article/front/article-meta/abstract[@abstract-type="toc"]')
+        if not abstract_toc or not abstract_toc[0].text:
+            output += "error: article xml is missing 'blurb'\n"
+    return root
+groomers.append(check_missing_blurb)
 
 def check_SI_attributes(root):
     raise NotImplementedError("Not done yet.")
