@@ -673,5 +673,59 @@ def test_sec_ack_title():
   </sec>
 </article>
 '''
-    message = "warning: there is a <sec> titled \'Acknowledgements\' rather than the use of an <ack> tag.warning: there is a <sec> titled \'Acknowledgements\' rather than the use of an <ack> tag.\n"
+    message = "warning: there is a <sec> titled \'Acknowledgements\' rather than the use of an <ack> tag.\nwarning: there is a <sec> titled \'Acknowledgements\' rather than the use of an <ack> tag.\n"
     check(before, message, x.check_sec_ack_title)
+
+
+def test_on_behalf_of_markup():
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <funding-statement>
+  </funding-statement>
+</article>
+'''
+    message = ""
+    check(before, message, x.check_improper_children_in_funding_statement)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <funding-statement>
+    <p>bad thing</p>
+  </funding-statement>
+</article>
+'''
+    message = "error: funding-statement has illegal child node: p\n"
+    check(before, message, x.check_improper_children_in_funding_statement)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <funding-statement>
+    <p>bad thing</p>
+    <lala>another bad thing</lala>
+  </funding-statement>
+</article>
+'''
+    message = "error: funding-statement has illegal child node: p\nerror: funding-statement has illegal child node: lala\n"
+    check(before, message, x.check_improper_children_in_funding_statement)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <funding-statement>
+     lala
+  </funding-statement>
+</article>
+'''
+    message = ""
+    check(before, message, x.check_improper_children_in_funding_statement)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <funding-statement>
+     <inline-formula></inline-formula>
+     <inline-formula><lala></lala></inline-formula>
+     <inline-graphic></inline-graphic>
+  </funding-statement>
+</article>
+'''
+    message = ""
+    check(before, message, x.check_improper_children_in_funding_statement)

@@ -553,7 +553,15 @@ def check_sec_ack_title(root):
     return root
 
 def check_improper_children_in_funding_statement(root):
-    raise NotImplementedError("Not done yet.")
+    global output
+
+    valid_tags = ['inline-formula', 'inline-graphic']
+    for funding_statement in root.xpath('//funding-statement'):
+        for elem in funding_statement:
+            if elem.tag not in valid_tags:
+                output += "error: funding-statement has illegal child node: %s\n" % elem.tag
+
+    return root
 
 def check_nlm_ta(root):
     global output
