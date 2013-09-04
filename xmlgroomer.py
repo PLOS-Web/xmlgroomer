@@ -533,7 +533,16 @@ def check_collab_markup(root):
     raise NotImplementedError("Not done yet.")
 
 def check_on_behalf_of_markup(root):
-    raise NotImplementedError("Not done yet.")
+    global output
+    
+    suspicious_words = ['for', 'on behalf of']
+    for collab in root.xpath('//contrib-group/contrib/collab'):
+        for word in suspicious_words:
+            if re.match(word, collab.text, re.IGNORECASE):
+                output += "warning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\n" % collab.text
+                break
+    
+    return root 
 
 def check_bad_sec_in_acknowledgment(root):
     raise NotImplementedError("Not done yet.")

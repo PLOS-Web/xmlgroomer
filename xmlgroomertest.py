@@ -600,3 +600,44 @@ def test_check_SI_attributes():
 </article>'''
     message = 'error: supp info pone.0011111.s001.docx does not match doi: pone.0012345\n'
     check(before, message, x.check_SI_attributes)
+
+def test_on_behalf_of_markup():
+    collab = "for"
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <contrib-group>
+    <contrib>
+       <collab>%s</collab>
+    </contrib>
+  </contrib-group>
+</article>
+''' % collab
+    message = "warning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\n" % collab
+    check(before, message, x.check_on_behalf_of_markup)
+
+    collab = "lalala"
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <contrib-group>
+    <contrib>
+       <collab>%s</collab>
+    </contrib>
+  </contrib-group>
+</article>
+''' % collab
+    message = ""
+    check(before, message, x.check_on_behalf_of_markup)
+
+    collab = "on behalf of"
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <contrib-group>
+    <contrib>
+       <collab>%s</collab>
+       <collab>%s</collab>
+    </contrib>
+  </contrib-group>
+</article>
+''' % (collab, collab)
+    message = "warning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\nwarning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\n" % (collab, collab)
+    check(before, message, x.check_on_behalf_of_markup)
