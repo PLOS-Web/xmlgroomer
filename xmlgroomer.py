@@ -575,7 +575,17 @@ def check_nlm_ta(root):
 groomers.append(check_nlm_ta)
 
 def check_valid_journal_title(root):
-    raise NotImplementedError("Not done yet.")
+    global output
+
+    valid_journal_titles = ["PLoS Biology", "PLoS Computational Biology", "PLoS Clinical Trials", "PLoS Genetics", "PLoS Medicine", "PLoS Neglected Tropical Diseases", "PLoS ONE", "PLoS Pathogens", "PLoS Currents"]
+    journal_title = root.xpath('/article/front/journal-meta/journal-title-group/journal-title')
+
+    if not journal_title:
+        output += "error: missing journal title in metadata\n"
+    elif journal_title[0].text not in valid_journal_titles:
+        output += "error: invalid journal title in metadata: %s\n" % journal_title[0].text
+        
+    return root
 
 if __name__ == '__main__':
     if len(sys.argv) not in [2,3]:

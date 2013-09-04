@@ -729,3 +729,46 @@ def test_on_behalf_of_markup():
 '''
     message = ""
     check(before, message, x.check_improper_children_in_funding_statement)
+
+def test_check_valid_journal_title():
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <journal-meta>
+      <journal-title-group>
+        <journal-title>PLoS Biology</journal-title>
+      </journal-title-group>
+    </journal-meta>
+  </front>
+</article>
+'''
+    message = ""
+    check(before, message, x.check_valid_journal_title)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <journal-meta>
+      <journal-title-group>
+      </journal-title-group>
+    </journal-meta>
+  </front>
+</article>
+'''
+    message = "error: missing journal title in metadata\n"
+    check(before, message, x.check_valid_journal_title)
+
+    bad_journal_name = "bad journal"
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <journal-meta>
+      <journal-title-group>
+        <journal-title>%s</journal-title>
+      </journal-title-group>
+    </journal-meta>
+  </front>
+</article>
+''' % bad_journal_name
+    message = "error: invalid journal title in metadata: %s" % bad_journal_name
+    check(before, message, x.check_valid_journal_title)
