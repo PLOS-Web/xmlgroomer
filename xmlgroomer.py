@@ -537,7 +537,17 @@ def check_lowercase_extensions(root):
     return root
 
 def check_collab_markup(root):
-    raise NotImplementedError("Not done yet.")
+    global output
+
+    suspicious_pattern = "\S*\s\S*\s\S*\s\S*|\sthe\s|\sfor\s|\sof\s|\son\s|\sin\s|\swith\s|\sgroup\s|\scenter|\sorganization|\sorganizing|\scollaboration|\scollaborative\s|\scommittee|\scouncil|\sconsortium|\sassociation|\spartnership|\sproject|\steam|\ssociety\s"
+
+    authors_names = root.xpath('//contrib[@contrib-type="author"]/name/surname | //contrib[@contrib-type="author"]/name/given-name')
+    for name in authors_names:
+        print name.text
+        if re.search(suspicious_pattern, name.text, re.IGNORECASE):
+            output += "warning: Article may contain incorrect markup for a collaborative author. Suspicious text to search for: %s\n" % name.text
+
+    return root
 
 def check_on_behalf_of_markup(root):
     raise NotImplementedError("Not done yet.")

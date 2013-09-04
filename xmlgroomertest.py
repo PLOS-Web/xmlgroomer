@@ -628,3 +628,40 @@ def test_check_lowercase_extensions():
 ''' % href
     message = 'error: bad or missing file extension: %s\n' % href
     check(before, message, x.check_lowercase_extensions)
+
+def test_check_collab_markup():
+    name = "James"
+    before = '''
+<contrib contrib-type="author">
+  <name>
+    <surname>%s</surname>
+  </name>
+</contrib>
+''' % name
+
+    message = ""
+    check(before, message, x.check_collab_markup)
+
+    name = " of "
+    before = '''
+<contrib contrib-type="author">
+  <name>
+    <surname>%s</surname>
+  </name>
+</contrib>
+''' % name
+
+    message = "warning: Article may contain incorrect markup for a collaborative author. Suspicious text to search for: %s\n" % name
+    check(before, message, x.check_collab_markup)
+
+    name = " of "
+    before = '''
+<contrib contrib-type="author">
+  <name>
+    <given-name>%s</given-name>
+  </name>
+</contrib>
+''' % name
+
+    message = "warning: Article may contain incorrect markup for a collaborative author. Suspicious text to search for: %s\n" % name
+    check(before, message, x.check_collab_markup)
