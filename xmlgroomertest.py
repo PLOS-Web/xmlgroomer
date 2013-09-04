@@ -641,3 +641,37 @@ def test_on_behalf_of_markup():
 ''' % (collab, collab)
     message = "warning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\nwarning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\n" % (collab, collab)
     check(before, message, x.check_on_behalf_of_markup)
+
+def test_sec_ack_title():
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <sec>
+    <title>Acknowledgements</title>
+  </sec>
+</article>
+'''
+    message = "warning: there is a <sec> titled \'Acknowledgements\' rather than the use of an <ack> tag."
+    check(before, message, x.check_sec_ack_title)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <sec>
+    <title>lalala</title>
+  </sec>
+</article>
+'''
+    message = ""
+    check(before, message, x.check_sec_ack_title)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <sec>
+    <title>Acknowledgements</title>
+  </sec>
+  <sec>
+    <title>Acknowledgements</title>
+  </sec>
+</article>
+'''
+    message = "warning: there is a <sec> titled \'Acknowledgements\' rather than the use of an <ack> tag.warning: there is a <sec> titled \'Acknowledgements\' rather than the use of an <ack> tag.\n"
+    check(before, message, x.check_sec_ack_title)

@@ -544,8 +544,13 @@ def check_on_behalf_of_markup(root):
     
     return root 
 
-def check_bad_sec_in_acknowledgment(root):
-    raise NotImplementedError("Not done yet.")
+def check_sec_ack_title(root):
+    global output
+
+    for fake_ack in root.xpath('//sec/title[text()="Acknowledgements"]'):
+        output += "warning: there is a <sec> titled \'Acknowledgements\' rather than the use of an <ack> tag.\n"
+
+    return root
 
 def check_improper_children_in_funding_statement(root):
     raise NotImplementedError("Not done yet.")
