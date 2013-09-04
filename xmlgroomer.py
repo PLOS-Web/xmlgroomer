@@ -527,7 +527,14 @@ def check_SI_attributes(root):
     return root
 
 def check_lowercase_extensions(root):
-    raise NotImplementedError("Not done yet.")
+    global output
+
+    for graphic in root.findall('graphic'):
+        href = graphic.attrib['{http://www.w3.org/1999/xlink}href']
+        if not re.match(r'.+?\.[gte][0-9]{3,4}\.[a-z0-9]+', href):
+            output += "error: bad or missing file extension: %s\n" % href
+
+    return root
 
 def check_collab_markup(root):
     raise NotImplementedError("Not done yet.")

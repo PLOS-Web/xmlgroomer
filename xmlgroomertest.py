@@ -600,3 +600,31 @@ def test_check_SI_attributes():
 </article>'''
     message = 'error: supp info pone.0011111.s001.docx does not match doi: pone.0012345\n'
     check(before, message, x.check_SI_attributes)
+
+def test_check_lowercase_extensions():
+    href = 'lalalal'
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graphic xlink:href='%s'></graphic>
+</article>
+''' % href
+    message = 'error: bad or missing file extension: %s\n' % href
+    check(before, message, x.check_lowercase_extensions)
+
+    href = 'pone.0012345.g001.tif'
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graphic xlink:href='%s'></graphic>
+</article>
+''' % href
+    message = ''
+    check(before, message, x.check_lowercase_extensions)
+
+    href = 'pone.0012345.g001.TIF'
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graphic xlink:href='%s'></graphic>
+</article>
+''' % href
+    message = 'error: bad or missing file extension: %s\n' % href
+    check(before, message, x.check_lowercase_extensions)
