@@ -13,6 +13,11 @@ groomers = []
 char_stream_groomers = []
 output = ''
 
+def register_groom(fn):
+    global groomers
+    groomers.append(fn)
+    return fn
+
 def get_doi(root):
     return root.xpath("//article-id[@pub-id-type='doi']")[0].text
 
@@ -135,7 +140,7 @@ def fix_volume(root):
     year = root.xpath("//pub-date[@pub-type='epub']/year")[0].text
     journal = root.xpath("//journal-id[@journal-id-type='pmc']")[0].text
     volumes = {'plosbiol':2002, 'plosmed':2003, 'ploscomp':2004, 'plosgen':2004, 'plospath':2004,
-                'plosone':2005, 'plosntds':2006}
+               'plosone':2005, 'plosntds':2006}
     for volume in root.xpath("//article-meta/volume"):
         correct_volume = str(int(year) - volumes[journal])
         if volume.text != correct_volume:
@@ -515,12 +520,158 @@ def remove_pua_set(char_stream):
     char_stream = re.sub(pua_set, '', char_stream)
     
     return char_stream
-
 char_stream_groomers.append(remove_pua_set)
 
+@register_groom
+def check_article_type(root):
+    global output
+    article_types = ["Book Review","Book Review/Science in the Media","Community Page","Debate","Editorial",
+                     "Education","Essay","Expert Commentary","Expression of Concern","Feature","From Innovation to Application",
+                     "Guidelines and Guidance","Health in Action","Historical Profiles and Perspectives",
+                     "Historical and Philosophical Perspectives","History/Profile","Interview","Journal Club","Learning Forum",
+                     "Message from ISCB","Message from PLoS","Neglected Diseases","Obituary","Online Only: Editorial","Opinion",
+                     "Overview","Perspective","Pearls","Photo Quiz","Policy Forum","Policy Platform","Primer","Reader Poll",
+                     "Research Article","Research in Translation","Review","Special Report","Symposium","Synopsis",
+                     "Technical Report","The PLoS Medicine Debate","Unsolved Mystery","Viewpoints"]
+    for typ in root.xpath("//article-categories//subj-group[@subj-group-type='heading']/subject"):
+        if typ.text not in article_types:
+            output += 'error: '+typ.text+' is not a valid article type\n'
+    return root
+
+@register_groom
+def check_misplaced_pullquotes(root):
+    global output
+    pull_quote_placed_last = root.xpath('//body/sec/p[last()]/named-content[@content-type="pullquote"]')
+    if (pull_quote_placed_last):
+        output += 'warning: pullquote appears as last element of a section\n'
+    return root
+
+@register_groom
+def check_missing_blurb(root):
+    global output
+    journal = root.xpath("//journal-id[@journal-id-type='pmc']")[0].text
+
+    blurb_journals = ['plosmed', 'plosbio']
+    if journal in blurb_journals:
+        abstract_toc = root.xpath('//article/front/article-meta/abstract[@abstract-type="toc"]')
+        if not abstract_toc or not abstract_toc[0].text:
+            output += "error: article xml is missing 'blurb'\n"
+    return root
+
+@register_groom
+def check_SI_attributes(root):
+    global output
+    print get_doi(root)
+    doi = get_doi(root).split('10.1371/journal.')[1]
+
+    for si in root.xpath("//article/body/sec/supplementary-material"):
+        mimetype = si.get("mimetype")
+        label = si.find("label")
+        si_id = si.get("id")
+        href = si.attrib['{http://www.w3.org/1999/xlink}href']
+        #TODO: was href hash built here.  Need replacement
+    
+        if not mimetype:
+            output += "error: mimetype missing: %s!\n" % si_id
+
+        good_href_pattern = re.compile(r'%s\.[a-z0-9]+' % si_id)
+        if not good_href_pattern.match(href):
+            output += "error: bad or missing file extension: %s\n" % href
+
+        doi_pattern = re.compile(r'%s' % doi)
+        if not doi_pattern.match(href) or not doi_pattern.match(si_id):
+            output += "error: supp info %s does not match doi: %s\n" % (href, doi)
+
+    return root
+
+@register_groom
+def check_lowercase_extensions(root):
+    global output
+
+    for graphic in root.findall('graphic'):
+        href = graphic.attrib['{http://www.w3.org/1999/xlink}href']
+        if not re.match(r'.+?\.[gte][0-9]{3,4}\.[a-z0-9]+', href):
+            output += "error: bad or missing file extension: %s\n" % href
+
+    return root
+
+@register_groom
+def check_collab_markup(root):
+    global output
+
+    suspicious_pattern = "\S*\s\S*\s\S*\s\S*|\sthe\s|\sfor\s|\sof\s|\son\s|\sin\s|\swith\s|\sgroup\s|\scenter|\sorganization|\sorganizing|\scollaboration|\scollaborative\s|\scommittee|\scouncil|\sconsortium|\sassociation|\spartnership|\sproject|\steam|\ssociety\s"
+
+    authors_names = root.xpath('//contrib[@contrib-type="author"]/name/surname | //contrib[@contrib-type="author"]/name/given-name')
+    for name in authors_names:
+        if re.search(suspicious_pattern, name.text, re.IGNORECASE):
+            output += "warning: Article may contain incorrect markup for a collaborative author. Suspicious text to search for: %s\n" % name.text
+
+    return root
+
+@register_groom
+def check_on_behalf_of_markup(root):
+    global output
+    
+    suspicious_words = ['for', 'on behalf of']
+    for collab in root.xpath('//contrib-group/contrib/collab'):
+        for word in suspicious_words:
+            if re.match(word, collab.text, re.IGNORECASE):
+                output += "warning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\n" % collab.text
+                break
+    
+    return root 
+
+@register_groom
+def check_sec_ack_title(root):
+    global output
+
+    for fake_ack in root.xpath('//sec/title[text()="Acknowledgements"]'):
+        output += "warning: there is a <sec> titled \'Acknowledgements\' rather than the use of an <ack> tag.\n"
+
+    return root
+
+@register_groom
+def check_improper_children_in_funding_statement(root):
+    global output
+
+    valid_tags = ['inline-formula', 'inline-graphic']
+    for funding_statement in root.xpath('//funding-statement'):
+        for elem in funding_statement:
+            if elem.tag not in valid_tags:
+                output += "error: funding-statement has illegal child node: %s\n" % elem.tag
+
+    return root
+
+@register_groom
+def check_nlm_ta(root):
+    global output
+    nlm_tas = ["PLoS Biol", "PLoS Comput Biol", "PLoS Clin Trials", "PLoS Genet", "PLoS Med", "PLoS Negl Trop Dis", "PLoS One", "PLoS ONE", "PLoS Pathog", "PLoS Curr"]
+    nlm_ta = root.xpath("//journal-meta/journal-id[@journal-id-type='nlm-ta']")
+    if not nlm_ta:
+        output += 'error: missing nlm-ta in metadata\n'
+    elif nlm_ta[0].text not in nlm_tas:
+        output += 'error: invalid nlm-ta in metadata: '+nlm_ta[0].text+'\n'
+    return root
+groomers.append(check_nlm_ta)
+
+@register_groom
+def check_valid_journal_title(root):
+    global output
+
+    valid_journal_titles = ["PLoS Biology", "PLoS Computational Biology", "PLoS Clinical Trials", "PLoS Genetics", "PLoS Medicine", "PLoS Neglected Tropical Diseases", "PLoS ONE", "PLoS Pathogens", "PLoS Currents"]
+    journal_title = root.xpath('/article/front/journal-meta/journal-title-group/journal-title')
+
+    if not journal_title:
+        output += "error: missing journal title in metadata\n"
+    elif journal_title[0].text not in valid_journal_titles:
+        output += "error: invalid journal title in metadata: %s\n" % journal_title[0].text
+        
+    return root
+
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        sys.exit('usage: xmlgroomer.py before.xml after.xml')
+    if len(sys.argv) not in [2,3]:
+        sys.exit('usage: xmlgroomer.py before.xml after.xml\ndry run: xmlgroomer.py before.xml')
+    dry_run = (len(sys.argv) == 2)
     log = open('/var/local/scripts/production/xmlgroomer/log/log', 'a')
     log.write('-'*50 + '\n'+time.strftime("%Y-%m-%d %H:%M:%S   "))
 
@@ -547,13 +698,20 @@ if __name__ == '__main__':
         raise
     try: log.write(get_doi(root)+'\n')
     except: log.write('** error getting doi\n')
+
     for groomer in groomers:
         try: 
-			root = groomer(root)
+            root = groomer(root)
         except Exception as ee: 
-			traceback.print_exc()
-			log.write('** error in '+groomer.__name__+': '+str(ee)+'\n')
-    etree.ElementTree(root).write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
+            traceback.print_exc()
+            print('** error in '+groomer.__name__+': '+str(ee)+'\n')
+            log.write('** error in '+groomer.__name__+': '+str(ee)+'\n')
+
+    if not dry_run:
+        e.write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
+    else:
+        output = output.replace('correction:', 'suggested correction:')
+
     log.write(output.encode('ascii','ignore'))
     log.close()
     print output
