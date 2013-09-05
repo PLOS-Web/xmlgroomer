@@ -11,6 +11,11 @@ import re
 groomers = []
 output = ''
 
+def register_groom(fn):
+    global groomers
+    groomers.append(fn)
+    return fn
+
 def get_doi(root):
     return root.xpath("//article-id[@pub-id-type='doi']")[0].text
 
@@ -466,6 +471,7 @@ def fix_mimetype(root):
     return root
 groomers.append(fix_mimetype)
 
+@register_groom
 def check_article_type(root):
     global output
     article_types = ["Book Review","Book Review/Science in the Media","Community Page","Debate","Editorial",
@@ -480,16 +486,16 @@ def check_article_type(root):
         if typ.text not in article_types:
             output += 'error: '+typ.text+' is not a valid article type\n'
     return root
-groomers.append(check_article_type)
 
+@register_groom
 def check_misplaced_pullquotes(root):
     global output
     pull_quote_placed_last = root.xpath('//body/sec/p[last()]/named-content[@content-type="pullquote"]')
     if (pull_quote_placed_last):
         output += 'warning: pullquote appears as last element of a section\n'
     return root
-groomers.append(check_misplaced_pullquotes)
 
+@register_groom
 def check_missing_blurb(root):
     global output
     journal = root.xpath("//journal-id[@journal-id-type='pmc']")[0].text
@@ -500,11 +506,11 @@ def check_missing_blurb(root):
         if not abstract_toc or not abstract_toc[0].text:
             output += "error: article xml is missing 'blurb'\n"
     return root
-groomers.append(check_missing_blurb)
 
+@register_groom
 def check_SI_attributes(root):
     global output
-    doi = get_doi(root)
+    doi = get_doi(root).split('10.1371/journal.')[1]
 
     for si in root.xpath("//article/body/sec/supplementary-material"):
         mimetype = si.get("mimetype")
@@ -526,6 +532,7 @@ def check_SI_attributes(root):
 
     return root
 
+@register_groom
 def check_lowercase_extensions(root):
     global output
 
@@ -536,6 +543,7 @@ def check_lowercase_extensions(root):
 
     return root
 
+@register_groom
 def check_collab_markup(root):
     global output
 
@@ -549,6 +557,7 @@ def check_collab_markup(root):
 
     return root
 
+@register_groom
 def check_on_behalf_of_markup(root):
     global output
     
@@ -561,6 +570,7 @@ def check_on_behalf_of_markup(root):
     
     return root 
 
+@register_groom
 def check_sec_ack_title(root):
     global output
 
@@ -569,6 +579,7 @@ def check_sec_ack_title(root):
 
     return root
 
+@register_groom
 def check_improper_children_in_funding_statement(root):
     global output
 
@@ -580,6 +591,7 @@ def check_improper_children_in_funding_statement(root):
 
     return root
 
+@register_groom
 def check_nlm_ta(root):
     global output
     nlm_tas = ["PLoS Biol", "PLoS Comput Biol", "PLoS Clin Trials", "PLoS Genet", "PLoS Med", "PLoS Negl Trop Dis", "PLoS One", "PLoS ONE", "PLoS Pathog", "PLoS Curr"]
@@ -591,6 +603,7 @@ def check_nlm_ta(root):
     return root
 groomers.append(check_nlm_ta)
 
+@register_groom
 def check_valid_journal_title(root):
     global output
 
@@ -604,9 +617,11 @@ def check_valid_journal_title(root):
         
     return root
 
+
 if __name__ == '__main__':
     if len(sys.argv) not in [2,3]:
         sys.exit('usage: xmlgroomer.py before.xml after.xml\ndry run: xmlgroomer.py before.xml')
+    dry_run = (len(sys.argv) == 2)
     log = open('/var/local/scripts/production/xmlgroomer/log/log', 'a')
     log.write('-'*50 + '\n'+time.strftime("%Y-%m-%d %H:%M:%S   "))
     try:
@@ -620,10 +635,13 @@ if __name__ == '__main__':
         raise
     try: log.write(get_doi(root)+'\n')
     except: log.write('** error getting doi\n')
+
     for groomer in groomers:
         try: root = groomer(root)
-        except Exception as ee: log.write('** error in '+groomer.__name__+': '+str(ee)+'\n')
-    if len(sys.argv) == 3:
+        except Exception as ee: 
+            print('** error in '+groomer.__name__+': '+str(ee)+'\n')
+            log.write('** error in '+groomer.__name__+': '+str(ee)+'\n')
+    if not dry_run:
         e.write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
     else:
         output = output.replace('correction:', 'suggested correction:')
