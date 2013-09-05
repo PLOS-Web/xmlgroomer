@@ -10,8 +10,8 @@ def verify(before, after, groomer, *args):
     goal = normalize(after)
     result = normalize(etree.tostring(groomer(etree.fromstring(before), *args)))
     if goal != result:
-        print 'goal:\n', goal
-        print 'result:\n', result
+        print 'goal: %r' % goal
+        print 'result: %r' % result
         assert False
 
 def verify_char_stream(before, after, groomer, *args):
@@ -25,6 +25,14 @@ def verify_char_stream(before, after, groomer, *args):
 def normalize(string):
     string = ''.join([line.strip() for line in string.split('\n')])
     return etree.tostring(etree.fromstring(string))
+
+def check(before, message, groomer):
+    x.output = ''
+    groomer(etree.fromstring(before))
+    if x.output.strip() != message.strip():
+        print 'goal:   %r' % message
+        print 'result: %r' % x.output
+        assert False
 
 def test_fix_article_type():
     before = '''<article>
@@ -483,9 +491,391 @@ def test_fix_mimetype():
 		</supplementary-material></article>'''
 	verify(before, after, x.fix_mimetype)
 
+
 def test_remove_pua_set():
     before = u'''<p>estrogen stimuli </p>'''
     after = u'''<p>estrogen stimuli </p>'''
     verify_char_stream(before, after, x.remove_pua_set)
+
+def test_check_article_type():
+    before = '''<article>
+        <article-categories>
+        <subj-group subj-group-type="heading">
+        <subject>Romantic Comedy</subject>
+        </subj-group>
+        </article-categories>
+        </article>'''
+    message = 'error: Romantic Comedy is not a valid article type'
+    check(before, message, x.check_article_type)
+
+def test_check_nlm_ta():
+    before = '''<journal-meta><journal-id journal-id-type="nlm-ta">plosone</journal-id></journal-meta>'''
+    message = 'error: invalid nlm-ta in metadata: plosone'
+    check(before, message, x.check_nlm_ta)
+
+def test_check_misplaced_pullquotes():
+    before = '''<body><sec><p><named-content content-type="pullquote">lalala</named-content></p></sec></body>'''
+    message = 'warning: pullquote appears as last element of a section\n'
+    check(before, message, x.check_misplaced_pullquotes)
+
+    before = '''<body><sec><p></p><p><named-content content-type="pullquote">lalala</named-content></p></sec></body>'''
+    message = 'warning: pullquote appears as last element of a section\n'
+    check(before, message, x.check_misplaced_pullquotes)
+
+    before = '''<body><sec><p><named-content content-type="pullquote">lalala</named-content></p><p></p></sec></body>'''
+    message = ''
+    check(before, message, x.check_misplaced_pullquotes)
+
+def test_check_missing_blurbs():
+    before = '''
+<article>
+  <front>
+    <journal-meta>
+      <journal-id journal-id-type="pmc">plosmed</journal-id>
+    </journal-meta>
+    <article-meta>
+      <abstract abstract-type="toc"></abstract>
+    </article-meta>
+  </front>
+</article>'''
+    message = "error: article xml is missing 'blurb'\n"
+    check(before, message, x.check_missing_blurb)
+
+    before = '''
+<article>
+  <front>
+    <journal-meta>
+      <journal-id journal-id-type="pmc">plosmed</journal-id>
+    </journal-meta>
+    <article-meta>
+      <abstract abstract-type="toc">lalala</abstract>
+    </article-meta>
+  </front>
+</article>'''
+    message = ""
+    check(before, message, x.check_missing_blurb)
+
+    before = '''
+<article>
+  <front>
+    <journal-meta>
+      <journal-id journal-id-type="pmc">plosmed</journal-id>
+    </journal-meta>
+    <article-meta>
+    </article-meta>
+  </front>
+</article>'''
+    message = "error: article xml is missing 'blurb'\n"
+    check(before, message, x.check_missing_blurb)
+
+def test_check_SI_attributes():
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <article-meta>
+      <article-id pub-id-type='doi'>10.1371/journal.pone.0012345</article-id>
+    </article-meta>
+  </front>
+  <body>
+    <sec>
+      <supplementary-material mimetype='mime/test' id='pone.0012345.s001' xlink:href='pone.0012345.s001.docx'>
+        <label></label>
+      </supplementary-material>
+    </sec>
+  </body>
+</article>'''
+    message = ''
+    check(before, message, x.check_SI_attributes)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <article-meta>
+      <article-id pub-id-type='doi'>10.1371/journal.pone.0012345</article-id>
+    </article-meta>
+  </front>
+  <body>
+    <sec>
+      <supplementary-material id='pone.0012345.s001' xlink:href='pone.0012345.s001.docx'>
+        <label></label>
+      </supplementary-material>
+    </sec>
+  </body>
+</article>'''
+    message = 'error: mimetype missing: pone.0012345.s001!'
+    check(before, message, x.check_SI_attributes)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <article-meta>
+      <article-id pub-id-type='doi'>10.1371/journal.pone.0012345</article-id>
+    </article-meta>
+  </front>
+  <body>
+    <sec>
+      <supplementary-material mimetype='mime/test' id='pone.0012345.s001' xlink:href='pone.0012345.s001.'>
+        <label></label>
+      </supplementary-material>
+    </sec>
+  </body>
+</article>'''
+    message = 'error: bad or missing file extension: pone.0012345.s001.\n'
+    check(before, message, x.check_SI_attributes)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <article-meta>
+      <article-id pub-id-type='doi'>10.1371/journal.pone.0012345</article-id>
+    </article-meta>
+  </front>
+  <body>
+    <sec>
+      <supplementary-material mimetype='mime/test' id='pone.0011111.s001' xlink:href='pone.0011111.s001.docx'>
+        <label></label>
+      </supplementary-material>
+    </sec>
+  </body>
+</article>'''
+    message = 'error: supp info pone.0011111.s001.docx does not match doi: pone.0012345\n'
+    check(before, message, x.check_SI_attributes)
+
+def test_check_lowercase_extensions():
+    href = 'lalalal'
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graphic xlink:href='%s'></graphic>
+</article>
+''' % href
+    message = 'error: bad or missing file extension: %s\n' % href
+    check(before, message, x.check_lowercase_extensions)
+
+    href = 'pone.0012345.g001.tif'
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graphic xlink:href='%s'></graphic>
+</article>
+''' % href
+    message = ''
+    check(before, message, x.check_lowercase_extensions)
+
+    href = 'pone.0012345.g001.TIF'
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graphic xlink:href='%s'></graphic>
+</article>
+''' % href
+    message = 'error: bad or missing file extension: %s\n' % href
+    check(before, message, x.check_lowercase_extensions)
+
+def test_check_collab_markup():
+    name = "James"
+    before = '''
+<contrib contrib-type="author">
+  <name>
+    <surname>%s</surname>
+  </name>
+</contrib>
+''' % name
+
+    message = ""
+    check(before, message, x.check_collab_markup)
+
+    name = " of "
+    before = '''
+<contrib contrib-type="author">
+  <name>
+    <surname>%s</surname>
+  </name>
+</contrib>
+''' % name
+
+    message = "warning: Article may contain incorrect markup for a collaborative author. Suspicious text to search for: %s\n" % name
+    check(before, message, x.check_collab_markup)
+
+    name = " of "
+    before = '''
+<contrib contrib-type="author">
+  <name>
+    <given-name>%s</given-name>
+  </name>
+</contrib>
+''' % name
+
+    message = "warning: Article may contain incorrect markup for a collaborative author. Suspicious text to search for: %s\n" % name
+    check(before, message, x.check_collab_markup)
+
+def test_on_behalf_of_markup():
+    collab = "for"
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <contrib-group>
+    <contrib>
+       <collab>%s</collab>
+    </contrib>
+  </contrib-group>
+</article>
+''' % collab
+    message = "warning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\n" % collab
+    check(before, message, x.check_on_behalf_of_markup)
+
+    collab = "lalala"
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <contrib-group>
+    <contrib>
+       <collab>%s</collab>
+    </contrib>
+  </contrib-group>
+</article>
+''' % collab
+    message = ""
+    check(before, message, x.check_on_behalf_of_markup)
+
+    collab = "on behalf of"
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <contrib-group>
+    <contrib>
+       <collab>%s</collab>
+       <collab>%s</collab>
+    </contrib>
+  </contrib-group>
+</article>
+''' % (collab, collab)
+    message = "warning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\nwarning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\n" % (collab, collab)
+    check(before, message, x.check_on_behalf_of_markup)
+
+def test_sec_ack_title():
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <sec>
+    <title>Acknowledgements</title>
+  </sec>
+</article>
+'''
+    message = "warning: there is a <sec> titled \'Acknowledgements\' rather than the use of an <ack> tag."
+    check(before, message, x.check_sec_ack_title)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <sec>
+    <title>lalala</title>
+  </sec>
+</article>
+'''
+    message = ""
+    check(before, message, x.check_sec_ack_title)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <sec>
+    <title>Acknowledgements</title>
+  </sec>
+  <sec>
+    <title>Acknowledgements</title>
+  </sec>
+</article>
+'''
+    message = "warning: there is a <sec> titled \'Acknowledgements\' rather than the use of an <ack> tag.\nwarning: there is a <sec> titled \'Acknowledgements\' rather than the use of an <ack> tag.\n"
+    check(before, message, x.check_sec_ack_title)
+
+
+def test_on_behalf_of_markup():
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <funding-statement>
+  </funding-statement>
+</article>
+'''
+    message = ""
+    check(before, message, x.check_improper_children_in_funding_statement)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <funding-statement>
+    <p>bad thing</p>
+  </funding-statement>
+</article>
+'''
+    message = "error: funding-statement has illegal child node: p\n"
+    check(before, message, x.check_improper_children_in_funding_statement)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <funding-statement>
+    <p>bad thing</p>
+    <lala>another bad thing</lala>
+  </funding-statement>
+</article>
+'''
+    message = "error: funding-statement has illegal child node: p\nerror: funding-statement has illegal child node: lala\n"
+    check(before, message, x.check_improper_children_in_funding_statement)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <funding-statement>
+     lala
+  </funding-statement>
+</article>
+'''
+    message = ""
+    check(before, message, x.check_improper_children_in_funding_statement)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <funding-statement>
+     <inline-formula></inline-formula>
+     <inline-formula><lala></lala></inline-formula>
+     <inline-graphic></inline-graphic>
+  </funding-statement>
+</article>
+'''
+    message = ""
+    check(before, message, x.check_improper_children_in_funding_statement)
+
+def test_check_valid_journal_title():
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <journal-meta>
+      <journal-title-group>
+        <journal-title>PLoS Biology</journal-title>
+      </journal-title-group>
+    </journal-meta>
+  </front>
+</article>
+'''
+    message = ""
+    check(before, message, x.check_valid_journal_title)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <journal-meta>
+      <journal-title-group>
+      </journal-title-group>
+    </journal-meta>
+  </front>
+</article>
+'''
+    message = "error: missing journal title in metadata\n"
+    check(before, message, x.check_valid_journal_title)
+
+    bad_journal_name = "bad journal"
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <journal-meta>
+      <journal-title-group>
+        <journal-title>%s</journal-title>
+      </journal-title-group>
+    </journal-meta>
+  </front>
+</article>
+''' % bad_journal_name
+    message = "error: invalid journal title in metadata: %s" % bad_journal_name
+    check(before, message, x.check_valid_journal_title)
 
 
