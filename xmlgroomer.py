@@ -556,4 +556,4 @@ if __name__ == '__main__':
     etree.ElementTree(root).write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
     log.write(output.encode('ascii','ignore'))
     log.close()
-    print output
+    print output.encode('utf-8')
