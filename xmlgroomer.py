@@ -550,13 +550,35 @@ def check_collab_markup(root):
     return root
 
 def check_on_behalf_of_markup(root):
-    raise NotImplementedError("Not done yet.")
+    global output
+    
+    suspicious_words = ['for', 'on behalf of']
+    for collab in root.xpath('//contrib-group/contrib/collab'):
+        for word in suspicious_words:
+            if re.match(word, collab.text, re.IGNORECASE):
+                output += "warning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\n" % collab.text
+                break
+    
+    return root 
 
-def check_bad_sec_in_acknowledgment(root):
-    raise NotImplementedError("Not done yet.")
+def check_sec_ack_title(root):
+    global output
+
+    for fake_ack in root.xpath('//sec/title[text()="Acknowledgements"]'):
+        output += "warning: there is a <sec> titled \'Acknowledgements\' rather than the use of an <ack> tag.\n"
+
+    return root
 
 def check_improper_children_in_funding_statement(root):
-    raise NotImplementedError("Not done yet.")
+    global output
+
+    valid_tags = ['inline-formula', 'inline-graphic']
+    for funding_statement in root.xpath('//funding-statement'):
+        for elem in funding_statement:
+            if elem.tag not in valid_tags:
+                output += "error: funding-statement has illegal child node: %s\n" % elem.tag
+
+    return root
 
 def check_nlm_ta(root):
     global output
@@ -570,7 +592,17 @@ def check_nlm_ta(root):
 groomers.append(check_nlm_ta)
 
 def check_valid_journal_title(root):
-    raise NotImplementedError("Not done yet.")
+    global output
+
+    valid_journal_titles = ["PLoS Biology", "PLoS Computational Biology", "PLoS Clinical Trials", "PLoS Genetics", "PLoS Medicine", "PLoS Neglected Tropical Diseases", "PLoS ONE", "PLoS Pathogens", "PLoS Currents"]
+    journal_title = root.xpath('/article/front/journal-meta/journal-title-group/journal-title')
+
+    if not journal_title:
+        output += "error: missing journal title in metadata\n"
+    elif journal_title[0].text not in valid_journal_titles:
+        output += "error: invalid journal title in metadata: %s\n" % journal_title[0].text
+        
+    return root
 
 if __name__ == '__main__':
     if len(sys.argv) not in [2,3]:

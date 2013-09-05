@@ -665,3 +665,176 @@ def test_check_collab_markup():
 
     message = "warning: Article may contain incorrect markup for a collaborative author. Suspicious text to search for: %s\n" % name
     check(before, message, x.check_collab_markup)
+
+def test_on_behalf_of_markup():
+    collab = "for"
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <contrib-group>
+    <contrib>
+       <collab>%s</collab>
+    </contrib>
+  </contrib-group>
+</article>
+''' % collab
+    message = "warning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\n" % collab
+    check(before, message, x.check_on_behalf_of_markup)
+
+    collab = "lalala"
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <contrib-group>
+    <contrib>
+       <collab>%s</collab>
+    </contrib>
+  </contrib-group>
+</article>
+''' % collab
+    message = ""
+    check(before, message, x.check_on_behalf_of_markup)
+
+    collab = "on behalf of"
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <contrib-group>
+    <contrib>
+       <collab>%s</collab>
+       <collab>%s</collab>
+    </contrib>
+  </contrib-group>
+</article>
+''' % (collab, collab)
+    message = "warning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\nwarning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\n" % (collab, collab)
+    check(before, message, x.check_on_behalf_of_markup)
+
+def test_sec_ack_title():
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <sec>
+    <title>Acknowledgements</title>
+  </sec>
+</article>
+'''
+    message = "warning: there is a <sec> titled \'Acknowledgements\' rather than the use of an <ack> tag."
+    check(before, message, x.check_sec_ack_title)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <sec>
+    <title>lalala</title>
+  </sec>
+</article>
+'''
+    message = ""
+    check(before, message, x.check_sec_ack_title)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <sec>
+    <title>Acknowledgements</title>
+  </sec>
+  <sec>
+    <title>Acknowledgements</title>
+  </sec>
+</article>
+'''
+    message = "warning: there is a <sec> titled \'Acknowledgements\' rather than the use of an <ack> tag.\nwarning: there is a <sec> titled \'Acknowledgements\' rather than the use of an <ack> tag.\n"
+    check(before, message, x.check_sec_ack_title)
+
+
+def test_on_behalf_of_markup():
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <funding-statement>
+  </funding-statement>
+</article>
+'''
+    message = ""
+    check(before, message, x.check_improper_children_in_funding_statement)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <funding-statement>
+    <p>bad thing</p>
+  </funding-statement>
+</article>
+'''
+    message = "error: funding-statement has illegal child node: p\n"
+    check(before, message, x.check_improper_children_in_funding_statement)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <funding-statement>
+    <p>bad thing</p>
+    <lala>another bad thing</lala>
+  </funding-statement>
+</article>
+'''
+    message = "error: funding-statement has illegal child node: p\nerror: funding-statement has illegal child node: lala\n"
+    check(before, message, x.check_improper_children_in_funding_statement)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <funding-statement>
+     lala
+  </funding-statement>
+</article>
+'''
+    message = ""
+    check(before, message, x.check_improper_children_in_funding_statement)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <funding-statement>
+     <inline-formula></inline-formula>
+     <inline-formula><lala></lala></inline-formula>
+     <inline-graphic></inline-graphic>
+  </funding-statement>
+</article>
+'''
+    message = ""
+    check(before, message, x.check_improper_children_in_funding_statement)
+
+def test_check_valid_journal_title():
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <journal-meta>
+      <journal-title-group>
+        <journal-title>PLoS Biology</journal-title>
+      </journal-title-group>
+    </journal-meta>
+  </front>
+</article>
+'''
+    message = ""
+    check(before, message, x.check_valid_journal_title)
+
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <journal-meta>
+      <journal-title-group>
+      </journal-title-group>
+    </journal-meta>
+  </front>
+</article>
+'''
+    message = "error: missing journal title in metadata\n"
+    check(before, message, x.check_valid_journal_title)
+
+    bad_journal_name = "bad journal"
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <journal-meta>
+      <journal-title-group>
+        <journal-title>%s</journal-title>
+      </journal-title-group>
+    </journal-meta>
+  </front>
+</article>
+''' % bad_journal_name
+    message = "error: invalid journal title in metadata: %s" % bad_journal_name
+    check(before, message, x.check_valid_journal_title)
+
