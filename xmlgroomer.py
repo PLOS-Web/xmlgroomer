@@ -708,7 +708,7 @@ if __name__ == '__main__':
             log.write('** error in '+groomer.__name__+': '+str(ee)+'\n')
 
     if not dry_run:
-        e.write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
+        etree.ElementTree(root).write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
     else:
         output = output.replace('correction:', 'suggested correction:')
 
