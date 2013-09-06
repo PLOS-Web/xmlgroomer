@@ -795,22 +795,11 @@ def test_on_behalf_of_markup():
     before = '''
 <article xmlns:xlink="http://www.w3.org/1999/xlink">
   <funding-statement>
-    <p>bad thing</p>
+    <p>fine thing</p>
   </funding-statement>
 </article>
 '''
-    message = "error: funding-statement has illegal child node: p\n"
-    check(before, message, x.check_improper_children_in_funding_statement)
-
-    before = '''
-<article xmlns:xlink="http://www.w3.org/1999/xlink">
-  <funding-statement>
-    <p>bad thing</p>
-    <lala>another bad thing</lala>
-  </funding-statement>
-</article>
-'''
-    message = "error: funding-statement has illegal child node: p\nerror: funding-statement has illegal child node: lala\n"
+    message = ""
     check(before, message, x.check_improper_children_in_funding_statement)
 
     before = '''
@@ -827,12 +816,10 @@ def test_on_behalf_of_markup():
 <article xmlns:xlink="http://www.w3.org/1999/xlink">
   <funding-statement>
      <inline-formula></inline-formula>
-     <inline-formula><lala></lala></inline-formula>
-     <inline-graphic></inline-graphic>
   </funding-statement>
 </article>
 '''
-    message = ""
+    message = "error: funding-statement has illegal child node: inline-formula\n"
     check(before, message, x.check_improper_children_in_funding_statement)
 
 def test_check_valid_journal_title():

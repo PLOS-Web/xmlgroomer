@@ -561,7 +561,6 @@ def check_missing_blurb(root):
 @register_groom
 def check_SI_attributes(root):
     global output
-    print get_doi(root)
     doi = get_doi(root).split('10.1371/journal.')[1]
 
     for si in root.xpath("//article/body/sec/supplementary-material"):
@@ -634,10 +633,10 @@ def check_sec_ack_title(root):
 def check_improper_children_in_funding_statement(root):
     global output
 
-    valid_tags = ['inline-formula', 'inline-graphic']
+    invalid_tags = ['inline-formula', 'inline-graphic']
     for funding_statement in root.xpath('//funding-statement'):
         for elem in funding_statement:
-            if elem.tag not in valid_tags:
+            if elem.tag in invalid_tags:
                 output += "error: funding-statement has illegal child node: %s\n" % elem.tag
 
     return root
@@ -692,7 +691,6 @@ if __name__ == '__main__':
         parser = etree.XMLParser(recover = True)
         root = etree.fromstring(char_stream.encode('utf-8'), parser)
     except Exception as ee:
-        print 'error parsing: '+str(ee)+'\n'
         log.write('** error parsing: '+str(ee)+'\n')
         log.close()
         raise
