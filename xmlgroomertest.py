@@ -361,6 +361,11 @@ def test_fix_footnote_attribute():
         </fn></table-wrap-foot>'''
     verify(before, after, x.fix_footnote_attribute)
 
+def test_fix_underline_whitespace():
+    before = '''<article><underline>Test</underline><underline> </underline><underline>the underline function</underline>.</article>'''
+    after = '''<article><underline>Test</underline> <underline>the underline function</underline>.</article>'''
+    verify(before, after, x.fix_underline_whitespace)
+
 def test_fix_url():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <ext-link ext-link-type="uri" xlink:href="10.1023/A:1020  830703012" xlink:type="simple"></ext-link>
@@ -864,5 +869,4 @@ def test_check_valid_journal_title():
 ''' % bad_journal_name
     message = "error: invalid journal title in metadata: %s" % bad_journal_name
     check(before, message, x.check_valid_journal_title)
-
 
