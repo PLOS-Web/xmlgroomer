@@ -323,11 +323,28 @@ groomers.append(fix_target_footnote)
 
 def fix_NCBI_ext_link(root):
     global output
+    changed = False
     for link in root.xpath("//ext-link[@ext-link-type='NCBI:nucleotide']"):
-        etree.strip_tags(link.getparent(), 'ext-link')
+        link.tag = 'remove'
+        etree.strip_tags(link.getparent(), 'remove')
+        changed = True
+    if changed:
         output += "correction: stripped bad ext-link (ext-link-type='NCBI:nucleotide')\n"
     return root
 groomers.append(fix_NCBI_ext_link)
+
+def fix_underline_whitespace(root):
+    global output
+    changed = False
+    for typ in root.xpath("//underline"):
+        if typ.text  == ' ':
+            typ.tag = 'remove'
+            etree.strip_tags(typ.getparent(), 'remove')
+            changed = True
+    if changed:
+        output += "removed underline tags on whitespace"
+    return root
+groomers.append(fix_underline_whitespace) 
 
 def fix_footnote_attribute(root):
     global output
@@ -336,7 +353,7 @@ def fix_footnote_attribute(root):
         if 'fn-type' in fn.attrib:
             fn.attrib.pop('fn-type')
             changed = True
-    if changed == True:
+    if changed:
         output += "correction: stripped fn-type from table footnote\n"
     return root
 groomers.append(fix_footnote_attribute)
