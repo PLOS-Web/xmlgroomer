@@ -719,7 +719,6 @@ if __name__ == '__main__':
             root = groomer(root)
         except Exception as ee: 
             traceback.print_exc()
-            print('** error in '+groomer.__name__+': '+str(ee)+'\n')
             log.write('** error in '+groomer.__name__+': '+str(ee)+'\n')
 
     if not dry_run:
