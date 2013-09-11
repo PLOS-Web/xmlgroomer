@@ -261,7 +261,8 @@ def fix_bold(root):
             if title.getparent().tag == 'sec':
                 label = title.getparent().attrib['id']
             else:
-                label = title.getparent().getparent().xpath("label")[0].text
+                typ = title.getparent().getparent()
+                label = typ.xpath("label")[0].text if typ.xpath("label") else typ.tag
             output += 'correction: removed bold tags from '+label+' title\n'
     return root
 groomers.append(fix_bold)
