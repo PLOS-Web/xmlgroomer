@@ -343,7 +343,7 @@ def fix_underline_whitespace(root):
             etree.strip_tags(typ.getparent(), 'remove')
             changed = True
     if changed:
-        output += "removed underline tags on whitespace\n"
+        output += "correction: removed underline tags on whitespace\n"
     return root
 groomers.append(fix_underline_whitespace)
 
@@ -364,7 +364,7 @@ def fix_equal_contributions(root):
     for fn in root.xpath("//fn[@id='equal1']"):
         fn.getparent().remove(fn)
     if changed:
-        output += "fixed equal contributions mark up\n"
+        output += "correction: fixed equal contributions mark up\n"
     return root
 groomers.append(fix_equal_contributions)
 
