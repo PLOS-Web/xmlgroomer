@@ -261,7 +261,8 @@ def fix_bold(root):
             if title.getparent().tag == 'sec':
                 label = title.getparent().attrib['id']
             else:
-                label = title.getparent().getparent().xpath("label")[0].text
+                typ = title.getparent().getparent()
+                label = typ.xpath("label")[0].text if typ.xpath("label") else typ.tag
             output += 'correction: removed bold tags from '+label+' title\n'
     return root
 groomers.append(fix_bold)
@@ -740,7 +741,7 @@ if __name__ == '__main__':
             root = groomer(root)
         except Exception as ee: 
             traceback.print_exc()
-            print('** error in '+groomer.__name__+': '+str(ee)+'\n')
+            print >>sys.stderr, '** error in '+groomer.__name__+': '+str(ee)+'\n'
             log.write('** error in '+groomer.__name__+': '+str(ee)+'\n')
 
     if not dry_run:
