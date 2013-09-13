@@ -342,9 +342,30 @@ def fix_underline_whitespace(root):
             etree.strip_tags(typ.getparent(), 'remove')
             changed = True
     if changed:
-        output += "removed underline tags on whitespace"
+        output += "removed underline tags on whitespace\n"
     return root
-groomers.append(fix_underline_whitespace) 
+groomers.append(fix_underline_whitespace)
+
+def fix_equal_contributions(root):
+    global output
+    changed = False
+    for author in root.xpath("//contrib[@contrib-type='author']"):
+        #print 'first:', author.attrib
+        #print author.xpath("//xref[@rid='equal1']")
+        if author.xpath("xref[@rid='equal1']"):
+            
+            #print 'before:', author.attrib
+            author.attrib['equal-contrib'] = 'yes'
+            for xref in author.xpath("xref[@rid='equal1']"):
+                xref.getparent().remove(xref)
+            #print 'after:', author.attrib
+            changed = True
+    for fn in root.xpath("//fn[@id='equal1']"):
+        fn.getparent().remove(fn)
+    if changed:
+        output += "fixed equal contributions mark up\n"
+    return root
+groomers.append(fix_equal_contributions)
 
 def fix_footnote_attribute(root):
     global output
