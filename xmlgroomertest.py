@@ -366,6 +366,30 @@ def test_fix_underline_whitespace():
     after = '''<article><underline>Test</underline> <underline>the underline function</underline>.</article>'''
     verify(before, after, x.fix_underline_whitespace)
 
+def test_fix_equal_contributions():
+    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+    <contrib xlink:type="simple" contrib-type="author">
+<name name-style="western"><surname>Wen</surname><given-names>Shih-Tao</given-names></name>
+<xref ref-type="aff" rid="aff1"><sup>1</sup></xref>
+<xref ref-type="fn" rid="equal1"><sup>.</sup></xref>
+</contrib>
+<contrib xlink:type="simple" contrib-type="author">
+<name name-style="western"><surname>Chen</surname><given-names>Wei</given-names></name>
+<xref ref-type="aff" rid="aff1"><sup>1</sup></xref>
+<xref ref-type="aff" rid="aff2"><sup>2</sup></xref>
+<xref ref-type="fn" rid="equal1"><sup>3</sup></xref></contrib>
+<fn id="equal1" fn-type="equal"><label>.</label><p content-type="equal">These authors contributed equally to this work.</p></fn></article>'''
+    after  = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+<contrib xlink:type="simple" contrib-type="author" equal-contrib="yes">
+<name name-style="western"><surname>Wen</surname><given-names>Shih-Tao</given-names></name>
+<xref ref-type="aff" rid="aff1"><sup>1</sup></xref>
+</contrib>
+<contrib xlink:type="simple" contrib-type="author" equal-contrib="yes">
+<name name-style="western"><surname>Chen</surname><given-names>Wei</given-names></name>
+<xref ref-type="aff" rid="aff1"><sup>1</sup></xref>
+<xref ref-type="aff" rid="aff2"><sup>2</sup></xref></contrib></article>'''
+    verify(before, after, x.fix_equal_contributions)
+
 def test_fix_url():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <ext-link ext-link-type="uri" xlink:href="10.1023/A:1020  830703012" xlink:type="simple"></ext-link>
