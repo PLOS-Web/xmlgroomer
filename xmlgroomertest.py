@@ -494,6 +494,28 @@ def test_fix_si_captions():
         </article>'''
     verify(before, after, x.fix_si_captions)
 
+def test_fix_remove_si_label_punctuation():
+    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML">
+        <supplementary-material xlink:type="simple"><label>Figure S1.</label>
+        <caption><p><bold>Colocalization.</bold> Bars.</p><p>(PDF)</p></caption></supplementary-material>
+        <supplementary-material xlink:type="simple"><label>Figure S2.</label>
+        <caption><p><bold>Colocalization.</bold></p><p>(PDF)</p></caption></supplementary-material>
+        <supplementary-material xlink:type="simple"><label>Figure S3.</label>
+        <caption><p><bold>Colocalization.</bold> Bars.</p><p>Another.</p></caption></supplementary-material>
+        <supplementary-material xlink:type="simple"><label>Figure S4.</label>
+        <caption><p><bold>Colocalization.</bold></p></caption></supplementary-material>
+        </article>'''
+    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML">
+        <supplementary-material xlink:type="simple"><label>Figure S1</label>
+        <caption><p><bold>Colocalization.</bold> Bars.</p><p>(PDF)</p></caption></supplementary-material>
+        <supplementary-material xlink:type="simple"><label>Figure S2</label>
+        <caption><p><bold>Colocalization.</bold></p><p>(PDF)</p></caption></supplementary-material>
+        <supplementary-material xlink:type="simple"><label>Figure S3</label>
+        <caption><p><bold>Colocalization.</bold> Bars.</p><p>Another.</p></caption></supplementary-material>
+        <supplementary-material xlink:type="simple"><label>Figure S4</label>
+        <caption><p><bold>Colocalization.</bold></p></caption></supplementary-material>
+        </article>'''
+
 def test_fix_extension():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <supplementary-material id="pone.0063011.s001" xlink:href="pone.0063011.s001" mimetype="image/tiff">
