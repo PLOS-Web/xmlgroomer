@@ -8,6 +8,7 @@ import lxml.etree as etree
 import mimetypes
 import re
 import traceback
+import string
 
 groomers = []
 char_stream_groomers = []
@@ -516,9 +517,9 @@ def fix_remove_si_label_punctuation(root):
     global output
     changed = False
     for lab in root.xpath("//supplementary-material/label"):
-        if lab.text[-1] == ".":
-            oldtext = lab.text[:-1]
-            lab.text = oldtext
+        stripped = lab.text.strip(string.whitespace + string.punctuation)
+        if lab.text != stripped:
+            lab.text = stripped
             changed = True
     if changed:
         output += 'correction: removed punctuation from end of label tag text'

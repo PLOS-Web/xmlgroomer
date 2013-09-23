@@ -498,11 +498,11 @@ def test_fix_remove_si_label_punctuation():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML">
         <supplementary-material xlink:type="simple"><label>Figure S1.</label>
         <caption><p><bold>Colocalization.</bold> Bars.</p><p>(PDF)</p></caption></supplementary-material>
-        <supplementary-material xlink:type="simple"><label>Figure S2.</label>
+        <supplementary-material xlink:type="simple"><label>Figure S2 </label>
         <caption><p><bold>Colocalization.</bold></p><p>(PDF)</p></caption></supplementary-material>
         <supplementary-material xlink:type="simple"><label>Figure S3.</label>
         <caption><p><bold>Colocalization.</bold> Bars.</p><p>Another.</p></caption></supplementary-material>
-        <supplementary-material xlink:type="simple"><label>Figure S4.</label>
+        <supplementary-material xlink:type="simple"><label>Figure S4. </label>
         <caption><p><bold>Colocalization.</bold></p></caption></supplementary-material>
         </article>'''
     after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML">
@@ -589,7 +589,7 @@ def test_check_missing_blurbs():
     </article-meta>
   </front>
 </article>'''
-    message = "error: article xml is missing 'blurb'\n"
+    message = ""
     check(before, message, x.check_missing_blurb)
 
     before = '''
