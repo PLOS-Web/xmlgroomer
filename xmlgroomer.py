@@ -351,15 +351,10 @@ def fix_equal_contributions(root):
     global output
     changed = False
     for author in root.xpath("//contrib[@contrib-type='author']"):
-        #print 'first:', author.attrib
-        #print author.xpath("//xref[@rid='equal1']")
         if author.xpath("xref[@rid='equal1']"):
-            
-            #print 'before:', author.attrib
             author.attrib['equal-contrib'] = 'yes'
             for xref in author.xpath("xref[@rid='equal1']"):
                 xref.getparent().remove(xref)
-            #print 'after:', author.attrib
             changed = True
     for fn in root.xpath("//fn[@id='equal1']"):
         fn.getparent().remove(fn)
@@ -516,6 +511,19 @@ def fix_si_captions(root):
         output += 'correction: moved title inside p/bold for '+label+'\n'
     return root
 groomers.append(fix_si_captions)
+
+def fix_remove_si_label_punctuation(root):
+    global output
+    changed = False
+    for lab in root.xpath("//supplementary-material/label"):
+        if lab.text[-1] == ".":
+            oldtext = lab.text[:-1]
+            lab.text = oldtext
+            changed = True
+    if changed:
+        output += 'correction: removed punctuation from end of label tag text'
+    return root
+groomers.append(fix_remove_si_label_punctuation)
 
 def fix_extension(root):
     global output    
