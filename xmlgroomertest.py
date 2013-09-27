@@ -352,7 +352,10 @@ def test_fix_NCBI_ext_link():
         <ext-link ext-link-type="UniProt" xlink:href="Q9VFY9">Q9VFY9</ext-link>,
         <ext-link ext-link-type="NCBI:protein" xlink:href="NP_650258">NP_650258</ext-link></article>'''
     after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">NCT01042860,Q9VFY9,NP_650258</article>'''
+    message = ("correction: stripped bad ext-link (ext-link-type="
+               "'NCBI:nucleotide', 'NCBI:protein', 'UniProt')\n")
     verify(before, after, x.fix_NCBI_ext_link)
+    check(before, message, x.fix_NCBI_ext_link)
 
 def test_fix_footnote_attribute():
     before = '''<table-wrap-foot><fn id="ngtab1.1" fn-type="footnote.other">

@@ -10,6 +10,7 @@ import re
 import traceback
 import string
 
+
 groomers = []
 char_stream_groomers = []
 output = ''
@@ -326,12 +327,15 @@ groomers.append(fix_target_footnote)
 def fix_NCBI_ext_link(root):
     global output
     changed = False
-    for link in root.xpath("//ext-link[@ext-link-type='NCBI:nucleotide' or @ext-link-type='NCBI:protein' or @ext-link-type='UniProt']"):
+    for link in root.xpath("//ext-link[@ext-link-type='NCBI:nucleotide' or "
+                           "@ext-link-type='NCBI:protein' or "
+                           "@ext-link-type='UniProt']"):
         link.tag = 'remove'
         etree.strip_tags(link.getparent(), 'remove')
         changed = True
     if changed:
-        output += "correction: stripped bad ext-link (ext-link-type='NCBI:nucleotide', 'NCBI:protein', 'UniProt')\n"
+        output += ("correction: stripped bad ext-link (ext-link-type="
+                   "'NCBI:nucleotide', 'NCBI:protein', 'UniProt')\n")
     return root
 groomers.append(fix_NCBI_ext_link)
 
