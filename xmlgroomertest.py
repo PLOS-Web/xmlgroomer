@@ -348,8 +348,10 @@ def test_fix_target_footnote():
 
 def test_fix_NCBI_ext_link():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
-        <ext-link ext-link-type="NCBI:nucleotide" xlink:href="http://NCT01042860">NCT01042860</ext-link></article>'''
-    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">NCT01042860</article>'''
+        <ext-link ext-link-type="NCBI:nucleotide" xlink:href="http://NCT01042860">NCT01042860</ext-link>,
+        <ext-link ext-link-type="UniProt" xlink:href="Q9VFY9">Q9VFY9</ext-link>,
+        <ext-link ext-link-type="NCBI:protein" xlink:href="NP_650258">NP_650258</ext-link></article>'''
+    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">NCT01042860,Q9VFY9,NP_650258</article>'''
     verify(before, after, x.fix_NCBI_ext_link)
 
 def test_fix_footnote_attribute():
