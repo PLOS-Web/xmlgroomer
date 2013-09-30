@@ -659,7 +659,7 @@ def check_collab_markup(root):
 
     return root
 
-@register_groom
+#@register_groom
 def check_on_behalf_of_markup(root):
     global output
     
