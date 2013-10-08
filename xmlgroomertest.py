@@ -352,10 +352,7 @@ def test_fix_NCBI_ext_link():
         <ext-link ext-link-type="UniProt" xlink:href="Q9VFY9">Q9VFY9</ext-link>,
         <ext-link ext-link-type="NCBI:protein" xlink:href="NP_650258">NP_650258</ext-link></article>'''
     after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">NCT01042860,Q9VFY9,NP_650258</article>'''
-    message = ("correction: stripped bad ext-link (ext-link-type="
-               "'NCBI:nucleotide', 'NCBI:protein', 'UniProt')\n")
     verify(before, after, x.fix_NCBI_ext_link)
-    check(before, message, x.fix_NCBI_ext_link)
 
 def test_fix_footnote_attribute():
     before = '''<table-wrap-foot><fn id="ngtab1.1" fn-type="footnote.other">
@@ -503,11 +500,11 @@ def test_fix_remove_si_label_punctuation():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML">
         <supplementary-material xlink:type="simple"><label>Figure S1.</label>
         <caption><p><bold>Colocalization.</bold> Bars.</p><p>(PDF)</p></caption></supplementary-material>
-        <supplementary-material xlink:type="simple"><label>Figure S2 </label>
+        <supplementary-material xlink:type="simple"><label>Figure S2.</label>
         <caption><p><bold>Colocalization.</bold></p><p>(PDF)</p></caption></supplementary-material>
         <supplementary-material xlink:type="simple"><label>Figure S3.</label>
         <caption><p><bold>Colocalization.</bold> Bars.</p><p>Another.</p></caption></supplementary-material>
-        <supplementary-material xlink:type="simple"><label>Figure S4. </label>
+        <supplementary-material xlink:type="simple"><label>Figure S4.</label>
         <caption><p><bold>Colocalization.</bold></p></caption></supplementary-material>
         </article>'''
     after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML">
@@ -594,7 +591,7 @@ def test_check_missing_blurbs():
     </article-meta>
   </front>
 </article>'''
-    message = ""
+    message = "error: article xml is missing 'blurb'\n"
     check(before, message, x.check_missing_blurb)
 
     before = '''
