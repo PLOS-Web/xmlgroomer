@@ -5,6 +5,7 @@
 
 import lxml.etree as etree
 import xmlgroomer as x
+from lxml import html
 
 def verify(before, after, groomer, *args):
     goal = normalize(after)
@@ -75,6 +76,11 @@ def test_fix_article_title_tags():
         <article-title>Identification of Immunity Related Genes to Study the<italic>Physalis</italic>
         <italic>peruviana</italic> - <italic>Fusarium oxysporum</italic> pathosystem</article-title></title-group></article>'''
     verify(before, after, x.fix_article_title_tags)
+
+def test_fix_bad_italic_tags_running_title():
+    before = '<article><title-group><alt-title alt-title-type="running-head">&lt;I&gt;Vibrio cholerae&lt;/I&gt; in Kenya</alt-title></title-group></article>'
+    after = '<article><title-group><alt-title alt-title-type="running-head"><italic>Vibrio cholerae</italic> in Kenya</alt-title></title-group></article>'
+    verify(before, after, x.fix_bad_italic_tags_running_title)
 
 def test_fix_affiliation():
     before = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
