@@ -5,6 +5,7 @@ import sys
 import time
 import subprocess
 import lxml.etree as etree
+from lxml import html
 import mimetypes
 import re
 import traceback
@@ -60,6 +61,25 @@ def fix_article_title_tags(root):
         output += 'correction: removed named-content tags from article title\n' 
     return root
 groomers.append(fix_article_title_tags)
+
+def fix_bad_italic_tags_running_title(root):
+    global output
+    changed = False
+    for typ in root.xpath("//title-group/alt-title[@alt-title-type='running-head']"):
+        if not typ.text:
+            continue
+        atitle = html.fromstring(typ.text)
+        if atitle.xpath('//i'):
+            for i in atitle.xpath('//i'):
+                i.tag = 'italic'
+            atitle.tag = 'alt-title'
+            atitle.attrib['alt-title-type'] = 'running-head'
+            typ.getparent().replace(typ, atitle)
+        changed = True   
+    if changed:
+        output += 'correction: fixed italic tags in running title\n'''
+    return root
+groomers.append(fix_bad_italic_tags_running_title)
 
 def fix_affiliation(root):
     global output
