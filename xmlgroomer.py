@@ -194,6 +194,32 @@ def fix_copyright(root):
     return root
 groomers.append(fix_copyright)
 
+def add_creative_commons_copyright_link(root):
+    global output
+    for statement in root.xpath("//permissions/license/license-p"):
+        if statement.text[30:36] == " distr":
+            l = etree.SubElement(statement, "ext-link")
+            l.attrib['ext-link-type'] = 'uri'
+            statement.text = 'This is an open-access article distributed under the terms of the '
+            l.attrib['{http://www.w3.org/1999/xlink}href'] = 'http://creativecommons.org/licenses/by/3.0/'
+            l.text = "Creative Commons Attribution License"
+            l.tail = ', which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited.'
+            for attr in root.xpath("//permissions/license"):
+                attr.attrib['{http://www.w3.org/1999/xlink}href'] = 'http://creativecommons.org/licenses/by/3.0/'
+        elif statement.text[30:36] == ", free":
+            l = etree.SubElement(statement, "ext-link")
+            statement.text = 'This is an open-access article, free of all copyright, and may be freely reproduced, distributed, transmitted, modified, built upon, or otherwise used by anyone for any lawful purpose. The work is made available under the '
+            l.attrib['ext-link-type'] = 'uri'
+            l.attrib['{http://www.w3.org/1999/xlink}href'] = 'http://creativecommons.org/publicdomain/zero/1.0/'
+            l.text = 'Creative Commons CC0'
+            l.tail = ' public domain dedication.'
+            for attr in root.xpath("//permissions/license"):
+                attr.attrib['{http://www.w3.org/1999/xlink}href'] = 'http://creativecommons.org/publicdomain/zero/1.0/'
+        else:
+            output += 'warning: License text was not recognized CC license, CC link not added'
+    return root
+groomers.append(add_creative_commons_copyright_link)
+
 def fix_elocation(root):
     global output
     doi = get_doi(root)
