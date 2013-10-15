@@ -56,7 +56,7 @@ groomers.append(fix_article_title)
 def fix_article_title_tags(root):
     global output
     title = root.xpath("//title-group/article-title")[0]
-    if title.xpath("//named-content"):
+    if title.xpath(".//named-content"):
         etree.strip_tags(title, 'named-content')
         output += 'correction: removed named-content tags from article title\n'
     return root

@@ -75,7 +75,18 @@ def test_fix_article_title_tags():
     after = '''<article><meta><named-content>hello</named-content></meta><title-group>
         <article-title>Identification of Immunity Related Genes to Study the<italic>Physalis</italic>
         <italic>peruviana</italic> - <italic>Fusarium oxysporum</italic> pathosystem</article-title></title-group></article>'''
-    verify(before, after, x.fix_article_title_tags)
+    message = "correction: removed named-content tags from article title\n"
+    check(before, message, x.fix_article_title_tags)
+
+
+    before = '''<article><meta><named-content>hello</named-content></meta><title-group>
+        <article-title>Identification of Immunity Related Genes to Study the<italic>Physalis</italic>
+        <italic>peruviana</italic> - <italic>Fusarium oxysporum</italic> pathosystem</article-title></title-group></article>'''
+    after = '''<article><meta><named-content>hello</named-content></meta><title-group>
+        <article-title>Identification of Immunity Related Genes to Study the<italic>Physalis</italic>
+        <italic>peruviana</italic> - <italic>Fusarium oxysporum</italic> pathosystem</article-title></title-group></article>'''
+    message = ""
+    check(before, message, x.fix_article_title_tags)
 
 def test_fix_bad_italic_tags_running_title():
     before = '<article><title-group><alt-title alt-title-type="running-head">&lt;I&gt;Vibrio cholerae&lt;/I&gt; in Kenya</alt-title></title-group></article>'
@@ -597,7 +608,7 @@ def test_check_missing_blurbs():
     </article-meta>
   </front>
 </article>'''
-    message = "error: article xml is missing 'blurb'\n"
+    message = ""
     check(before, message, x.check_missing_blurb)
 
     before = '''
