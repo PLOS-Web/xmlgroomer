@@ -57,7 +57,7 @@ def fix_article_title_tags(root):
     title = root.xpath("//title-group/article-title")[0]
     if title.xpath("//named-content"):
         etree.strip_tags(title, 'named-content')
-        output += 'correction: removed named-content tags from article title\n' 
+        output += 'correction: removed named-content tags from article title\n'
     return root
 groomers.append(fix_article_title_tags)
 
@@ -495,8 +495,9 @@ groomers.append(fix_suppressed_tags)
 def fix_si_title(root):
     global output
     for si_title in root.xpath("//sec[@sec-type='supplementary-material']/title"):
-        si_title.text = 'Supporting Information'
-        output += 'correction: set supplementary material section title to Supporting Information\n'
+        if si_title.text != 'Supporting Information':
+            si_title.text = 'Supporting Information'
+            output += 'correction: set supplementary material section title to Supporting Information\n'
     return root
 groomers.append(fix_si_title)
 
@@ -510,7 +511,13 @@ def fix_si_captions(root):
             title.getparent().replace(title, etree.fromstring('<p>'+etree.tostring(title)+'</p>'))
         else:
             ns = '''<p xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML">'''
-            new_paragraph = etree.fromstring(etree.tostring(paragraphs[0]).replace(ns, '<p>'+etree.tostring(title)+' '))
+            # This is failing on captions that contain xlink requirements (ie xlink:href).  Hence this try/except.
+            #   we need to fix this at some point.
+            try:
+                new_paragraph = etree.fromstring(etree.tostring(paragraphs[0]).replace(ns, '<p>'+etree.tostring(title)+' '))
+            except etree.XMLSyntaxError, e:
+                output += 'suggested correction: moved title inside p/bold for '+label+'\n'
+                continue
             paragraphs[0].getparent().replace(paragraphs[0], new_paragraph)
             title.getparent().remove(title)
         output += 'correction: moved title inside p/bold for '+label+'\n'
