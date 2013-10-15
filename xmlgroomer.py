@@ -75,7 +75,7 @@ def fix_bad_italic_tags_running_title(root):
             atitle.tag = 'alt-title'
             atitle.attrib['alt-title-type'] = 'running-head'
             typ.getparent().replace(typ, atitle)
-        changed = True   
+            changed = True   
     if changed:
         output += 'correction: fixed italic tags in running title\n'''
     return root
