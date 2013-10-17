@@ -312,7 +312,7 @@ def fix_formula(root):
         graphic.attrib.pop('position')
         output += 'correction: changed disp-formula to inline-formula for '+graphic.attrib['{http://www.w3.org/1999/xlink}href']+'\n'
     return root
-groomers.append(fix_formula)
+#groomers.append(fix_formula)
 
 def fix_formula_label(root):
     global output
