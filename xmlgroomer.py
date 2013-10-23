@@ -616,7 +616,6 @@ def alert_merops_validator_error(char_stream):
         if (start < 0): start = 0
         end = m.start() + display_width
         if (end >= len(char_stream)): start = -1
-        #output += ("error: %s" % m)
         output += ("error: located merops-inserted validation error, "
                    "please address and remove: \"%s%s\"\n" %
                    (char_stream[start:m.start()],
