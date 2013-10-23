@@ -23,6 +23,14 @@ def verify_char_stream(before, after, groomer, *args):
         print 'result:\n', result
         assert False
 
+def check_char_stream(before, message, groomer):
+    x.output = ''
+    groomer(before)
+    if x.output.strip() != message.strip():
+        print 'goal:   %r' % message
+        print 'result: %r' % x.output
+        assert False    
+
 def normalize(string):
     string = ''.join([line.strip() for line in string.split('\n')])
     return etree.tostring(etree.fromstring(string))
@@ -935,3 +943,45 @@ def test_check_valid_journal_title():
     message = "error: invalid journal title in metadata: %s" % bad_journal_name
     check(before, message, x.check_valid_journal_title)
 
+def test_alert_merops_validator_error():
+    before = """\
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <journal-meta>
+      <journal-title-group>
+        <journal-title>[!lalalla!]</journal-title>
+      </journal-title-group>
+    </journal-meta>
+  </front>
+</article>"""
+    message = 'error: located merops-inserted validation error, please address and remove: "     <journal-title>[!lalalla!]</journal"\n'
+
+    check_char_stream(before, message, x.alert_merops_validator_error)
+
+    before = """\
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <journal-meta>
+      <journal-title-group>
+        <journal-title>[!(%lalalla%)!]</journal-title>
+      </journal-title-group>
+    </journal-meta>
+  </front>
+</article>"""
+    message = 'error: located merops-inserted validation error, please address and remove: "     <journal-title>[!(%lalalla%)!]</jou"\n'
+
+    check_char_stream(before, message, x.alert_merops_validator_error)
+
+    before = """\
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <front>
+    <journal-meta>
+      <journal-title-group>
+        <journal-title>[!</journal-title>
+      </journal-title-group>
+    </journal-meta>
+  </front>
+</article>"""
+    message = ''
+
+    check_char_stream(before, message, x.alert_merops_validator_error)

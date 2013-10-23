@@ -21,6 +21,11 @@ def register_groom(fn):
     groomers.append(fn)
     return fn
 
+def register_char_stream_groom(fn):
+    global groomers
+    char_stream_groomers.append(fn)
+    return fn
+
 def get_doi(root):
     return root.xpath("//article-id[@pub-id-type='doi']")[0].text
 
@@ -600,6 +605,22 @@ def remove_pua_set(char_stream):
     
     return char_stream
 char_stream_groomers.append(remove_pua_set)
+
+@register_char_stream_groom
+def alert_merops_validator_error(char_stream):
+    global output
+    merops_error_re = ur'\[!.{0,100}!\]'
+    display_width = 20
+    for m in re.finditer(merops_error_re, char_stream):
+        start = m.start() - display_width
+        if (start < 0): start = 0
+        end = m.start() + display_width
+        if (end >= len(char_stream)): start = -1
+        #output += ("error: %s" % m)
+        output += ("error: located merops-inserted validation error, "
+                   "please address and remove: \"%s%s\"\n" %
+                   (char_stream[start:m.start()],
+                    char_stream[m.start():end]))
 
 @register_groom
 def check_article_type(root):
