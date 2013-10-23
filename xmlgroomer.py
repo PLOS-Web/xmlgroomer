@@ -620,6 +620,7 @@ def alert_merops_validator_error(char_stream):
                    "please address and remove: \"%s%s\"\n" %
                    (char_stream[start:m.start()],
                     char_stream[m.start():end]))
+        return char_stream
 
 @register_groom
 def check_article_type(root):
