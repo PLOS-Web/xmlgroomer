@@ -421,6 +421,7 @@ groomers.append(fix_label)
 def fix_url(root):
     global output
     h = '{http://www.w3.org/1999/xlink}href'
+    correction_count = 0
     for link in root.xpath("//ext-link"):
         old_link = link.attrib[h]
         # remove whitespace
@@ -429,14 +430,18 @@ def fix_url(root):
         # prepend http:// if not there
         if not link.attrib[h].startswith('http') and not link.attrib[h].startswith('ftp'):
             link.attrib[h] = 'http://' + link.attrib[h]
+            output += 'correction: changed link from '+old_link+' to '+link.attrib[h]+'\n'
         # prepend dx.doi.org/ for doi
         if re.match(r'http://10\.[0-9]{4}', link.attrib[h]):
             link.attrib[h] = link.attrib[h].replace('http://', 'http://dx.doi.org/')
+            correction_count += 1
         # prepend www.ncbi.nlm.nih.gov/pubmed/ for pmid
         if re.match(r'http://[0-9]{7,8}$', link.attrib[h]) or link.attrib['ext-link-type'] == 'pmid':
             link.attrib[h] = link.attrib[h].replace('http://', 'http://www.ncbi.nlm.nih.gov/pubmed/')
-        if old_link != link.attrib[h]:
-            output += 'correction: changed link from '+old_link+' to '+link.attrib[h]+'\n'        
+            correction_count += 1
+    
+    if correction_count > 0:
+        output += "correction: fixed %i doi/pmid link(s)."
     return root
 groomers.append(fix_url)
 
