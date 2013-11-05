@@ -21,6 +21,11 @@ def register_groom(fn):
     groomers.append(fn)
     return fn
 
+def register_char_stream_groom(fn):
+    global groomers
+    char_stream_groomers.append(fn)
+    return fn
+
 def get_doi(root):
     return root.xpath("//article-id[@pub-id-type='doi']")[0].text
 
@@ -56,9 +61,9 @@ groomers.append(fix_article_title)
 def fix_article_title_tags(root):
     global output
     title = root.xpath("//title-group/article-title")[0]
-    if title.xpath("//named-content"):
+    if title.xpath(".//named-content"):
         etree.strip_tags(title, 'named-content')
-        output += 'correction: removed named-content tags from article title\n' 
+        output += 'correction: removed named-content tags from article title\n'
     return root
 groomers.append(fix_article_title_tags)
 
@@ -75,7 +80,7 @@ def fix_bad_italic_tags_running_title(root):
             atitle.tag = 'alt-title'
             atitle.attrib['alt-title-type'] = 'running-head'
             typ.getparent().replace(typ, atitle)
-        changed = True   
+            changed = True   
     if changed:
         output += 'correction: fixed italic tags in running title\n'''
     return root
@@ -348,7 +353,7 @@ def fix_formula_label(root):
         if label.text != old_label:
             output += 'correction: changed disp-formula label from '+old_label+' to '+label.text+'\n'
     return root
-groomers.append(fix_formula_label)
+#groomers.append(fix_formula_label)
 
 def fix_null_footnote(root):
     global output
@@ -442,6 +447,7 @@ groomers.append(fix_label)
 def fix_url(root):
     global output
     h = '{http://www.w3.org/1999/xlink}href'
+    correction_count = 0
     for link in root.xpath("//ext-link"):
         old_link = link.attrib[h]
         # remove whitespace
@@ -450,14 +456,18 @@ def fix_url(root):
         # prepend http:// if not there
         if not link.attrib[h].startswith('http') and not link.attrib[h].startswith('ftp'):
             link.attrib[h] = 'http://' + link.attrib[h]
+            output += 'correction: changed link from '+old_link+' to '+link.attrib[h]+'\n'
         # prepend dx.doi.org/ for doi
         if re.match(r'http://10\.[0-9]{4}', link.attrib[h]):
             link.attrib[h] = link.attrib[h].replace('http://', 'http://dx.doi.org/')
+            correction_count += 1
         # prepend www.ncbi.nlm.nih.gov/pubmed/ for pmid
         if re.match(r'http://[0-9]{7,8}$', link.attrib[h]) or link.attrib['ext-link-type'] == 'pmid':
             link.attrib[h] = link.attrib[h].replace('http://', 'http://www.ncbi.nlm.nih.gov/pubmed/')
-        if old_link != link.attrib[h]:
-            output += 'correction: changed link from '+old_link+' to '+link.attrib[h]+'\n'        
+            correction_count += 1
+    
+    if correction_count > 0:
+        output += "correction: fixed %i doi/pmid link(s)."
     return root
 groomers.append(fix_url)
 
@@ -541,8 +551,9 @@ groomers.append(fix_suppressed_tags)
 def fix_si_title(root):
     global output
     for si_title in root.xpath("//sec[@sec-type='supplementary-material']/title"):
-        si_title.text = 'Supporting Information'
-        output += 'correction: set supplementary material section title to Supporting Information\n'
+        if si_title.text != 'Supporting Information':
+            si_title.text = 'Supporting Information'
+            output += 'correction: set supplementary material section title to Supporting Information\n'
     return root
 groomers.append(fix_si_title)
 
@@ -556,7 +567,13 @@ def fix_si_captions(root):
             title.getparent().replace(title, etree.fromstring('<p>'+etree.tostring(title)+'</p>'))
         else:
             ns = '''<p xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML">'''
-            new_paragraph = etree.fromstring(etree.tostring(paragraphs[0]).replace(ns, '<p>'+etree.tostring(title)+' '))
+            # This is failing on captions that contain xlink requirements (ie xlink:href).  Hence this try/except.
+            #   we need to fix this at some point.
+            try:
+                new_paragraph = etree.fromstring(etree.tostring(paragraphs[0]).replace(ns, '<p>'+etree.tostring(title)+' '))
+            except etree.XMLSyntaxError, e:
+                output += 'suggested correction: moved title inside p/bold for '+label+'\n'
+                continue
             paragraphs[0].getparent().replace(paragraphs[0], new_paragraph)
             title.getparent().remove(title)
         output += 'correction: moved title inside p/bold for '+label+'\n'
@@ -619,6 +636,23 @@ def remove_pua_set(char_stream):
     
     return char_stream
 char_stream_groomers.append(remove_pua_set)
+
+@register_char_stream_groom
+def alert_merops_validator_error(char_stream):
+    global output
+    merops_error_re = ur'\[!.{0,100}!\]'
+    display_width = 20
+    for m in re.finditer(merops_error_re, char_stream):
+        start = m.start() - display_width
+        if (start < 0): start = 0
+        end = m.start() + display_width
+        if (end >= len(char_stream)): start = -1
+        output += ("error: located merops-inserted validation error, "
+                   "please address and remove: \"%s%s\"\n" %
+                   (char_stream[start:m.start()],
+                    char_stream[m.start():end]))
+        
+    return char_stream
 
 @register_groom
 def check_article_type(root):
