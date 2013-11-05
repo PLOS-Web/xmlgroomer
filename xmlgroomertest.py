@@ -204,6 +204,32 @@ def test_fix_copyright():
         </article-meta></article>'''
     verify(before, after, x.fix_copyright)
 
+def test_add_creative_commons_copyright_link():
+    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink"><article-meta><permissions>
+        <copyright-year>2013</copyright-year><copyright-holder>Cheng, Guggino</copyright-holder>
+        <license xlink:type="simple"><license-p>This is an open-access article distributed under 
+        the terms of the Creative Commons Attribution License, which permits unrestricted use, 
+        distribution, and reproduction in any medium, provided the original author and source are 
+        credited.</license-p></license></permissions><permissions><copyright-year>2013</copyright-year>
+        <license><license-p>This is an open-access article, free of all copyright, and may be freely 
+        reproduced, distributed, transmitted, modified, built upon, or otherwise used by anyone for any 
+        lawful purpose. The work is made available under the Creative Commons CC0 public domain dedication.
+        </license-p></license></permissions></article-meta></article>'''
+    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink"><article-meta><permissions>
+        <copyright-year>2013</copyright-year><copyright-holder>Cheng, Guggino</copyright-holder>
+        <license xlink:type="simple" xlink:href="http://creativecommons.org/licenses/by/3.0/"><license-p>
+        This is an open-access article distributed under the terms of the <ext-link ext-link-type="uri" 
+        xlink:href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution License</ext-link>, 
+        which permits unrestricted use, distribution, and reproduction in any medium, provided the original 
+        author and source are credited.</license-p></license></permissions><permissions><copyright-year>2013
+        </copyright-year><license xlink:href="http://creativecommons.org/publicdomain/zero/1.0/"><license-p 
+        xlink:href="http://creativecommons.org/publicdomain/zero/1.0/">This is an open-access article, free 
+        of all copyright, and may be freely reproduced, distributed, transmitted, modified, built upon, or 
+        otherwise used by anyone for any lawful purpose. The work is made available under the <ext-link 
+        ext-link-type="uri" xlink:href="http://creativecommons.org/publicdomain/zero/1.0/">Creative Commons CC0
+        </ext-link> public domain dedication.</license-p></license></permissions></article-meta></article>'''
+    verify(before, after, x.add_creative_commons_copyright_link)
+
 def test_fix_elocation():
     before = '''<article><article-meta>
     		<article-id pub-id-type="doi">10.1371/journal.pone.0058162</article-id>
