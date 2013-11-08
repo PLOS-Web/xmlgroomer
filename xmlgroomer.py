@@ -441,7 +441,7 @@ def fix_url(root):
             correction_count += 1
     
     if correction_count > 0:
-        output += "correction: fixed %i doi/pmid link(s)."
+        output += "correction: fixed %i doi/pmid link(s).\n" % correction_count
     return root
 groomers.append(fix_url)
 
