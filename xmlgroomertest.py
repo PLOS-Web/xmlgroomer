@@ -86,6 +86,11 @@ def test_fix_article_title_tags():
     message = "correction: removed named-content tags from article title\n"
     check(before, message, x.fix_article_title_tags)
 
+def test_fix_article_title_whitespace():
+    before = '<article><title-group><article-title>Bottle\rnose Dolp\nhins </article-title></title-group></article>'
+    after = '<article><title-group><article-title>Bottlenose Dolphins</article-title></title-group></article>'
+    verify(before, after, x.fix_article_title_whitespace)
+
 
     before = '''<article><meta><named-content>hello</named-content></meta><title-group>
         <article-title>Identification of Immunity Related Genes to Study the<italic>Physalis</italic>
