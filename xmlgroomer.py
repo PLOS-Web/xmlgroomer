@@ -467,7 +467,7 @@ def fix_url(root):
             correction_count += 1
     
     if correction_count > 0:
-        output += "correction: fixed %i doi/pmid link(s)."
+        output += "correction: fixed %i doi/pmid link(s).\n" % correction_count
     return root
 groomers.append(fix_url)
 
@@ -651,7 +651,8 @@ def alert_merops_validator_error(char_stream):
                    "please address and remove: \"%s%s\"\n" %
                    (char_stream[start:m.start()],
                     char_stream[m.start():end]))
-        return char_stream
+        
+    return char_stream
 
 @register_groom
 def check_article_type(root):
@@ -663,7 +664,8 @@ def check_article_type(root):
                      "Message from ISCB","Message from PLoS","Neglected Diseases","Obituary","Online Only: Editorial","Opinion",
                      "Overview","Perspective","Pearls","Photo Quiz","Policy Forum","Policy Platform","Primer","Reader Poll",
                      "Research Article","Research in Translation","Review","Special Report","Symposium","Synopsis",
-                     "Technical Report","The PLoS Medicine Debate","Unsolved Mystery","Viewpoints", "Correction", "Retraction"]
+                     "Technical Report","The PLoS Medicine Debate","Unsolved Mystery","Viewpoints", "Correction", "Retraction",
+                     "Formal Comment"]
     for typ in root.xpath("//article-categories//subj-group[@subj-group-type='heading']/subject"):
         if typ.text not in article_types:
             output += 'error: '+typ.text+' is not a valid article type\n'
