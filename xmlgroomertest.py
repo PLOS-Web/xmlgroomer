@@ -448,6 +448,65 @@ def test_fix_table_footnote_labels():
 </table-wrap-foot>'''
     verify(before, after, x.fix_table_footnote_labels)
 
+    # case 2: two <p>'s in one <fn>
+    before = '''
+<table-wrap-foot>
+  <fn>
+    <label>
+      <italic>a</italic>
+    </label>
+    <p>Number of isolates characterized by sequencing the URR ± E6 region;</p>
+  </fn>
+  <fn>
+    <label>
+      <italic>b</italic>
+    </label>
+    <p>Test text for footnote b.</p>
+    <p>A second paragraph that shouldn't break this</p>
+   </fn>
+</table-wrap-foot>
+'''
+    after = '''
+<table-wrap-foot>
+  <fn>
+    <p><sup>a</sup> Number of isolates characterized by sequencing the URR ± E6 region;</p>
+  </fn>
+  <fn>
+    <p><sup>b</sup> Test text for footnote b.</p>
+    <p>A second paragraph that shouldn't break this</p>
+  </fn>
+</table-wrap-foot>'''
+    verify(before, after, x.fix_table_footnote_labels)
+
+    # No <p> element; should throw error
+    before = '''
+<table-wrap-foot>
+  <fn>
+    <label>
+      <italic>a</italic>
+    </label>
+    <p>Number of isolates characterized by sequencing the URR ± E6 region;</p>
+  </fn>
+  <fn>
+    <label>
+      <italic>b</italic>
+    </label>
+   </fn>
+</table-wrap-foot>
+'''
+    after = '''
+<table-wrap-foot>
+  <fn>
+    <p><sup>a</sup> Number of isolates characterized by sequencing the URR ± E6 region;</p>
+  </fn>
+  <fn>
+    <label>
+      <italic>b</italic>
+    </label>
+  </fn>
+</table-wrap-foot>'''
+    verify(before, after, x.fix_table_footnote_labels)
+
 def test_fix_underline_whitespace():
     before = '''<article><underline>Test</underline><underline> </underline><underline>the underline function</underline>.</article>'''
     after = '''<article><underline>Test</underline> <underline>the underline function</underline>.</article>'''
