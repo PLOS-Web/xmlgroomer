@@ -86,6 +86,11 @@ def test_fix_article_title_tags():
     message = "correction: removed named-content tags from article title\n"
     check(before, message, x.fix_article_title_tags)
 
+def test_fix_article_title_whitespace():
+    before = '<article><title-group><article-title>Bottle\rnose Dolp\nhins </article-title></title-group></article>'
+    after = '<article><title-group><article-title>Bottlenose Dolphins</article-title></title-group></article>'
+    verify(before, after, x.fix_article_title_whitespace)
+
 
     before = '''<article><meta><named-content>hello</named-content></meta><title-group>
         <article-title>Identification of Immunity Related Genes to Study the<italic>Physalis</italic>
@@ -414,6 +419,93 @@ def test_fix_footnote_attribute():
         <label>a</label><p>Number of isolates characterized by sequencing the URR ± E6 region;</p>
         </fn></table-wrap-foot>'''
     verify(before, after, x.fix_footnote_attribute)
+
+def test_fix_table_footnote_labels():
+    before = '''
+<table-wrap-foot>
+  <fn>
+    <label>
+      <italic>a</italic>
+    </label>
+    <p>Number of isolates characterized by sequencing the URR ± E6 region;</p>
+  </fn>
+  <fn>
+    <label>
+      <italic>b</italic>
+    </label>
+    <p>Test text for footnote b.</p>
+   </fn>
+</table-wrap-foot>
+'''
+    after = '''
+<table-wrap-foot>
+  <fn>
+    <p><sup>a</sup> Number of isolates characterized by sequencing the URR ± E6 region;</p>
+  </fn>
+  <fn>
+    <p><sup>b</sup> Test text for footnote b.</p>
+  </fn>
+</table-wrap-foot>'''
+    verify(before, after, x.fix_table_footnote_labels)
+
+    # case 2: two <p>'s in one <fn>
+    before = '''
+<table-wrap-foot>
+  <fn>
+    <label>
+      <italic>a</italic>
+    </label>
+    <p>Number of isolates characterized by sequencing the URR ± E6 region;</p>
+  </fn>
+  <fn>
+    <label>
+      <italic>b</italic>
+    </label>
+    <p>Test text for footnote b.</p>
+    <p>A second paragraph that shouldn't break this</p>
+   </fn>
+</table-wrap-foot>
+'''
+    after = '''
+<table-wrap-foot>
+  <fn>
+    <p><sup>a</sup> Number of isolates characterized by sequencing the URR ± E6 region;</p>
+  </fn>
+  <fn>
+    <p><sup>b</sup> Test text for footnote b.</p>
+    <p>A second paragraph that shouldn't break this</p>
+  </fn>
+</table-wrap-foot>'''
+    verify(before, after, x.fix_table_footnote_labels)
+
+    # No <p> element; should throw error
+    before = '''
+<table-wrap-foot>
+  <fn>
+    <label>
+      <italic>a</italic>
+    </label>
+    <p>Number of isolates characterized by sequencing the URR ± E6 region;</p>
+  </fn>
+  <fn>
+    <label>
+      <italic>b</italic>
+    </label>
+   </fn>
+</table-wrap-foot>
+'''
+    after = '''
+<table-wrap-foot>
+  <fn>
+    <p><sup>a</sup> Number of isolates characterized by sequencing the URR ± E6 region;</p>
+  </fn>
+  <fn>
+    <label>
+      <italic>b</italic>
+    </label>
+  </fn>
+</table-wrap-foot>'''
+    verify(before, after, x.fix_table_footnote_labels)
 
 def test_fix_underline_whitespace():
     before = '''<article><underline>Test</underline><underline> </underline><underline>the underline function</underline>.</article>'''

@@ -67,6 +67,16 @@ def fix_article_title_tags(root):
     return root
 groomers.append(fix_article_title_tags)
 
+def fix_article_title_whitespace(root):
+    global output
+    for title in root.xpath("//title-group/article-title"):
+        stripped = title.text.strip(string.whitespace)
+        if title.text != stripped:
+            title.text = stripped
+            output += 'correction: removed whitespace from end of article title\n'
+    return root
+groomers.append(fix_article_title_whitespace)
+
 def fix_bad_italic_tags_running_title(root):
     global output
     changed = False
@@ -430,6 +440,31 @@ def fix_footnote_attribute(root):
         output += "correction: stripped fn-type from table footnote\n"
     return root
 groomers.append(fix_footnote_attribute)
+
+def fix_table_footnote_labels(root):
+    global output
+    changed = False
+    for fn in root.xpath("//table-wrap-foot/fn"):
+        if len(fn.xpath("label")) == 1:
+            if not fn.xpath("./p"):
+                output += "error: fn tag missing child element p\n"
+                continue
+            label =  fn.xpath("label")[0]
+            for item in list(label.iterdescendants()):
+                etree.strip_tags(label, item.tag)
+            label_text = label.text
+            label.getparent().remove(label)
+            p1 = fn.xpath("./p")[0]
+            old_fn_text = p1.text
+            p1.text = ''
+            sup = etree.SubElement(p1, "sup")
+            sup.text = label_text
+            sup.tail = ' '+ old_fn_text
+            changed = True
+    if changed:
+        output+= 'correction: reformatted table footnote label tag to superscript\n'
+    return root
+groomers.append(fix_table_footnote_labels)
 
 def fix_label(root):
     global output
