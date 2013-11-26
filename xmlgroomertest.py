@@ -421,14 +421,31 @@ def test_fix_footnote_attribute():
     verify(before, after, x.fix_footnote_attribute)
 
 def test_fix_table_footnote_labels():
-    before = '''<table-wrap-foot><fn>
-        <label><italic>a</italic></label><p>Number of isolates characterized by sequencing the URR ± E6 region;</p>
-        </fn><fn><label><italic>b</italic></label><p>Test text for footnote b.</p>
-        </fn></table-wrap-foot>'''
-    after = '''<table-wrap-foot><fn>
-        <p><sup>a</sup> Number of isolates characterized by sequencing the URR ± E6 region;</p>
-        </fn><fn><p><sup>b</sup> Test text for footnote b.</p>
-        </fn></table-wrap-foot>'''
+    before = '''
+<table-wrap-foot>
+  <fn>
+    <label>
+      <italic>a</italic>
+    </label>
+    <p>Number of isolates characterized by sequencing the URR ± E6 region;</p>
+  </fn>
+  <fn>
+    <label>
+      <italic>b</italic>
+    </label>
+    <p>Test text for footnote b.</p>
+   </fn>
+</table-wrap-foot>
+'''
+    after = '''
+<table-wrap-foot>
+  <fn>
+    <p><sup>a</sup> Number of isolates characterized by sequencing the URR ± E6 region;</p>
+  </fn>
+  <fn>
+    <p><sup>b</sup> Test text for footnote b.</p>
+  </fn>
+</table-wrap-foot>'''
     verify(before, after, x.fix_table_footnote_labels)
 
 def test_fix_underline_whitespace():
