@@ -10,15 +10,22 @@ import mimetypes
 import re
 import traceback
 import string
+import argparse
 
 
 groomers = []
+validators = []
 char_stream_groomers = []
 output = ''
 
 def register_groom(fn):
     global groomers
     groomers.append(fn)
+    return fn
+
+def register_validator(fn):
+    global validators
+    validators.append(fn)
     return fn
 
 def register_char_stream_groom(fn):
@@ -158,6 +165,48 @@ def fix_pubdate(root):
                     output += 'correction: changed pub '+field+' from '+xml_val+' to '+em[field]+'\n'
     return root
 groomers.append(fix_pubdate)
+
+@register_validator
+def check_pubdate(root):
+    global output
+
+    #  Get EM Pubdate
+    doi = get_doi(root)
+    proc = subprocess.Popen(['php', '/var/local/scripts/production/getPubdate.php', doi], shell=False, stdout=subprocess.PIPE)
+    pubdate = proc.communicate()[0]
+    if not pubdate:
+        output += "error: EM has no pubdate for this article\n"
+        return root
+    
+    #  Get XML pubdate
+    epubs = root.xpath("//pub-date[@pub-type='epub']")
+    if len(epubs) < 1:  # error on missing pubdate
+        output += "error: no epub date defined in xml\n"
+        return root
+    elif len(epubs) > 1:  # error on > 1 pubdate
+        output += "error: more than one epub date defined in xml\n"
+        return root
+
+    #  Parse XML pubdate
+    epub = epubs[0]
+    epub_date = {}
+    for field in ['year','month','day']:
+        try:
+            epub_date[field] = epub.xpath('./' + field)[0].text
+        except IndexError, e:
+            output +="error: missing field in xml epub date: %s\n" % field
+            return root
+        
+    xml_pubdate_str = "%(year)s-%(month)s-%(day)s" % epub_date
+
+    #  Check that EM and XML pubdate match
+    if xml_pubdate_str != pubdate:
+        output += ("error: pubdate defined in xml (%s) does not "
+                   "match EM pubdate (%s)\n" %
+                   (xml_pubdate_str,
+                   pubdate))
+                 
+    return root
 
 def fix_collection(root):
     global output
@@ -836,24 +885,30 @@ def check_valid_journal_title(root):
     return root
 
 if __name__ == '__main__':
-    if len(sys.argv) not in [2,3]:
-        sys.exit('usage: xmlgroomer.py before.xml after.xml\ndry run: xmlgroomer.py before.xml')
+    parser = argparse.ArgumentParser("xmlgroomer.py before.xml after.xml\ndry run: xmlgroomer.py before.xml")
+    parser.add_argument("-e", "--error-check", action='store_true')
+    parser.add_argument("beforexml")
+    parser.add_argument("afterxml", nargs='?')
+    args = parser.parse_args()
+
     dry_run = (len(sys.argv) == 2)
     log = open('/var/local/scripts/production/xmlgroomer/log/log', 'a')
     log.write('-'*50 + '\n'+time.strftime("%Y-%m-%d %H:%M:%S   "))
 
     try:
-        f = open(sys.argv[1], 'r')
+        f = open(args.beforexml, 'r')
     except IOError, e:
         log.write(e.message)
         log.close()
         sys.exit(e)
-
+        
     # Read file into a char stream and groom it
     char_stream = f.read().decode('utf-8')#.decode('utf-8')
     f.close()
-    for char_stream_groomer in char_stream_groomers:
-        char_stream = char_stream_groomer(char_stream)
+
+    if not args.error_check:
+        for char_stream_groomer in char_stream_groomers:
+            char_stream = char_stream_groomer(char_stream)
 
     try: 
         parser = etree.XMLParser(recover = True)
@@ -865,16 +920,26 @@ if __name__ == '__main__':
     try: log.write(get_doi(root)+'\n')
     except: log.write('** error getting doi\n')
 
-    for groomer in groomers:
-        try: 
-            root = groomer(root)
-        except Exception as ee: 
-            traceback.print_exc()
-            print >>sys.stderr, '** error in '+groomer.__name__+': '+str(ee)+'\n'
-            log.write('** error in '+groomer.__name__+': '+str(ee)+'\n')
+    if args.error_check:
+        for groomer in validators:
+            try: 
+                root = groomer(root)
+            except Exception as ee: 
+                traceback.print_exc()
+                print >>sys.stderr, '** error in '+groomer.__name__+': '+str(ee)+'\n'
+                log.write('** error in '+groomer.__name__+': '+str(ee)+'\n')
 
-    if not dry_run:
-        etree.ElementTree(root).write(sys.argv[2], xml_declaration = True, encoding = 'UTF-8')
+    else:
+        for groomer in groomers:
+            try: 
+                root = groomer(root)
+            except Exception as ee: 
+                traceback.print_exc()
+                print >>sys.stderr, '** error in '+groomer.__name__+': '+str(ee)+'\n'
+                log.write('** error in '+groomer.__name__+': '+str(ee)+'\n')
+
+    if not dry_run and not args.error_check:
+        etree.ElementTree(root).write(args.afterxml, xml_declaration = True, encoding = 'UTF-8')
     else:
         output = output.replace('correction:', 'suggested correction:')
 
