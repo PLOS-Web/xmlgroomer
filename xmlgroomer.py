@@ -445,18 +445,22 @@ def fix_table_footnote_labels(root):
     global output
     changed = False
     for fn in root.xpath("//table-wrap-foot/fn"):
-        for label in fn.xpath("label"):
+        if len(fn.xpath("label")) == 1:
+            if not fn.xpath("./p"):
+                output += "error: fn tag missing child element p\n"
+                continue
+            label =  fn.xpath("label")[0]
             for item in list(label.iterdescendants()):
                 etree.strip_tags(label, item.tag)
             label_text = label.text
             label.getparent().remove(label)
-            for p in fn.xpath("p"):
-                old_fn_text = p.text
-                p.text = ''
-                sup = etree.SubElement(p, "sup")
-                sup.text = label_text
-                sup.tail = ' '+ old_fn_text
-                changed = True
+            p1 = fn.xpath("./p")[0]
+            old_fn_text = p1.text
+            p1.text = ''
+            sup = etree.SubElement(p1, "sup")
+            sup.text = label_text
+            sup.tail = ' '+ old_fn_text
+            changed = True
     if changed:
         output+= 'correction: reformatted table footnote label tag to superscript\n'
     return root
