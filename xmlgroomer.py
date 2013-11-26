@@ -69,12 +69,10 @@ groomers.append(fix_article_title_tags)
 
 def fix_article_title_whitespace(root):
     global output
-    changed = False
     for title in root.xpath("//title-group/article-title"):
         stripped = title.text.strip(string.whitespace)
         if title.text != stripped:
             title.text = stripped
-            changed = True
             output += 'correction: removed whitespace from end of article title\n'
     return root
 groomers.append(fix_article_title_whitespace)
