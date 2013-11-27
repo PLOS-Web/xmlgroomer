@@ -265,11 +265,11 @@ def add_creative_commons_copyright_link(root):
             l = etree.SubElement(statement, "ext-link")
             l.attrib['ext-link-type'] = 'uri'
             statement.text = 'This is an open-access article distributed under the terms of the '
-            l.attrib['{http://www.w3.org/1999/xlink}href'] = 'http://creativecommons.org/licenses/by/3.0/'
+            l.attrib['{http://www.w3.org/1999/xlink}href'] = 'http://creativecommons.org/licenses/by/4.0/'
             l.text = "Creative Commons Attribution License"
             l.tail = ', which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited.'
             for attr in root.xpath("//permissions/license"):
-                attr.attrib['{http://www.w3.org/1999/xlink}href'] = 'http://creativecommons.org/licenses/by/3.0/'
+                attr.attrib['{http://www.w3.org/1999/xlink}href'] = 'http://creativecommons.org/licenses/by/4.0/'
         elif statement.text[30:36] == ", free":
             l = etree.SubElement(statement, "ext-link")
             statement.text = 'This is an open-access article, free of all copyright, and may be freely reproduced, distributed, transmitted, modified, built upon, or otherwise used by anyone for any lawful purpose. The work is made available under the '

@@ -218,9 +218,9 @@ def test_add_creative_commons_copyright_link():
         credited.</license-p></license></permissions></article-meta></article>'''
     after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink"><article-meta><permissions>
         <copyright-year>2013</copyright-year><copyright-holder>Cheng, Guggino</copyright-holder>
-        <license xlink:type="simple" xlink:href="http://creativecommons.org/licenses/by/3.0/"><license-p>
+        <license xlink:type="simple" xlink:href="http://creativecommons.org/licenses/by/4.0/"><license-p>
         This is an open-access article distributed under the terms of the <ext-link ext-link-type="uri" \
-        xlink:href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution License</ext-link>, which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited.
+        xlink:href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution License</ext-link>, which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited.
         </license-p></license></permissions></article-meta></article>'''
     verify(before, after, x.add_creative_commons_copyright_link)
 
