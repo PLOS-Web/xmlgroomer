@@ -192,7 +192,11 @@ def check_pubdate(root):
     epub_date = {}
     for field in ['year','month','day']:
         try:
-            epub_date[field] = epub.xpath('./' + field)[0].text
+            if field != 'year':
+                epub_date[field] = epub.xpath('./' + field)[0].text.zfill(2)
+            else:
+                epub_date[field] = epub.xpath('./' + field)[0].text
+            
         except IndexError, e:
             output +="error: missing field in xml epub date: %s\n" % field
             return root
