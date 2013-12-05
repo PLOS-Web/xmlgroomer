@@ -491,7 +491,7 @@ def fix_footnote_attribute(root):
     return root
 groomers.append(fix_footnote_attribute)
 
-def fix_table_footnote_labels(root):
+'''def fix_table_footnote_labels(root):
     global output
     changed = False
     for fn in root.xpath("//table-wrap-foot/fn"):
@@ -514,7 +514,7 @@ def fix_table_footnote_labels(root):
     if changed:
         output+= 'correction: reformatted table footnote label tag to superscript\n'
     return root
-groomers.append(fix_table_footnote_labels)
+groomers.append(fix_table_footnote_labels)'''
 
 def fix_label(root):
     global output
