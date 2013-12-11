@@ -53,7 +53,7 @@ def fix_subject_category(root):
             subj.getparent().remove(subj)
         output += 'correction: removed Discipline-v2 categories\n'
     return root
-groomers.append(fix_subject_category)
+#groomers.append(fix_subject_category)
 
 def fix_article_title(root):
     global output
