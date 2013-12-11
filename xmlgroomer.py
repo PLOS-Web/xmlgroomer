@@ -499,7 +499,7 @@ def fix_table_footnote_labels(root):
             if not fn.xpath("./p"):
                 output += "error: fn tag missing child element p\n"
                 continue
-            label =  fn.xpath("label")[0]
+            label = fn.xpath("label")[0]
             for item in list(label.iterdescendants()):
                 etree.strip_tags(label, item.tag)
             label_text = label.text
@@ -512,7 +512,7 @@ def fix_table_footnote_labels(root):
             sup.tail = ' '+ old_fn_text
             changed = True
     if changed:
-        output+= 'correction: reformatted table footnote label tag to superscript\n'
+        output += 'correction: reformatted table footnote label tag to superscript\n'
     return root
 groomers.append(fix_table_footnote_labels)
 
