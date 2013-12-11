@@ -510,6 +510,35 @@ def test_fix_table_footnote_labels():
 </table-wrap-foot>'''
     verify(before, after, x.fix_table_footnote_labels)
 
+    # <p> with child elements
+    before = '''
+<table-wrap-foot>
+  <fn>
+    <label>
+      <italic>a</italic>
+    </label>
+    <p>Number of isolates characterized by sequencing the <xref ref-type="fig" rid="pone-0066220-g006">Fig. 6B</xref> URR ± E6 region;</p>
+  </fn>
+  <fn>
+    <label>
+      <italic>b</italic>
+    </label>
+   </fn>
+</table-wrap-foot>
+'''
+    after = '''
+<table-wrap-foot>
+  <fn>
+    <p><sup>a</sup> Number of isolates characterized by sequencing the <xref ref-type="fig" rid="pone-0066220-g006">Fig. 6B</xref> URR ± E6 region;</p>
+  </fn>
+  <fn>
+    <label>
+      <italic>b</italic>
+    </label>
+  </fn>
+</table-wrap-foot>'''
+    verify(before, after, x.fix_table_footnote_labels)
+
 def test_fix_underline_whitespace():
     before = '''<article><underline>Test</underline><underline> </underline><underline>the underline function</underline>.</article>'''
     after = '''<article><underline>Test</underline> <underline>the underline function</underline>.</article>'''
