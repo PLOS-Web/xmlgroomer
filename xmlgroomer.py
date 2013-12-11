@@ -495,7 +495,7 @@ def fix_footnote_attribute(root):
     return root
 groomers.append(fix_footnote_attribute)
 
-'''def fix_table_footnote_labels(root):
+def fix_table_footnote_labels(root):
     global output
     changed = False
     for fn in root.xpath("//table-wrap-foot/fn"):
@@ -506,19 +506,31 @@ groomers.append(fix_footnote_attribute)
             label =  fn.xpath("label")[0]
             for item in list(label.iterdescendants()):
                 etree.strip_tags(label, item.tag)
+            if label.text == None:
+                continue
             label_text = label.text
             label.getparent().remove(label)
             p1 = fn.xpath("./p")[0]
-            old_fn_text = p1.text
-            p1.text = ''
-            sup = etree.SubElement(p1, "sup")
-            sup.text = label_text
-            sup.tail = ' '+ old_fn_text
-            changed = True
+            if len(p1.getchildren()) >= 1:
+                old_fn_text = p1.text
+                p1.text = ''
+                sup = etree.SubElement(p1, "sup")
+                sup.text = label.text
+                p1.insert(0, sup)
+                sup.text = label_text
+                sup.tail = " " + old_fn_text
+                changed = True
+            else:
+                old_fn_text = p1.text
+                p1.text = ''
+                sup = etree.SubElement(p1, "sup")
+                sup.text = label_text
+                sup.tail = ' '+ old_fn_text
+                changed = True 
     if changed:
         output+= 'correction: reformatted table footnote label tag to superscript\n'
     return root
-groomers.append(fix_table_footnote_labels)'''
+groomers.append(fix_table_footnote_labels)
 
 def fix_label(root):
     global output
