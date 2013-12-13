@@ -223,13 +223,16 @@ def check_pubdate(root):
 def fix_collection(root):
     global output
     for coll in root.xpath("//pub-date[@pub-type='collection']"):
-        for field in ['year','month']:
-            if coll.xpath(field):
-                pub_val = root.xpath("//pub-date[@pub-type='epub']/"+field)[0].text
-                xml_val = coll.xpath(field)[0].text
-                if xml_val != pub_val:
-                    coll.xpath(field)[0].text = pub_val
-                    output += 'correction: changed collection '+field+' from '+xml_val+' to '+pub_val+'\n'
+        if coll.xpath('month'):
+            mo = coll.xpath('month')[0]
+            mo.getparent().remove(mo)
+            output += "correction: removed month from collection tag\n"
+        if coll.xpath('year'):
+            pub_val = root.xpath("//pub-date[@pub-type='epub']/year")[0].text
+            xml_val = coll.xpath('year')[0].text
+            if xml_val != pub_val:
+                coll.xpath('year')[0].text = pub_val
+                output += 'correction: changed collection year from '+xml_val+' to '+pub_val+'\n'
     return root
 groomers.append(fix_collection)
 
