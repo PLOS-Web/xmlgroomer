@@ -65,6 +65,10 @@ def fix_article_title(root):
     return root
 groomers.append(fix_article_title)
 
+# Merops only - Remove
+'''This groom strips out <named-content> tags from the article title, but this is
+    an internal issue with Ambra, because the tags made the article title go past
+    the character limit.'''
 def fix_article_title_tags(root):
     global output
     title = root.xpath("//title-group/article-title")[0]
@@ -74,6 +78,10 @@ def fix_article_title_tags(root):
     return root
 groomers.append(fix_article_title_tags)
 
+# Merops only - Remove
+''' This groom strips out trailing whitespace from the article title tag, because
+    in the citation line it created a space before the XSL-added period at the end of the title.
+    This only became an issue after Shabash relaxed the formatting a bit.'''
 def fix_article_title_whitespace(root):
     global output
     for title in root.xpath("//title-group/article-title"):
@@ -129,6 +137,9 @@ def fix_addrline(root):
     return root
 groomers.append(fix_addrline)
 
+# Merops only - Remove
+''' This strips out the <label> tag in the corresponding email footnote. Though technically it's
+    correct and valid, it affected the display of the email symbol in the byline.'''
 def fix_corresp_label(root):
     global output
     for corresp in root.xpath("//corresp"):
@@ -317,6 +328,11 @@ def fix_related_article(root):
     return root
 groomers.append(fix_related_article)
 
+# Merops only - Remove
+''' This stripped out closed ref-link tags in the body of the article. If the author referenced
+    "[3-5]" Merops created a closed reference tag for reference #4 in the xml, which is correct
+    in a sense. But, the PDF would display "[34.-5]" even though there was no text connected
+    to the reference.'''
 def fix_xref(root):
     global output
     refnums = ''
@@ -356,6 +372,11 @@ def fix_headed_title(root):
     return root
 groomers.append(fix_headed_title)
 
+# Merops only - Remove
+'''The tables weren't being formatted with <title> tags, only <caption><p> tags,
+    and <p> tags are supressed by our XSL. This groom reformatted them to <title>
+    tags. I think Merops was looking for two parts to the caption, a title and regular
+    text, but tables only have titles.'''
 def fix_caption(root):
     global output
     for caption in root.xpath("//fig/caption") + root.xpath("//table-wrap/caption"):
@@ -366,6 +387,9 @@ def fix_caption(root):
     return root
 groomers.append(fix_caption)
 
+# Merops only - Remove
+''' This stripped out <bold> tags that encompassed an entire title's text. Typically this
+    happened in sec titles.'''
 def fix_bold(root):
     global output
     for title in root.xpath("//sec/title") + root.xpath("//fig/caption/title") + root.xpath("//table-wrap/caption/title"):
@@ -380,6 +404,9 @@ def fix_bold(root):
     return root
 groomers.append(fix_bold)
 
+# Merops only - Remove
+''' This stripped out <italic> tags that encompassed an entire title's text. Typically this
+    happened in sec titles.'''
 def fix_italic(root):
     global output
     for title in root.xpath("//sec/title") + root.xpath("//fig/caption/title") + root.xpath("//table-wrap/caption/title"):
@@ -415,6 +442,8 @@ def fix_formula_label(root):
     return root
 #groomers.append(fix_formula_label)
 
+# Merops only - Remove
+''' This stripped out null table footnote tags.'''
 def fix_null_footnote(root):
     global output
     for xref in root.xpath("//xref[@rid='ng']"):
@@ -423,6 +452,9 @@ def fix_null_footnote(root):
     return root
 groomers.append(fix_null_footnote)
 
+# Merops only - Remove
+'''<target> tag info is supressed by our XSL, so this stripped them out,
+    though they are technically valid.'''
 def fix_target_footnote(root):
     global output
     for target in root.xpath("//table-wrap-foot/fn/p/target"):
@@ -435,6 +467,8 @@ def fix_target_footnote(root):
     return root
 groomers.append(fix_target_footnote)
 
+# Merops only - Remove
+''' This stripped out incorrect/invalid/unneeded ext-link tags of certain types.'''
 def fix_NCBI_ext_link(root):
     global output
     changed = False
@@ -450,6 +484,9 @@ def fix_NCBI_ext_link(root):
     return root
 groomers.append(fix_NCBI_ext_link)
 
+# Merops only - Remove
+'''This stripped out whitespace that was tagged on its own in <underline> tags,
+    as it caused validation/style check errors.'''
 def fix_underline_whitespace(root):
     global output
     changed = False
@@ -463,6 +500,13 @@ def fix_underline_whitespace(root):
     return root
 groomers.append(fix_underline_whitespace)
 
+# Merops only - Remove
+'''This reformatted the equal contributions markup. Merops
+    formatted them as an xref with a matching footnote,
+    but for instances of only one set of equal contributors,
+    we used an attribute in the contrib tag. This groom removed
+    the xref and the footnote, and added the equal-contrib attribute.
+    This is one of the oldest reported bugs that was never fixed.'''
 def fix_equal_contributions(root):
     global output
     changed = False
@@ -479,6 +523,8 @@ def fix_equal_contributions(root):
     return root
 groomers.append(fix_equal_contributions)
 
+# Merops only - Remove
+'''Stripped out invalid fn-type attributes in table footnotes.'''
 def fix_footnote_attribute(root):
     global output
     changed = False
@@ -491,6 +537,13 @@ def fix_footnote_attribute(root):
     return root
 groomers.append(fix_footnote_attribute)
 
+# Merops only - Remove
+'''This groom reformatted the table footnotes, and stripped out any sort of
+    formatting tags in the footnote <label> tag like <italic> or <bold>, which
+    was a recent bug. Apart from that, the footnotes were formatted validly,
+    but our XSL added periods after <label> tag text, and wouldn't superscript them.
+    This groom took the label tag text, and put it into the footnote's <p> tag within
+    superscript tags.'''
 def fix_table_footnote_labels(root):
     global output
     changed = False
@@ -560,6 +613,9 @@ def fix_url(root):
     return root
 groomers.append(fix_url)
 
+# Merops only - Remove
+'''This looks like it added a few attributes to the ref links. Maybe so our internal ref formatting would
+    work correctly?'''
 def fix_merops_link(root):
     global output
     refnums = ''
@@ -617,6 +673,9 @@ def fix_provenance(root):
     return root
 groomers.append(fix_provenance)
 
+# Merops only - Remove
+'''This reformatted an invalid fn-type from present-address to current-aff. It was a reported bug for
+    a while that I believe was eventually fixed by Shabash.'''
 def fix_fn_type(root):
     global output
     for fn in root.xpath("//fn[@fn-type='present-address']"):
@@ -625,6 +684,8 @@ def fix_fn_type(root):
     return root
 groomers.append(fix_fn_type)
 
+# Merops only - Remove
+'''This stripped out tags that were suppressed by our XSL.'''
 def fix_suppressed_tags(root):
     global output
     for related in root.xpath("//related-object"):
@@ -637,6 +698,9 @@ def fix_suppressed_tags(root):
     return root
 groomers.append(fix_suppressed_tags)
 
+# Merops only - Remove
+'''This made sure the title text for the Supporting Information section was consistent.
+    Sometimes it would say "Supplementary Information" or something else.'''
 def fix_si_title(root):
     global output
     for si_title in root.xpath("//sec[@sec-type='supplementary-material']/title"):
@@ -646,6 +710,10 @@ def fix_si_title(root):
     return root
 groomers.append(fix_si_title)
 
+# Merops only - Remove
+''' This reformatted the SI captions. Formatting from CW didn't use <title> tags for a caption, just
+    <bold>. This took the text formatted as <title>, and put it into <bold> and <p> tags to match the 
+    CW styling.'''
 def fix_si_captions(root):
     global output
     for title in root.xpath("//supplementary-material/caption/title"):
