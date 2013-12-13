@@ -169,7 +169,7 @@ def test_fix_collection():
         </article-meta></article>'''
     after = '''<article><article-meta>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
-        <pub-date pub-type="collection"><month>3</month><year>2013</year></pub-date>
+        <pub-date pub-type="collection"><year>2013</year></pub-date>
         </article-meta></article>'''
     verify(before, after, x.fix_collection)
 
