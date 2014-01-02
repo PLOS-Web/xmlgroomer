@@ -91,7 +91,7 @@ def fix_article_title_whitespace(root):
             text = title.text if title.text else title.getchildren()[0].text+title.getchildren()[0].tail
             output += 'correction: removed whitespace from end of title '+text+'\n'
     return root
-groomers.append(fix_article_title_whitespace)
+#groomers.append(fix_article_title_whitespace)
 
 def fix_bad_italic_tags_running_title(root):
     global output
@@ -226,10 +226,11 @@ def check_pubdate(root):
 def fix_collection(root):
     global output
     for coll in root.xpath("//pub-date[@pub-type='collection']"):
-        if coll.xpath('month'):
-            mo = coll.xpath('month')[0]
-            mo.getparent().remove(mo)
-            output += "correction: removed month from collection tag\n"
+        if root.xpath("//journal-title-group/journal-title")[0].text == "PLoS ONE":
+            if coll.xpath('month'):
+                mo = coll.xpath('month')[0]
+                mo.getparent().remove(mo)
+                output += "correction: removed month from collection tag\n"
         if coll.xpath('year'):
             pub_val = root.xpath("//pub-date[@pub-type='epub']/year")[0].text
             xml_val = coll.xpath('year')[0].text
