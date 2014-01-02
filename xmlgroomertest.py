@@ -163,6 +163,7 @@ def test_fix_pubdate():
     verify(before, after, x.fix_pubdate)
 
 def test_fix_collection():
+    #  PONE should NOT have a <month> in <collection>
     before = '''<article><article-meta><journal-title-group><journal-title>PLoS ONE</journal-title></journal-title-group>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
         <pub-date pub-type="collection"><month>5</month><year>2009</year></pub-date>
@@ -171,7 +172,9 @@ def test_fix_collection():
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
         <pub-date pub-type="collection"><year>2013</year></pub-date>
         </article-meta></article>'''
+    verify(before, after, x.fix_collection)
 
+    #  Non-PONE should have a <month> in collection>
     before = '''<article><article-meta><journal-title-group><journal-title>PLoS Genetics</journal-title></journal-title-group>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
         <pub-date pub-type="collection"><month>5</month><year>2009</year></pub-date>
