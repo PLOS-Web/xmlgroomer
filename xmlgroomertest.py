@@ -238,6 +238,7 @@ def test_add_creative_commons_copyright_link():
         This is an open-access article distributed under the terms of the <ext-link ext-link-type="uri" \
         xlink:href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution License</ext-link>, which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited.
         </license-p></license></permissions></article-meta></article>'''
+    verify(before, after, x.add_creative_commons_copyright_link)
     
     #Adds no link to CC0 Zero
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink"><article-meta><permissions><copyright-year>2013</copyright-year>
@@ -250,6 +251,7 @@ def test_add_creative_commons_copyright_link():
         reproduced, distributed, transmitted, modified, built upon, or otherwise used by anyone for any 
         lawful purpose. The work is made available under the Creative Commons CC0 public domain dedication.
         </license-p></license></permissions></article-meta></article>'''
+    verify(before, after, x.add_creative_commons_copyright_link)    
     
     #CC0 4.0 link present already, groom leaves alone
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink"><article-meta><permissions>
