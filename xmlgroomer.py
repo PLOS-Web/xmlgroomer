@@ -91,7 +91,7 @@ def fix_article_title_whitespace(root):
             text = title.text if title.text else title.getchildren()[0].text+title.getchildren()[0].tail
             output += 'correction: removed whitespace from end of title '+text+'\n'
     return root
-groomers.append(fix_article_title_whitespace)
+#groomers.append(fix_article_title_whitespace)
 
 def fix_bad_italic_tags_running_title(root):
     global output
@@ -204,7 +204,10 @@ def check_pubdate(root):
     epub_date = {}
     for field in ['year','month','day']:
         try:
-            epub_date[field] = epub.xpath('./' + field)[0].text
+            if field != 'year':
+                epub_date[field] = epub.xpath('./' + field)[0].text.zfill(2)
+            else:
+                epub_date[field] = epub.xpath('./' + field)[0].text
         except IndexError, e:
             output +="error: missing field in xml epub date: %s\n" % field
             return root
@@ -223,10 +226,11 @@ def check_pubdate(root):
 def fix_collection(root):
     global output
     for coll in root.xpath("//pub-date[@pub-type='collection']"):
-        if coll.xpath('month'):
-            mo = coll.xpath('month')[0]
-            mo.getparent().remove(mo)
-            output += "correction: removed month from collection tag\n"
+        if root.xpath("//journal-title-group/journal-title")[0].text == "PLoS ONE":
+            if coll.xpath('month'):
+                mo = coll.xpath('month')[0]
+                mo.getparent().remove(mo)
+                output += "correction: removed month from collection tag\n"
         if coll.xpath('year'):
             pub_val = root.xpath("//pub-date[@pub-type='epub']/year")[0].text
             xml_val = coll.xpath('year')[0].text
@@ -276,26 +280,20 @@ groomers.append(fix_copyright)
 def add_creative_commons_copyright_link(root):
     global output
     for statement in root.xpath("//permissions/license/license-p"):
-        if statement.text[30:36] == " distr":
-            l = etree.SubElement(statement, "ext-link")
-            l.attrib['ext-link-type'] = 'uri'
-            statement.text = 'This is an open-access article distributed under the terms of the '
-            l.attrib['{http://www.w3.org/1999/xlink}href'] = 'http://creativecommons.org/licenses/by/4.0/'
-            l.text = "Creative Commons Attribution License"
-            l.tail = ', which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited.'
-            for attr in root.xpath("//permissions/license"):
-                attr.attrib['{http://www.w3.org/1999/xlink}href'] = 'http://creativecommons.org/licenses/by/4.0/'
-        elif statement.text[30:36] == ", free":
-            l = etree.SubElement(statement, "ext-link")
-            statement.text = 'This is an open-access article, free of all copyright, and may be freely reproduced, distributed, transmitted, modified, built upon, or otherwise used by anyone for any lawful purpose. The work is made available under the '
-            l.attrib['ext-link-type'] = 'uri'
-            l.attrib['{http://www.w3.org/1999/xlink}href'] = 'http://creativecommons.org/publicdomain/zero/1.0/'
-            l.text = 'Creative Commons CC0'
-            l.tail = ' public domain dedication.'
-            for attr in root.xpath("//permissions/license"):
-                attr.attrib['{http://www.w3.org/1999/xlink}href'] = 'http://creativecommons.org/publicdomain/zero/1.0/'
-        else:
-            output += 'warning: License text was not recognized CC license, CC link not added'
+        if len(statement.xpath("ext-link")) == 0:
+            if statement.text[30:36] == " distr":
+                l = etree.SubElement(statement, "ext-link")
+                l.attrib['ext-link-type'] = 'uri'
+                statement.text = 'This is an open-access article distributed under the terms of the '
+                l.attrib['{http://www.w3.org/1999/xlink}href'] = 'http://creativecommons.org/licenses/by/4.0/'
+                l.text = "Creative Commons Attribution License"
+                l.tail = ', which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited.'
+                for attr in root.xpath("//permissions/license"):
+                    attr.attrib['{http://www.w3.org/1999/xlink}href'] = 'http://creativecommons.org/licenses/by/4.0/'
+            elif statement.text[30:36] == ", free":
+                pass
+            else:
+                output += 'warning: License text was not recognized CC license, CC link not added\n'
     return root
 groomers.append(add_creative_commons_copyright_link)
 
