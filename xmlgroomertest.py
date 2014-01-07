@@ -6,6 +6,7 @@
 import lxml.etree as etree
 import xmlgroomer as x
 from lxml import html
+from nose import tools
 
 def verify(before, after, groomer, *args):
     goal = normalize(after)
@@ -42,6 +43,15 @@ def check(before, message, groomer):
         print 'goal:   %r' % message
         print 'result: %r' % x.output
         assert False
+
+def test_get_singular_node():
+    article = "<article><title-group><title>Bottlenose Dolphins</title><year>2013</year><year>2014></year></title-group></article>"
+    root = etree.fromstring(article)
+    t = x.get_singular_node(root, '//title-group/title')
+    tools.eq_(t.text, "Bottlenose Dolphins", "Text not matching")
+    tools.eq_(t.tag, "title", "Tag not matching")
+    tools.assert_raises(ValueError, x.get_singular_node, root, '//title-group/alt-title')
+    tools.assert_raises(ValueError, x.get_singular_node, root, '//title-group/year')
 
 def test_fix_article_type():
     before = '''<article>
@@ -172,6 +182,15 @@ def test_fix_collection():
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
         <pub-date pub-type="collection"><year>2013</year></pub-date>
         </article-meta></article>'''
+
+    before = '''<article><article-meta><journal-title-group><journal-title>PLoS Genetics</journal-title></journal-title-group>
+        <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
+        <pub-date pub-type="collection"><month>5</month><year>2009</year></pub-date>
+        </article-meta></article>'''
+    after = '''<article><article-meta><journal-title-group><journal-title>PLoS Genetics</journal-title></journal-title-group>
+        <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
+        <pub-date pub-type="collection"><month>5</month><year>2013</year></pub-date>
+        </article-meta></article>'''
     verify(before, after, x.fix_collection)
 
     #  Non-PONE should have a <month> in collection>
@@ -239,6 +258,7 @@ def test_add_creative_commons_copyright_link():
         xlink:href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution License</ext-link>, which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited.
         </license-p></license></permissions></article-meta></article>'''
     verify(before, after, x.add_creative_commons_copyright_link)
+
     
     #Adds no link to CC0 Zero
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink"><article-meta><permissions><copyright-year>2013</copyright-year>
@@ -252,6 +272,7 @@ def test_add_creative_commons_copyright_link():
         lawful purpose. The work is made available under the Creative Commons CC0 public domain dedication.
         </license-p></license></permissions></article-meta></article>'''
     verify(before, after, x.add_creative_commons_copyright_link)    
+
     
     #CC0 4.0 link present already, groom leaves alone
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink"><article-meta><permissions>
