@@ -134,37 +134,53 @@ def test_fix_pubdate():
         </article-meta></article>'''
     verify(before, after, x.fix_pubdate)
 
-def test_fix_collection():
-    #  PONE should NOT have a <month> in <collection>
-    before = '''<article><article-meta><journal-title-group><journal-title>PLoS ONE</journal-title></journal-title-group>
+def test_fix_pub_date_elements():
+    #test to check and remove month tag in 'collection' if article is PLoS ONE
+    before = '''<article><article-meta>
+        <journal-title-group><journal-title>PLoS ONE</journal-title></journal-title-group>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
         <pub-date pub-type="collection"><month>5</month><year>2009</year></pub-date>
         </article-meta></article>'''
-    after = '''<article><article-meta><journal-title-group><journal-title>PLoS ONE</journal-title></journal-title-group>
+    after = '''<article><article-meta>
+        <journal-title-group><journal-title>PLoS ONE</journal-title></journal-title-group>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
         <pub-date pub-type="collection"><year>2013</year></pub-date>
         </article-meta></article>'''
-
-    before = '''<article><article-meta><journal-title-group><journal-title>PLoS Genetics</journal-title></journal-title-group>
+    verify(before, after, x.fix_pub_date_elements)
+    
+    #leave month tag in if journal other than PLoS ONE
+    before = '''<article><article-meta>
+        <journal-title-group><journal-title>PLoS Genetics</journal-title></journal-title-group>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
         <pub-date pub-type="collection"><month>5</month><year>2009</year></pub-date>
         </article-meta></article>'''
-    after = '''<article><article-meta><journal-title-group><journal-title>PLoS Genetics</journal-title></journal-title-group>
+    after = '''<article><article-meta>
+        <journal-title-group><journal-title>PLoS Genetics</journal-title></journal-title-group>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
         <pub-date pub-type="collection"><month>5</month><year>2013</year></pub-date>
         </article-meta></article>'''
-    verify(before, after, x.fix_collection)
+    verify(before, after, x.fix_pub_date_elements)
 
-    #  Non-PONE should have a <month> in collection>
-    before = '''<article><article-meta><journal-title-group><journal-title>PLoS Genetics</journal-title></journal-title-group>
+    #test to check for 'collection', if not found, it builds
+    before = '''<article><article-meta><author-notes>blah</author-notes>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
-        <pub-date pub-type="collection"><month>5</month><year>2009</year></pub-date>
         </article-meta></article>'''
-    after = '''<article><article-meta><journal-title-group><journal-title>PLoS Genetics</journal-title></journal-title-group>
+    after = '''<article><article-meta><author-notes>blah</author-notes>
+        <pub-date pub-type="collection"><year>2013</year></pub-date>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
-        <pub-date pub-type="collection"><month>5</month><year>2013</year></pub-date>
         </article-meta></article>'''
-    verify(before, after, x.fix_collection)
+    verify(before, after, x.fix_pub_date_elements)
+
+    #test to check for 'ppub', if found, it removes after building 'collection'
+    before = '''<article><article-meta><author-notes>blah</author-notes>
+        <pub-date pub-type="ppub"><day>13</day><month>3</month><year>2013</year></pub-date>
+        <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
+        </article-meta></article>'''
+    after = '''<article><article-meta><author-notes>blah</author-notes>
+        <pub-date pub-type="collection"><year>2013</year></pub-date>
+        <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
+        </article-meta></article>'''
+    verify(before, after, x.fix_pub_date_elements)
 
 def test_fix_volume():
     before = '''<article>
