@@ -200,22 +200,45 @@ def check_pubdate(root):
     
     return root
 
-def fix_collection(root):
+def fix_pub_date_elements(root):
+    '''
+    Outer If statement in try: checks for 'collection' element. if
+    it exists, it removes 'month' child if exists in ONE articles.
+    Then it checks the year against epub's year.
+    If 'collection' doesn't exist, the else: statement builds it and adds
+    it in correct location.
+    Last If statement checks for 'ppub' element, and removes it if it exists.
+    '''
     global output
-    for coll in root.xpath("//pub-date[@pub-type='collection']"):
-        if root.xpath("//journal-title-group/journal-title")[0].text == "PLoS ONE":
-            if coll.xpath('month'):
-                mo = coll.xpath('month')[0]
-                mo.getparent().remove(mo)
-                output += "correction: removed month from collection tag\n"
-        if coll.xpath('year'):
-            pub_val = root.xpath("//pub-date[@pub-type='epub']/year")[0].text
-            xml_val = coll.xpath('year')[0].text
-            if xml_val != pub_val:
-                coll.xpath('year')[0].text = pub_val
-                output += 'correction: changed collection year from '+xml_val+' to '+pub_val+'\n'
+    year = get_singular_node(root, "//pub-date[@pub-type='epub']/year")
+    if root.xpath("//pub-date[@pub-type='collection']"):
+        for coll in root.xpath("//pub-date[@pub-type='collection']"):
+            if root.xpath("//journal-title-group/journal-title")[0].text == "PLoS ONE":
+                if coll.xpath('month'):
+                    mo = coll.xpath('month')[0]
+                    mo.getparent().remove(mo)
+                    output += "correction: removed month from collection tag\n"
+            if coll.xpath('year'):
+                pub_val = year.text
+                xml_val = coll.xpath('year')[0].text
+                if xml_val != pub_val:
+                    coll.xpath('year')[0].text = pub_val
+                    output += 'correction: changed collection year from '+xml_val+' to '+pub_val+'\n'
+    else:
+        for pubds in root.xpath("//article-meta"):
+            col = etree.Element('pub-date')
+            col.attrib['pub-type'] = 'collection'
+            aunotes = root.xpath("//article-meta/author-notes")[0]
+            parent = aunotes.getparent()
+            parent.insert(parent.index(aunotes) + 1, col)
+            etree.SubElement(col, 'year').text = year.text
+            output += 'correction: added missing "collection" pub-type\n'
+    if root.xpath("//pub-date[@pub-type='ppub']"):
+        ppub = root.xpath("//pub-date[@pub-type='ppub']")[0]
+        ppub.getparent().remove(ppub)
+        output+= 'correction: removed pub-date element with "ppub" type\n'
     return root
-groomers.append(fix_collection)
+groomers.append(fix_pub_date_elements)
 
 def fix_volume(root):
     global output
