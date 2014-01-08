@@ -82,34 +82,6 @@ def fix_article_title(root):
     return root
 groomers.append(fix_article_title)
 
-# Merops only - Remove
-'''This groom strips out <named-content> tags from the article title, but this is
-    an internal issue with Ambra, because the tags made the article title go past
-    the character limit.'''
-def fix_article_title_tags(root):
-    global output
-    title = root.xpath("//title-group/article-title")[0]
-    if title.xpath(".//named-content"):
-        etree.strip_tags(title, 'named-content')
-        output += 'correction: removed named-content tags from article title\n'
-    return root
-groomers.append(fix_article_title_tags)
-
-# Merops only - Remove
-''' This groom strips out trailing whitespace from the article title tag, because
-    in the citation line it created a space before the XSL-added period at the end of the title.
-    This only became an issue after Shabash relaxed the formatting a bit.'''
-def fix_article_title_whitespace(root):
-    global output
-    for title in root.xpath("//title-group/article-title"):
-        title_str = etree.tostring(title)
-        if re.search(r'\s</article-title>', title_str):
-            title.getparent().replace(title, etree.fromstring(re.sub(r'\s*</article-title>', r'</article-title>', title_str)))
-            text = title.text if title.text else title.getchildren()[0].text+title.getchildren()[0].tail
-            output += 'correction: removed whitespace from end of title '+text+'\n'
-    return root
-#groomers.append(fix_article_title_whitespace)
-
 def fix_bad_italic_tags_running_title(root):
     global output
     changed = False
@@ -153,18 +125,6 @@ def fix_addrline(root):
             output += 'correction: removed punctuation after addr-line in '+addrline.getparent().attrib['id']+'\n'
     return root
 groomers.append(fix_addrline)
-
-# Merops only - Remove
-''' This strips out the <label> tag in the corresponding email footnote. Though technically it's
-    correct and valid, it affected the display of the email symbol in the byline.'''
-def fix_corresp_label(root):
-    global output
-    for corresp in root.xpath("//corresp"):
-        if corresp.xpath("label"):
-            etree.strip_tags(corresp, 'label')
-            output += 'correction: removed label tag from corresp '+corresp.attrib['id']+'\n'
-    return root
-groomers.append(fix_corresp_label)
 
 def fix_corresp_email(root):
     global output
@@ -346,28 +306,6 @@ def fix_related_article(root):
     return root
 groomers.append(fix_related_article)
 
-# Merops only - Remove
-''' This stripped out closed ref-link tags in the body of the article. If the author referenced
-    "[3-5]" Merops created a closed reference tag for reference #4 in the xml, which is correct
-    in a sense. But, the PDF would display "[34.-5]" even though there was no text connected
-    to the reference.'''
-def fix_xref(root):
-    global output
-    refnums = ''
-    for xref in root.xpath("//xref[@ref-type='bibr']"):
-        rid = xref.attrib['rid']
-        if not xref.text and rid.startswith('B'):
-            if xref.tail:
-                if xref.getprevious() is not None:
-                    xref.getprevious().tail = (xref.getprevious().tail or '') + xref.tail
-                else:
-                    xref.getparent().text = (xref.getparent().text or '') + xref.tail
-            refnums += rid + ' '
-            xref.getparent().remove(xref)
-    if refnums:
-        output += 'correction: removed closed xref bibr '+refnums+'\n'
-    return root
-groomers.append(fix_xref)
 
 def fix_title(root):
     global output
@@ -390,54 +328,6 @@ def fix_headed_title(root):
     return root
 groomers.append(fix_headed_title)
 
-# Merops only - Remove
-'''The tables weren't being formatted with <title> tags, only <caption><p> tags,
-    and <p> tags are supressed by our XSL. This groom reformatted them to <title>
-    tags. I think Merops was looking for two parts to the caption, a title and regular
-    text, but tables only have titles.'''
-def fix_caption(root):
-    global output
-    for caption in root.xpath("//fig/caption") + root.xpath("//table-wrap/caption"):
-        if not caption.xpath("title") and caption.xpath("p"):
-            caption.xpath("p")[0].tag = 'title'
-            label = caption.getparent().xpath("label")[0].text
-            output += 'correction: changed caption p to title for '+label+'\n'
-    return root
-groomers.append(fix_caption)
-
-# Merops only - Remove
-''' This stripped out <bold> tags that encompassed an entire title's text. Typically this
-    happened in sec titles.'''
-def fix_bold(root):
-    global output
-    for title in root.xpath("//sec/title") + root.xpath("//fig/caption/title") + root.xpath("//table-wrap/caption/title"):
-        if title.xpath("bold"):
-            etree.strip_tags(title, 'bold')
-            if title.getparent().tag == 'sec':
-                label = title.getparent().attrib['id']
-            else:
-                typ = title.getparent().getparent()
-                label = typ.xpath("label")[0].text if typ.xpath("label") else typ.tag
-            output += 'correction: removed bold tags from '+label+' title\n'
-    return root
-groomers.append(fix_bold)
-
-# Merops only - Remove
-''' This stripped out <italic> tags that encompassed an entire title's text. Typically this
-    happened in sec titles.'''
-def fix_italic(root):
-    global output
-    for title in root.xpath("//sec/title") + root.xpath("//fig/caption/title") + root.xpath("//table-wrap/caption/title"):
-        if not title.text and title.xpath("italic") and len(title.getchildren())==1 and title.xpath("italic")[0].tail in [None,'.',':','?']:
-            etree.strip_tags(title, 'italic')
-            if title.getparent().tag == 'sec':
-                label = title.getparent().attrib['id']
-            else:
-                label = title.getparent().getparent().xpath("label")[0].text
-            output += 'correction: removed italic tags from '+label+' title\n'
-    return root
-groomers.append(fix_italic)
-
 def fix_formula(root):
     global output
     for formula in root.xpath("//fig//caption//disp-formula") + root.xpath("//table//disp-formula"):
@@ -459,137 +349,6 @@ def fix_formula_label(root):
             output += 'correction: changed disp-formula label from '+old_label+' to '+label.text+'\n'
     return root
 #groomers.append(fix_formula_label)
-
-# Merops only - Remove
-''' This stripped out null table footnote tags.'''
-def fix_null_footnote(root):
-    global output
-    for xref in root.xpath("//xref[@rid='ng']"):
-        etree.strip_tags(xref.getparent(), 'xref')
-        output += "correction: stripped null footnotes (xref rid='ng')\n"
-    return root
-groomers.append(fix_null_footnote)
-
-# Merops only - Remove
-'''<target> tag info is supressed by our XSL, so this stripped them out,
-    though they are technically valid.'''
-def fix_target_footnote(root):
-    global output
-    for target in root.xpath("//table-wrap-foot/fn/p/target"):
-        rid = target.attrib['id']
-        for xref in root.xpath("//xref[@rid='"+rid+"']"):
-            etree.strip_tags(xref.getparent(), 'xref')
-        if target.getparent() is not None:
-            etree.strip_tags(target.getparent(), 'target')
-        output += "correction: stripped target footnotes and corresponding xref\n"
-    return root
-groomers.append(fix_target_footnote)
-
-# Merops only - Remove
-''' This stripped out incorrect/invalid/unneeded ext-link tags of certain types.'''
-def fix_NCBI_ext_link(root):
-    global output
-    changed = False
-    for link in root.xpath("//ext-link[@ext-link-type='NCBI:nucleotide' or "
-                           "@ext-link-type='NCBI:protein' or "
-                           "@ext-link-type='UniProt']"):
-        link.tag = 'remove'
-        etree.strip_tags(link.getparent(), 'remove')
-        changed = True
-    if changed:
-        output += ("correction: stripped bad ext-link (ext-link-type="
-                   "'NCBI:nucleotide', 'NCBI:protein', 'UniProt')\n")
-    return root
-groomers.append(fix_NCBI_ext_link)
-
-# Merops only - Remove
-'''This stripped out whitespace that was tagged on its own in <underline> tags,
-    as it caused validation/style check errors.'''
-def fix_underline_whitespace(root):
-    global output
-    changed = False
-    for typ in root.xpath("//underline"):
-        if typ.text  == ' ':
-            typ.tag = 'remove'
-            etree.strip_tags(typ.getparent(), 'remove')
-            changed = True
-    if changed:
-        output += "correction: removed underline tags on whitespace\n"
-    return root
-groomers.append(fix_underline_whitespace)
-
-# Merops only - Remove
-'''This reformatted the equal contributions markup. Merops
-    formatted them as an xref with a matching footnote,
-    but for instances of only one set of equal contributors,
-    we used an attribute in the contrib tag. This groom removed
-    the xref and the footnote, and added the equal-contrib attribute.
-    This is one of the oldest reported bugs that was never fixed.'''
-def fix_equal_contributions(root):
-    global output
-    changed = False
-    for author in root.xpath("//contrib[@contrib-type='author']"):
-        if author.xpath("xref[@rid='equal1']"):
-            author.attrib['equal-contrib'] = 'yes'
-            for xref in author.xpath("xref[@rid='equal1']"):
-                xref.getparent().remove(xref)
-            changed = True
-    for fn in root.xpath("//fn[@id='equal1']"):
-        fn.getparent().remove(fn)
-    if changed:
-        output += "correction: fixed equal contributions mark up\n"
-    return root
-groomers.append(fix_equal_contributions)
-
-# Merops only - Remove
-'''Stripped out invalid fn-type attributes in table footnotes.'''
-def fix_footnote_attribute(root):
-    global output
-    changed = False
-    for fn in root.xpath("//table-wrap-foot/fn"):
-        if 'fn-type' in fn.attrib:
-            fn.attrib.pop('fn-type')
-            changed = True
-    if changed:
-        output += "correction: stripped fn-type from table footnote\n"
-    return root
-groomers.append(fix_footnote_attribute)
-
-# Merops only - Remove
-'''This groom reformatted the table footnotes, and stripped out any sort of
-    formatting tags in the footnote <label> tag like <italic> or <bold>, which
-    was a recent bug. Apart from that, the footnotes were formatted validly,
-    but our XSL added periods after <label> tag text, and wouldn't superscript them.
-    This groom took the label tag text, and put it into the footnote's <p> tag within
-    superscript tags.'''
-def fix_table_footnote_labels(root):
-    global output
-    changed = False
-    for fn in root.xpath("//table-wrap-foot/fn"):
-        if len(fn.xpath("label")) == 1:
-            if not fn.xpath("./p"):
-                output += "error: fn tag missing child element p\n"
-                continue
-            label = fn.xpath("label")[0]
-            for item in list(label.iterdescendants()):
-                etree.strip_tags(label, item.tag)
-            if label.text == None:
-                continue
-            label_text = label.text
-            label.getparent().remove(label)
-            p1 = fn.xpath("./p")[0]
-            old_fn_text = p1.text
-            p1.text = ''
-            sup = etree.SubElement(p1, "sup")
-            sup.text = label.text
-            p1.insert(0, sup)
-            sup.text = label_text
-            sup.tail = " " + old_fn_text
-            changed = True 
-    if changed:
-        output += 'correction: reformatted table footnote label tag to superscript\n'
-    return root
-groomers.append(fix_table_footnote_labels)
 
 def fix_label(root):
     global output
@@ -630,21 +389,6 @@ def fix_url(root):
         output += "correction: fixed %i doi/pmid link(s).\n" % correction_count
     return root
 groomers.append(fix_url)
-
-# Merops only - Remove
-'''This looks like it added a few attributes to the ref links. Maybe so our internal ref formatting would
-    work correctly?'''
-def fix_merops_link(root):
-    global output
-    refnums = ''
-    for link in root.xpath("//ext-link[@ext-link-type='doi' or @ext-link-type='pmid' or not(@ext-link-type)]"):
-        link.attrib['ext-link-type'] = 'uri'
-        link.attrib['{http://www.w3.org/1999/xlink}type'] = 'simple'
-        refnums += list(link.iterancestors("ref"))[0].xpath("label")[0].text+' '
-    if refnums:
-        output += 'correction: set ext-link-type=uri and xlink:type=simple in journal references '+refnums+'\n'
-    return root
-groomers.append(fix_merops_link)
 
 def fix_page_range(root):
     global output
@@ -690,70 +434,6 @@ def fix_provenance(root):
             output += 'correction: moved provenance from author-notes to fn-group after references\n'
     return root
 groomers.append(fix_provenance)
-
-# Merops only - Remove
-'''This reformatted an invalid fn-type from present-address to current-aff. It was a reported bug for
-    a while that I believe was eventually fixed by Shabash.'''
-def fix_fn_type(root):
-    global output
-    for fn in root.xpath("//fn[@fn-type='present-address']"):
-        fn.attrib['fn-type'] = 'current-aff'
-        output += "correction: changed fn-type 'present address' to 'current-aff'\n"
-    return root
-groomers.append(fix_fn_type)
-
-# Merops only - Remove
-'''This stripped out tags that were suppressed by our XSL.'''
-def fix_suppressed_tags(root):
-    global output
-    for related in root.xpath("//related-object"):
-        for child in related.getchildren():
-            if not child.text and not child.getchildren():
-                related.remove(child)
-    if root.xpath("//roman") or root.xpath("//award-id") or root.xpath("//award-group") + root.xpath("//related-object"):
-        etree.strip_tags(root, 'roman', 'award-id', 'award-group', 'related-object')
-        output += 'correction: removed suppressed tags (award-id, award-group, roman, related-object)\n'
-    return root
-groomers.append(fix_suppressed_tags)
-
-# Merops only - Remove
-'''This made sure the title text for the Supporting Information section was consistent.
-    Sometimes it would say "Supplementary Information" or something else.'''
-def fix_si_title(root):
-    global output
-    for si_title in root.xpath("//sec[@sec-type='supplementary-material']/title"):
-        if si_title.text != 'Supporting Information':
-            si_title.text = 'Supporting Information'
-            output += 'correction: set supplementary material section title to Supporting Information\n'
-    return root
-groomers.append(fix_si_title)
-
-# Merops only - Remove
-''' This reformatted the SI captions. Formatting from CW didn't use <title> tags for a caption, just
-    <bold>. This took the text formatted as <title>, and put it into <bold> and <p> tags to match the 
-    CW styling.'''
-def fix_si_captions(root):
-    global output
-    for title in root.xpath("//supplementary-material/caption/title"):
-        label = title.getparent().getparent().xpath("label")[0].text
-        paragraphs = title.getparent().xpath("p")
-        title.tag = 'bold'
-        if not paragraphs or re.match(r'^\(.{1,10}\)$', paragraphs[0].text or ''):
-            title.getparent().replace(title, etree.fromstring('<p>'+etree.tostring(title)+'</p>'))
-        else:
-            ns = '''<p xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML">'''
-            # This is failing on captions that contain xlink requirements (ie xlink:href).  Hence this try/except.
-            #   we need to fix this at some point.
-            try:
-                new_paragraph = etree.fromstring(etree.tostring(paragraphs[0]).replace(ns, '<p>'+etree.tostring(title)+' '))
-            except etree.XMLSyntaxError, e:
-                output += 'suggested correction: moved title inside p/bold for '+label+'\n'
-                continue
-            paragraphs[0].getparent().replace(paragraphs[0], new_paragraph)
-            title.getparent().remove(title)
-        output += 'correction: moved title inside p/bold for '+label+'\n'
-    return root
-groomers.append(fix_si_captions)
 
 def fix_remove_si_label_punctuation(root):
     global output

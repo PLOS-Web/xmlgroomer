@@ -84,36 +84,6 @@ def test_fix_article_title():
     after = '<article><title-group><title>Bottlenose Dolphins</title></title-group></article>'
     verify(before, after, x.fix_article_title)
 
-def test_fix_article_title_tags():
-    before = '''<article><meta><named-content>hello</named-content></meta><title-group>
-        <article-title>Identification of Immunity Related Genes to Study the<named-content content-type="genus-species">
-        <named-content content-type="genus"><italic>Physalis</italic></named-content><italic><named-content content-type="species">
-        peruviana</named-content></italic></named-content> - <italic><named-content content-type="genus-species">Fusarium oxysporum
-        </named-content></italic> pathosystem</article-title></title-group></article>'''
-    after = '''<article><meta><named-content>hello</named-content></meta><title-group>
-        <article-title>Identification of Immunity Related Genes to Study the<italic>Physalis</italic>
-        <italic>peruviana</italic> - <italic>Fusarium oxysporum</italic> pathosystem</article-title></title-group></article>'''
-    message = "correction: removed named-content tags from article title\n"
-    check(before, message, x.fix_article_title_tags)
-
-def test_fix_article_title_whitespace():
-    before = '<article><title-group><article-title>Bottle\rnose Dolp\nhins </article-title></title-group></article>'
-    after = '<article><title-group><article-title>Bottlenose Dolphins</article-title></title-group></article>'
-    verify(before, after, x.fix_article_title_whitespace)
-
-    before = '<article><title-group><article-title>Bottle\rnose Dolp\nhins <italic>An italic part</italic></article-title></title-group></article>'
-    after = '<article><title-group><article-title>Bottlenose Dolphins <italic>An italic part</italic></article-title></title-group></article>'
-    verify(before, after, x.fix_article_title_whitespace)
-
-    before = '''<article><meta><named-content>hello</named-content></meta><title-group>
-        <article-title>Identification of Immunity Related Genes to Study the<italic>Physalis</italic>
-        <italic>peruviana</italic> - <italic>Fusarium oxysporum</italic> pathosystem</article-title></title-group></article>'''
-    after = '''<article><meta><named-content>hello</named-content></meta><title-group>
-        <article-title>Identification of Immunity Related Genes to Study the<italic>Physalis</italic>
-        <italic>peruviana</italic> - <italic>Fusarium oxysporum</italic> pathosystem</article-title></title-group></article>'''
-    message = ""
-    check(before, message, x.fix_article_title_tags)
-
 def test_fix_bad_italic_tags_running_title():
     before = '<article><title-group><alt-title alt-title-type="running-head">&lt;I&gt;Vibrio cholerae&lt;/I&gt; in Kenya</alt-title></title-group></article>'
     after = '<article><title-group><alt-title alt-title-type="running-head"><italic>Vibrio cholerae</italic> in Kenya</alt-title></title-group></article>'
@@ -143,14 +113,6 @@ def test_fix_addrline():
     after = """<aff id="aff1"><label>1</label> <addr-line>Institute</addr-line></aff>"""
     verify(before, after, x.fix_addrline)
 
-def test_fix_corresp_label():
-    before = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
-        <corresp id="cor1"><label>*</label> E-mail: <email xlink:type="simple">me@example.net</email></corresp>
-        </article>"""
-    after = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
-        <corresp id="cor1">* E-mail: <email xlink:type="simple">me@example.net</email></corresp>
-        </article>"""
-    verify(before, after, x.fix_corresp_label)
 
 def test_fix_corresp_email():
     before = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -316,18 +278,6 @@ def test_fix_related_article():
             </article>'''
     verify(before, after, x.fix_related_article)
 
-def test_fix_xref():
-    before = '''<article>
-        <xref ref-type="bibr" rid="B3">3</xref>
-        <xref ref-type="bibr" rid="B4"/>-
-        <xref ref-type="bibr" rid="B5">5</xref>
-        </article>'''
-    after = '''<article>
-        <xref ref-type="bibr" rid="B3">3</xref>-
-        <xref ref-type="bibr" rid="B5">5</xref>
-        </article>'''
-    verify(before, after, x.fix_xref)
-
 def test_fix_title():
     before = '''<article><title>Lipid <title>storage</title> in bulbils.  </title></article>'''
     after = '''<article><title>Lipid <title>storage</title> in bulbils.</title></article>'''
@@ -344,56 +294,6 @@ def test_fix_headed_title():
         </sec>'''
     verify(before, after, x.fix_headed_title)    
 
-def test_fix_caption():
-    before = '''<article><fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
-        <caption><p><bold>Bony labyrinth of<italic>Kulbeckia kulbecke</italic>.</bold></p>
-        <p><bold>A</bold>, stereopair and labeled line drawing of digital endocast in anterior view.</p>
-        </caption></fig>
-        <table-wrap id="tab1" position="float"><label>Table 1</label>
-        <caption><p>Summary of border control and vaccination.</p></caption>
-        <table/></table-wrap></article>'''
-    after = '''<article><fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
-        <caption><title><bold>Bony labyrinth of<italic>Kulbeckia kulbecke</italic>.</bold></title>
-        <p><bold>A</bold>, stereopair and labeled line drawing of digital endocast in anterior view.</p>
-        </caption></fig>
-        <table-wrap id="tab1" position="float"><label>Table 1</label>
-        <caption><title>Summary of border control and vaccination.</title></caption>
-        <table/></table-wrap></article>'''
-    verify(before, after, x.fix_caption)
-
-def test_fix_bold():
-    before = '''<article><sec id="s3.6"><title><bold>PAPP5</bold> responds to the tetrapyrrole mediated plastid 
-        signal and acts as a negative regulator of <bold><italic>PhANG</italic></bold> expression</title></sec>
-        <fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
-        <caption><title><bold>Bony labyrinth of Kulbeckia kulbecke</bold></title></caption></fig>
-        <table-wrap id="tab1" position="float"><label>Table 1</label>
-        <caption><title>Summary of border control and <bold>vaccination</bold>.</title></caption>
-        <table/></table-wrap></article>'''
-    after = '''<article><sec id="s3.6"><title>PAPP5 responds to the tetrapyrrole mediated plastid 
-        signal and acts as a negative regulator of <italic>PhANG</italic> expression</title></sec>
-        <fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
-        <caption><title>Bony labyrinth of Kulbeckia kulbecke</title></caption></fig>
-        <table-wrap id="tab1" position="float"><label>Table 1</label>
-        <caption><title>Summary of border control and vaccination.</title></caption>
-        <table/></table-wrap></article>'''
-    verify(before, after, x.fix_bold)
-
-def test_fix_italic():
-    before = '''<article><sec id="s3.6"><title><italic>PhANG</italic></title></sec>
-        <sec id="s3.6"><title><italic>tetrapyrrole</italic> mediated plastid <italic>PhANG</italic></title></sec>
-        <fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
-        <caption><title><italic>Bony labyrinth of Kulbeckia kulbecke</italic></title></caption></fig>
-        <table-wrap id="tab1" position="float"><label>Table 1</label>
-        <caption><title><italic>Summary of border control</italic> and vaccination.</title></caption>
-        <table/></table-wrap></article>'''
-    after = '''<article><sec id="s3.6"><title>PhANG</title></sec>
-        <sec id="s3.6"><title><italic>tetrapyrrole</italic> mediated plastid <italic>PhANG</italic></title></sec>
-        <fig id="pone-0066624-g006" position="float"><label>Figure 6</label>
-        <caption><title>Bony labyrinth of Kulbeckia kulbecke</title></caption></fig>
-        <table-wrap id="tab1" position="float"><label>Table 1</label>
-        <caption><title><italic>Summary of border control</italic> and vaccination.</title></caption>
-        <table/></table-wrap></article>'''
-    verify(before, after, x.fix_italic)
 
 def test_fix_formula():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -440,183 +340,6 @@ def test_fix_label():
     after = '''<ref><label>13</label></ref>'''
     verify(before, after, x.fix_label)
 
-def test_fix_null_footnote():
-    before = '''<sup><xref rid="ng">3</xref></sup>'''
-    after = '''<sup>3</sup>'''
-    verify(before, after, x.fix_null_footnote)
-
-def test_fix_target_footnote():
-    before = '''<article><table><tbody><tr><td>0.022<xref rid="ngtab1.1">*</xref></td></tr></tbody></table>
-        <table-wrap-foot><fn>
-        <p>Test or <target id="ngtab1.1" target-type="fn">*</target> exact probability test. NS = not significant.</p>
-        </fn></table-wrap-foot></article>'''
-    after = '''<article><table><tbody><tr><td>0.022*</td></tr></tbody></table>
-        <table-wrap-foot><fn>
-        <p>Test or * exact probability test. NS = not significant.</p>
-        </fn></table-wrap-foot></article>'''
-    verify(before, after, x.fix_target_footnote)
-
-def test_fix_NCBI_ext_link():
-    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
-        <ext-link ext-link-type="NCBI:nucleotide" xlink:href="http://NCT01042860">NCT01042860</ext-link>,
-        <ext-link ext-link-type="UniProt" xlink:href="Q9VFY9">Q9VFY9</ext-link>,
-        <ext-link ext-link-type="NCBI:protein" xlink:href="NP_650258">NP_650258</ext-link></article>'''
-    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">NCT01042860,Q9VFY9,NP_650258</article>'''
-    verify(before, after, x.fix_NCBI_ext_link)
-
-def test_fix_footnote_attribute():
-    before = '''<table-wrap-foot><fn id="ngtab1.1" fn-type="footnote.other">
-        <label>a</label><p>Number of isolates characterized by sequencing the URR ± E6 region;</p>
-        </fn></table-wrap-foot>'''
-    after = '''<table-wrap-foot><fn id="ngtab1.1">
-        <label>a</label><p>Number of isolates characterized by sequencing the URR ± E6 region;</p>
-        </fn></table-wrap-foot>'''
-    verify(before, after, x.fix_footnote_attribute)
-
-def test_fix_table_footnote_labels():
-    before = '''
-<table-wrap-foot>
-  <fn>
-    <label>
-      <italic>a</italic>
-    </label>
-    <p>Number of isolates characterized by sequencing the URR ± E6 region;</p>
-  </fn>
-  <fn>
-    <label>
-      <italic>b</italic>
-    </label>
-    <p>Test text for footnote b.</p>
-   </fn>
-</table-wrap-foot>
-'''
-    after = '''
-<table-wrap-foot>
-  <fn>
-    <p><sup>a</sup> Number of isolates characterized by sequencing the URR ± E6 region;</p>
-  </fn>
-  <fn>
-    <p><sup>b</sup> Test text for footnote b.</p>
-  </fn>
-</table-wrap-foot>'''
-    verify(before, after, x.fix_table_footnote_labels)
-
-    # case 2: two <p>'s in one <fn>
-    before = '''
-<table-wrap-foot>
-  <fn>
-    <label>
-      <italic>a</italic>
-    </label>
-    <p>Number of isolates characterized by sequencing the URR ± E6 region;</p>
-  </fn>
-  <fn>
-    <label>
-      <italic>b</italic>
-    </label>
-    <p>Test text for footnote b.</p>
-    <p>A second paragraph that shouldn't break this</p>
-   </fn>
-</table-wrap-foot>
-'''
-    after = '''
-<table-wrap-foot>
-  <fn>
-    <p><sup>a</sup> Number of isolates characterized by sequencing the URR ± E6 region;</p>
-  </fn>
-  <fn>
-    <p><sup>b</sup> Test text for footnote b.</p>
-    <p>A second paragraph that shouldn't break this</p>
-  </fn>
-</table-wrap-foot>'''
-    verify(before, after, x.fix_table_footnote_labels)
-
-    # No <p> element; should throw error
-    before = '''
-<table-wrap-foot>
-  <fn>
-    <label>
-      <italic>a</italic>
-    </label>
-    <p>Number of isolates characterized by sequencing the URR ± E6 region;</p>
-  </fn>
-  <fn>
-    <label>
-      <italic>b</italic>
-    </label>
-   </fn>
-</table-wrap-foot>
-'''
-    after = '''
-<table-wrap-foot>
-  <fn>
-    <p><sup>a</sup> Number of isolates characterized by sequencing the URR ± E6 region;</p>
-  </fn>
-  <fn>
-    <label>
-      <italic>b</italic>
-    </label>
-  </fn>
-</table-wrap-foot>'''
-    verify(before, after, x.fix_table_footnote_labels)
-
-    # <p> with child elements
-    before = '''
-<table-wrap-foot>
-  <fn>
-    <label>
-      <italic>a</italic>
-    </label>
-    <p>Number of isolates characterized by sequencing the <xref ref-type="fig" rid="pone-0066220-g006">Fig. 6B</xref> URR ± E6 region;</p>
-  </fn>
-  <fn>
-    <label>
-      <italic>b</italic>
-    </label>
-   </fn>
-</table-wrap-foot>
-'''
-    after = '''
-<table-wrap-foot>
-  <fn>
-    <p><sup>a</sup> Number of isolates characterized by sequencing the <xref ref-type="fig" rid="pone-0066220-g006">Fig. 6B</xref> URR ± E6 region;</p>
-  </fn>
-  <fn>
-    <label>
-      <italic>b</italic>
-    </label>
-  </fn>
-</table-wrap-foot>'''
-    verify(before, after, x.fix_table_footnote_labels)
-
-def test_fix_underline_whitespace():
-    before = '''<article><underline>Test</underline><underline> </underline><underline>the underline function</underline>.</article>'''
-    after = '''<article><underline>Test</underline> <underline>the underline function</underline>.</article>'''
-    verify(before, after, x.fix_underline_whitespace)
-
-def test_fix_equal_contributions():
-    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
-    <contrib xlink:type="simple" contrib-type="author">
-<name name-style="western"><surname>Wen</surname><given-names>Shih-Tao</given-names></name>
-<xref ref-type="aff" rid="aff1"><sup>1</sup></xref>
-<xref ref-type="fn" rid="equal1"><sup>.</sup></xref>
-</contrib>
-<contrib xlink:type="simple" contrib-type="author">
-<name name-style="western"><surname>Chen</surname><given-names>Wei</given-names></name>
-<xref ref-type="aff" rid="aff1"><sup>1</sup></xref>
-<xref ref-type="aff" rid="aff2"><sup>2</sup></xref>
-<xref ref-type="fn" rid="equal1"><sup>3</sup></xref></contrib>
-<fn id="equal1" fn-type="equal"><label>.</label><p content-type="equal">These authors contributed equally to this work.</p></fn></article>'''
-    after  = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
-<contrib xlink:type="simple" contrib-type="author" equal-contrib="yes">
-<name name-style="western"><surname>Wen</surname><given-names>Shih-Tao</given-names></name>
-<xref ref-type="aff" rid="aff1"><sup>1</sup></xref>
-</contrib>
-<contrib xlink:type="simple" contrib-type="author" equal-contrib="yes">
-<name name-style="western"><surname>Chen</surname><given-names>Wei</given-names></name>
-<xref ref-type="aff" rid="aff1"><sup>1</sup></xref>
-<xref ref-type="aff" rid="aff2"><sup>2</sup></xref></contrib></article>'''
-    verify(before, after, x.fix_equal_contributions)
 
 def test_fix_url():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -630,21 +353,6 @@ def test_fix_url():
         <ext-link ext-link-type="uri" xlink:href="ftp://example.net/hello" xlink:type="simple">hello</ext-link>
         </article>'''
     verify(before, after, x.fix_url)
-
-def test_fix_merops_link():
-    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
-        <ref><label>2</label><mixed-citation><comment>
-        <ext-link xlink:href="http://dx.doi.org/10.1126/science.1103538"></ext-link>
-        <ext-link ext-link-type="pmid" xlink:href="http://www.ncbi.nlm.nih.gov/pubmed/15486254"></ext-link>
-        </comment></mixed-citation></ref>
-        </article>'''
-    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
-        <ref><label>2</label><mixed-citation><comment>
-        <ext-link xlink:href="http://dx.doi.org/10.1126/science.1103538" ext-link-type="uri" xlink:type="simple"></ext-link>
-        <ext-link ext-link-type="uri" xlink:href="http://www.ncbi.nlm.nih.gov/pubmed/15486254" xlink:type="simple"></ext-link>
-        </comment></mixed-citation></ref>
-        </article>'''
-    verify(before, after, x.fix_merops_link)
 
 def test_fix_page_range():
     before = '''<ref id="B1"><label>1</label>
@@ -682,45 +390,6 @@ def test_fix_provenance():
         </article>'''
     verify(before, after, x.fix_provenance)
 
-def test_fix_fn_type():
-    before = '<fn id="fn1" fn-type="present-address"><label>a</label><p>Current address</p></fn>'
-    after = '<fn id="fn1" fn-type="current-aff"><label>a</label><p>Current address</p></fn>'
-    verify(before, after, x.fix_fn_type)
-
-def test_fix_suppressed_tags():
-    before = '''<article><award-group><award-id>45902</award-id> </award-group><related-object>H<month/></related-object>
-        <roman><italic>P</italic><italic>. troglodytes</italic></roman>_PARG</article>'''
-    after = '''<article>45902 H
-        <italic>P</italic><italic>. troglodytes</italic>_PARG</article>'''    
-    verify(before, after, x.fix_suppressed_tags)
-
-def test_fix_si_title():
-    before = '''<sec sec-type="supplementary-material"><title>Supporting Information Legends</title></sec>'''
-    after = '''<sec sec-type="supplementary-material"><title>Supporting Information</title></sec>'''
-    verify(before, after, x.fix_si_title)
-
-def test_fix_si_captions():
-    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML">
-        <supplementary-material xlink:type="simple"><label>Figure S1</label>
-        <caption><title>Colocalization.</title><p>Bars.</p><p>(PDF)</p></caption></supplementary-material>
-        <supplementary-material xlink:type="simple"><label>Figure S2</label>
-        <caption><title>Colocalization.</title><p>(PDF)</p></caption></supplementary-material>
-        <supplementary-material xlink:type="simple"><label>Figure S3</label>
-        <caption><title>Colocalization.</title><p>Bars.</p><p>Another.</p></caption></supplementary-material>
-        <supplementary-material xlink:type="simple"><label>Figure S4</label>
-        <caption><title>Colocalization.</title></caption></supplementary-material>
-        </article>'''
-    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML">
-        <supplementary-material xlink:type="simple"><label>Figure S1</label>
-        <caption><p><bold>Colocalization.</bold> Bars.</p><p>(PDF)</p></caption></supplementary-material>
-        <supplementary-material xlink:type="simple"><label>Figure S2</label>
-        <caption><p><bold>Colocalization.</bold></p><p>(PDF)</p></caption></supplementary-material>
-        <supplementary-material xlink:type="simple"><label>Figure S3</label>
-        <caption><p><bold>Colocalization.</bold> Bars.</p><p>Another.</p></caption></supplementary-material>
-        <supplementary-material xlink:type="simple"><label>Figure S4</label>
-        <caption><p><bold>Colocalization.</bold></p></caption></supplementary-material>
-        </article>'''
-    verify(before, after, x.fix_si_captions)
 
 def test_fix_remove_si_label_punctuation():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML">
