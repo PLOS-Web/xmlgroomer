@@ -36,6 +36,23 @@ def register_char_stream_groom(fn):
 def get_doi(root):
     return root.xpath("//article-id[@pub-id-type='doi']")[0].text
 
+def get_singular_node(elmnt, path):
+    """Get an insured singular etree node via xpath
+        Args:
+        elmnt = etree object
+        path = specific node within elmnt we're looking for
+        Returns single node specified in path or raises and error
+        if node doesn't exist or too many exist.
+    """
+    matches = elmnt.xpath(path)
+    if len(matches) > 1:
+        raise ValueError("Found %s %s(s) when only looking for 1" %
+                         (len(elmnt.xpath(path)), path))
+    elif len(matches) == 0:
+        raise ValueError("%s doesn't exist!" % (path))
+    else:
+        return matches[0]
+
 def fix_article_type(root):
     global output
     for typ in root.xpath("//article-categories//subj-group[@subj-group-type='heading']/subject"):
@@ -219,8 +236,8 @@ def check_pubdate(root):
         output += ("error: pubdate defined in xml (%s) does not "
                    "match EM pubdate (%s)\n" %
                    (xml_pubdate_str,
-                   pubdate))
-                 
+                   pubdate))           
+    
     return root
 
 def fix_collection(root):
@@ -1001,6 +1018,7 @@ if __name__ == '__main__':
             except Exception as ee: 
                 traceback.print_exc()
                 print >>sys.stderr, '** error in '+groomer.__name__+': '+str(ee)+'\n'
+                output += 'error: error in '+groomer.__name__+': '+str(ee)+'\n'
                 log.write('** error in '+groomer.__name__+': '+str(ee)+'\n')
 
     else:
