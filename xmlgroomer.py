@@ -239,7 +239,7 @@ def fix_pub_date_elements(root):
         for coll in root.xpath("//pub-date[@pub-type='collection']"):
             if root.xpath("//journal-title-group/journal-title")[0].text == "PLoS ONE":
                 if coll.xpath('month'):
-                    mo = coll.xpath('month')[0]
+                    mo = get_singular_node(coll, 'month')
                     mo.getparent().remove(mo)
                     output += "correction: removed month from collection tag\n"
             if coll.xpath('year'):
@@ -253,13 +253,13 @@ def fix_pub_date_elements(root):
         for pubds in root.xpath("//article-meta"):
             col = etree.Element('pub-date')
             col.attrib['pub-type'] = 'collection'
-            aunotes = root.xpath("//article-meta/author-notes")[0]
+            aunotes = get_singular_node(root, "//article-meta/author-notes")
             parent = aunotes.getparent()
             parent.insert(parent.index(aunotes) + 1, col)
             etree.SubElement(col, 'year').text = year.text
             output += 'correction: added missing "collection" pub-type\n'
     if root.xpath("//pub-date[@pub-type='ppub']"):
-        ppub = root.xpath("//pub-date[@pub-type='ppub']")[0]
+        ppub = get_singular_node(root, "//pub-date[@pub-type='ppub']")
         ppub.getparent().remove(ppub)
         output+= 'correction: removed pub-date element with "ppub" type\n'
     return root
@@ -355,11 +355,11 @@ def fix_fpage_lpage_in_meta(root):
     global output
     changed = False
     if root.xpath("//article-meta/fpage"):
-        fp = root.xpath("//article-meta/fpage")[0]
+        fp = get_singular_node(root, "//article-meta/fpage")
         fp.getparent().remove(fp)
         changed = True
     if root.xpath("//article-meta/lpage"):
-        lp = root.xpath("//article-meta/lpage")[0]
+        lp = get_singular_node(root, "//article-meta/lpage")
         lp.getparent().remove(lp)
         changed = True
     if changed:
