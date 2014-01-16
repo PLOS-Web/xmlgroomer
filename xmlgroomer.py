@@ -18,23 +18,28 @@ validators = []
 char_stream_groomers = []
 output = ''
 
+
 def register_groom(fn):
     global groomers
     groomers.append(fn)
     return fn
+
 
 def register_validator(fn):
     global validators
     validators.append(fn)
     return fn
 
+
 def register_char_stream_groom(fn):
     global groomers
     char_stream_groomers.append(fn)
     return fn
 
+
 def get_doi(root):
     return root.xpath("//article-id[@pub-id-type='doi']")[0].text
+
 
 def get_singular_node(elmnt, path):
     """Get an insured singular etree node via xpath
@@ -53,18 +58,23 @@ def get_singular_node(elmnt, path):
     else:
         return matches[0]
 
+
 def fix_article_type(root):
     global output
-    for typ in root.xpath("//article-categories//subj-group[@subj-group-type='heading']/subject"):
+    for typ in (root.xpath("//article-categories//"
+                           "subj-group[@subj-group-type='heading']/subject")):
         if typ.text == 'Clinical Trial':
             typ.text = 'Research Article'
-            output += 'correction: changed article type from Clinical Trial to Research Article\n'
+            output += 'correction: changed article type from' \
+                      ' Clinical Trial to Research Article\n'
     return root
 groomers.append(fix_article_type)
 
+
 def fix_subject_category(root):
     global output
-    discipline_v2 = root.xpath("//subj-group[@subj-group-type='Discipline-v2']")
+    discipline_v2 = (root.xpath("//subj-group"
+                                "[@subj-group-type='Discipline-v2']"))
     if discipline_v2:
         for subj in discipline_v2:
             subj.getparent().remove(subj)
@@ -72,20 +82,24 @@ def fix_subject_category(root):
     return root
 #groomers.append(fix_subject_category)
 
+
 def fix_article_title(root):
     global output
     for title in root.xpath("//title-group/article-title"):
         if re.search(r'[\t\n\r]| {2,}', unicode(title.text)):
             old_title = title.text
             title.text = re.sub(r'[\t\n\r ]+', r' ', unicode(title.text))
-            output += 'correction: changed article title from '+old_title+' to '+title.text+'\n'
+            output += 'correction: changed article title from '\
+                      + old_title + ' to ' + title.text + '\n'
     return root
 groomers.append(fix_article_title)
+
 
 def fix_bad_italic_tags_running_title(root):
     global output
     changed = False
-    for typ in root.xpath("//title-group/alt-title[@alt-title-type='running-head']"):
+    for typ in (root.xpath("//title-group/alt-title"
+                           "[@alt-title-type='running-head']")):
         if not typ.text:
             continue
         atitle = html.fromstring(typ.text)
@@ -95,17 +109,20 @@ def fix_bad_italic_tags_running_title(root):
             atitle.tag = 'alt-title'
             atitle.attrib['alt-title-type'] = 'running-head'
             typ.getparent().replace(typ, atitle)
-            changed = True   
+            changed = True
     if changed:
         output += 'correction: fixed italic tags in running title\n'''
     return root
 groomers.append(fix_bad_italic_tags_running_title)
 
+
 def fix_affiliation(root):
     global output
     for author in root.xpath("//contrib[@contrib-type='author']"):
         aff = author.xpath("xref[@ref-type='aff']")
-        name = author.xpath("name/surname")[0].text if author.xpath("name/surname") else author.xpath("collab")[0].text
+        name = (author.xpath("name/surname")[0].text
+                if author.xpath("name/surname")
+                else author.xpath("collab")[0].text)
         aff_count = len(root.xpath("//aff[starts-with(@id, 'aff')]"))
         if not aff:
             if aff_count == 1:
@@ -117,27 +134,32 @@ def fix_affiliation(root):
     return root
 groomers.append(fix_affiliation)
 
+
 def fix_addrline(root):
     global output
     for addrline in root.xpath("//aff/addr-line"):
         if addrline.tail in [',','.',':']:
             addrline.tail = ''
-            output += 'correction: removed punctuation after addr-line in '+addrline.getparent().attrib['id']+'\n'
+            output += 'correction: removed punctuation after addr-line in '\
+                      + addrline.getparent().attrib['id'] + '\n'
     return root
 groomers.append(fix_addrline)
+
 
 def fix_corresp_email(root):
     global output
     for corresp in root.xpath("//corresp"):
         if not corresp.getchildren():
             email = re.sub(r'(\S+@\S+)', r'<email xlink:type="simple">\1</email>', corresp.text)
-            temp = etree.fromstring('<temp xmlns:xlink="http://www.w3.org/1999/xlink">'+email+'</temp>')
+            temp = etree.fromstring('<temp xmlns:xlink="http://www.w3.org/1999/xlink">'
+                                    + email + '</temp>')
             corresp.text = ''
             corresp.append(temp)
             etree.strip_tags(corresp, 'temp')
             output += 'correction: activated email in corresp '+corresp.attrib['id']+'\n'
     return root
 groomers.append(fix_corresp_email)
+
 
 def fix_pubdate(root):
     global output
@@ -154,6 +176,7 @@ def fix_pubdate(root):
                     output += 'correction: changed pub '+field+' from '+xml_val+' to '+em[field]+'\n'
     return root
 groomers.append(fix_pubdate)
+
 
 @register_validator
 def check_pubdate(root):
@@ -196,33 +219,59 @@ def check_pubdate(root):
         output += ("error: pubdate defined in xml (%s) does not "
                    "match EM pubdate (%s)\n" %
                    (xml_pubdate_str,
-                   pubdate))           
-    
+                   pubdate))
+
     return root
 
-def fix_collection(root):
+
+def fix_pub_date_elements(root):
+    '''
+    Outer If statement in try: checks for 'collection' element. if
+    it exists, it removes 'month' child if exists in ONE articles.
+    Then it checks the year against epub's year.
+    If 'collection' doesn't exist, the else: statement builds it and adds
+    it in correct location.
+    Last If statement checks for 'ppub' element, and removes it if it exists.
+    '''
     global output
-    for coll in root.xpath("//pub-date[@pub-type='collection']"):
-        if root.xpath("//journal-title-group/journal-title")[0].text == "PLoS ONE":
-            if coll.xpath('month'):
-                mo = coll.xpath('month')[0]
-                mo.getparent().remove(mo)
-                output += "correction: removed month from collection tag\n"
-        if coll.xpath('year'):
-            pub_val = root.xpath("//pub-date[@pub-type='epub']/year")[0].text
-            xml_val = coll.xpath('year')[0].text
-            if xml_val != pub_val:
-                coll.xpath('year')[0].text = pub_val
-                output += 'correction: changed collection year from '+xml_val+' to '+pub_val+'\n'
+    year = get_singular_node(root, "//pub-date[@pub-type='epub']/year")
+    if root.xpath("//pub-date[@pub-type='collection']"):
+        for coll in root.xpath("//pub-date[@pub-type='collection']"):
+            if get_singular_node(root, '//journal-title-group/journal-title').text == "PLoS ONE":
+                if coll.xpath('month'):
+                    mo = get_singular_node(coll, 'month')
+                    mo.getparent().remove(mo)
+                    output += "correction: removed month from collection tag\n"
+            if coll.xpath('year'):
+                pub_val = year.text
+                xml_val = get_singular_node(coll, 'year').text
+                if xml_val != pub_val:
+                    get_singular_node(coll, 'year').text = pub_val
+                    output += 'correction: changed collection year from '\
+                              + xml_val + ' to ' + pub_val + '\n'
+    else:
+        for pubds in root.xpath("//article-meta"):
+            col = etree.Element('pub-date')
+            col.attrib['pub-type'] = 'collection'
+            aunotes = get_singular_node(root, "//article-meta/author-notes")
+            parent = aunotes.getparent()
+            parent.insert(parent.index(aunotes) + 1, col)
+            etree.SubElement(col, 'year').text = year.text
+            output += 'correction: added missing "collection" pub-type\n'
+    if root.xpath("//pub-date[@pub-type='ppub']"):
+        ppub = get_singular_node(root, "//pub-date[@pub-type='ppub']")
+        ppub.getparent().remove(ppub)
+        output+= 'correction: removed pub-date element with "ppub" type\n'
     return root
-groomers.append(fix_collection)
+groomers.append(fix_pub_date_elements)
+
 
 def fix_volume(root):
     global output
     year = root.xpath("//pub-date[@pub-type='epub']/year")[0].text
     journal = root.xpath("//journal-id[@journal-id-type='pmc']")[0].text
-    volumes = {'plosbiol':2002, 'plosmed':2003, 'ploscomp':2004, 'plosgen':2004, 'plospath':2004,
-               'plosone':2005, 'plosntds':2006}
+    volumes = {'plosbiol':2002, 'plosmed':2003, 'ploscomp':2004, 'plosgen':2004,
+               'plospath':2004, 'plosone':2005, 'plosntds':2006}
     for volume in root.xpath("//article-meta/volume"):
         correct_volume = str(int(year) - volumes[journal])
         if volume.text != correct_volume:
@@ -231,6 +280,7 @@ def fix_volume(root):
             output += 'correction: changed volume from '+old_volume+' to '+volume.text+'\n'
     return root
 groomers.append(fix_volume)
+
 
 def fix_issue(root):
     global output
@@ -243,6 +293,7 @@ def fix_issue(root):
     return root
 groomers.append(fix_issue)
 
+
 def fix_copyright(root):
     global output
     year = root.xpath("//pub-date[@pub-type='epub']/year")[0].text
@@ -250,9 +301,11 @@ def fix_copyright(root):
         if copyright.text != year:
             old_copyright = copyright.text
             copyright.text = year
-            output += 'correction: changed copyright year from '+old_copyright+' to '+copyright.text+'\n'
+            output += 'correction: changed copyright year from '\
+                      + old_copyright + ' to ' + copyright.text + '\n'
     return root
 groomers.append(fix_copyright)
+
 
 def add_creative_commons_copyright_link(root):
     global output
@@ -264,7 +317,9 @@ def add_creative_commons_copyright_link(root):
                 statement.text = 'This is an open-access article distributed under the terms of the '
                 l.attrib['{http://www.w3.org/1999/xlink}href'] = 'http://creativecommons.org/licenses/by/4.0/'
                 l.text = "Creative Commons Attribution License"
-                l.tail = ', which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited.'
+                l.tail = (', which permits unrestricted use, distribution, '
+                          'and reproduction in any medium, provided the original '
+                          'author and source are credited.')
                 for attr in root.xpath("//permissions/license"):
                     attr.attrib['{http://www.w3.org/1999/xlink}href'] = 'http://creativecommons.org/licenses/by/4.0/'
             elif statement.text[30:36] == ", free":
@@ -273,6 +328,7 @@ def add_creative_commons_copyright_link(root):
                 output += 'warning: License text was not recognized CC license, CC link not added\n'
     return root
 groomers.append(add_creative_commons_copyright_link)
+
 
 def fix_elocation(root):
     global output
@@ -293,6 +349,24 @@ def fix_elocation(root):
         output += 'correction: added missing elocation '+eloc.text+'\n'
     return root
 groomers.append(fix_elocation)
+
+
+def fix_fpage_lpage_in_meta(root):
+    global output
+    changed = False
+    if root.xpath("//article-meta/fpage"):
+        fp = get_singular_node(root, "//article-meta/fpage")
+        fp.getparent().remove(fp)
+        changed = True
+    if root.xpath("//article-meta/lpage"):
+        lp = get_singular_node(root, "//article-meta/lpage")
+        lp.getparent().remove(lp)
+        changed = True
+    if changed:
+        output += "correction: removed fpage/lpage tag(s) from article-meta\n"
+    return root
+groomers.append(fix_fpage_lpage_in_meta)
+
 
 def fix_related_article(root):
     global output
@@ -318,6 +392,7 @@ def fix_title(root):
     return root
 groomers.append(fix_title)
 
+
 def fix_headed_title(root):
     global output
     for title in root.xpath("//sec[@sec-type='headed']/title"):
@@ -328,6 +403,7 @@ def fix_headed_title(root):
     return root
 groomers.append(fix_headed_title)
 
+
 def fix_formula(root):
     global output
     for formula in root.xpath("//fig//caption//disp-formula") + root.xpath("//table//disp-formula"):
@@ -336,9 +412,11 @@ def fix_formula(root):
         graphic = formula.xpath("graphic")[0]
         graphic.tag = 'inline-graphic'
         graphic.attrib.pop('position')
-        output += 'correction: changed disp-formula to inline-formula for '+graphic.attrib['{http://www.w3.org/1999/xlink}href']+'\n'
+        output += 'correction: changed disp-formula to inline-formula for '\
+                  +graphic.attrib['{http://www.w3.org/1999/xlink}href']+'\n'
     return root
 groomers.append(fix_formula)
+
 
 def fix_formula_label(root):
     global output
@@ -349,6 +427,7 @@ def fix_formula_label(root):
             output += 'correction: changed disp-formula label from '+old_label+' to '+label.text+'\n'
     return root
 #groomers.append(fix_formula_label)
+
 
 def fix_label(root):
     global output
@@ -362,6 +441,7 @@ def fix_label(root):
         output += 'correction: removed tags inside reference labels '+refnums+'\n'
     return root
 groomers.append(fix_label)
+
 
 def fix_url(root):
     global output
@@ -390,6 +470,7 @@ def fix_url(root):
     return root
 groomers.append(fix_url)
 
+
 def fix_page_range(root):
     global output
     for ref in root.xpath("//ref/mixed-citation"):
@@ -410,6 +491,7 @@ def fix_page_range(root):
     return root
 groomers.append(fix_page_range)
 
+
 def fix_comment(root):
     global output
     refnums = ''
@@ -421,6 +503,7 @@ def fix_comment(root):
         output += 'correction: removed period after comment end tag in journal references '+refnums+'\n'
     return root
 groomers.append(fix_comment)
+
 
 def fix_provenance(root):
     global output
@@ -435,6 +518,7 @@ def fix_provenance(root):
     return root
 groomers.append(fix_provenance)
 
+
 def fix_remove_si_label_punctuation(root):
     global output
     changed = False
@@ -448,8 +532,9 @@ def fix_remove_si_label_punctuation(root):
     return root
 groomers.append(fix_remove_si_label_punctuation)
 
+
 def fix_extension(root):
-    global output    
+    global output
     for si in root.xpath("//supplementary-material"):
         typ = si.xpath("caption/p")[-1].text
         if re.match(r'^\(.*\)$', typ):
@@ -457,9 +542,11 @@ def fix_extension(root):
             ext = typ.strip('()').lower()
             if re.match(r's[0-9]{3}', filename[-4:]):
                 si.attrib['{http://www.w3.org/1999/xlink}href'] = filename+'.'+ext
-                output += 'correction: set extension of '+filename+' to '+ext+' for '+si.xpath("label")[0].text+'\n'
+                output += 'correction: set extension of '\
+                          +filename+' to '+ext+' for '+si.xpath("label")[0].text+'\n'
     return root
 groomers.append(fix_extension)
+
 
 def fix_mimetype(root):
     global output
@@ -469,14 +556,16 @@ def fix_mimetype(root):
             mime, enc = mimetypes.guess_type('x.'+typ.strip('()').lower(), False)
             if mime and ('mimetype' not in si.attrib or mime != si.attrib['mimetype']):
                 si.attrib['mimetype'] = mime
-                output += 'correction: set mimetype of '+typ+' to '+mime+' for '+si.xpath("label")[0].text+'\n'
+                output += 'correction: set mimetype of '\
+                          +typ+' to '+mime+' for '+si.xpath("label")[0].text+'\n'
     return root
 groomers.append(fix_mimetype)
+
 
 def remove_pua_set(char_stream):
     global output
     pua_set = ur'[\uE000-\uF8FF]'
-    
+
     # form correction output
     display_width = 20
     for m in re.finditer(pua_set, char_stream):
@@ -484,13 +573,16 @@ def remove_pua_set(char_stream):
         if (start < 0): start = 0
         end = m.start() + display_width
         if (end >= len(char_stream)): start = -1
-        output += "correction: removed bad character at index=%s (marked by ^): \"%s^%s\"\n" % (m.start(), char_stream[start:m.start()], char_stream[m.start():end])
+        output += "correction: removed bad character at index=%s " \
+                  "(marked by ^): \"%s^%s\"\n" \
+                  % (m.start(), char_stream[start:m.start()], char_stream[m.start():end])
 
     # actually make the corrections
     char_stream = re.sub(pua_set, '', char_stream)
-    
+
     return char_stream
 char_stream_groomers.append(remove_pua_set)
+
 
 @register_char_stream_groom
 def alert_merops_validator_error(char_stream):
@@ -506,8 +598,9 @@ def alert_merops_validator_error(char_stream):
                    "please address and remove: \"%s%s\"\n" %
                    (char_stream[start:m.start()],
                     char_stream[m.start():end]))
-        
+
     return char_stream
+
 
 @register_groom
 def check_article_type(root):
@@ -526,6 +619,7 @@ def check_article_type(root):
             output += 'error: '+typ.text+' is not a valid article type\n'
     return root
 
+
 @register_groom
 def check_misplaced_pullquotes(root):
     global output
@@ -533,6 +627,7 @@ def check_misplaced_pullquotes(root):
     if (pull_quote_placed_last):
         output += 'warning: pullquote appears as last element of a section\n'
     return root
+
 
 @register_groom
 def check_missing_blurb(root):
@@ -546,6 +641,7 @@ def check_missing_blurb(root):
             output += "error: article xml is missing 'blurb'\n"
     return root
 
+
 @register_groom
 def check_SI_attributes(root):
     global output
@@ -557,7 +653,7 @@ def check_SI_attributes(root):
         si_id = si.get("id")
         href = si.attrib['{http://www.w3.org/1999/xlink}href']
         #TODO: was href hash built here.  Need replacement
-    
+
         if not mimetype:
             output += "error: mimetype missing: %s!\n" % si_id
 
@@ -571,6 +667,7 @@ def check_SI_attributes(root):
 
     return root
 
+
 @register_groom
 def check_lowercase_extensions(root):
     global output
@@ -582,6 +679,7 @@ def check_lowercase_extensions(root):
 
     return root
 
+
 @register_groom
 def check_collab_markup(root):
     global output
@@ -591,31 +689,38 @@ def check_collab_markup(root):
     authors_names = root.xpath('//contrib[@contrib-type="author"]/name/surname | //contrib[@contrib-type="author"]/name/given-name')
     for name in authors_names:
         if re.search(suspicious_pattern, name.text, re.IGNORECASE):
-            output += "warning: Article may contain incorrect markup for a collaborative author. Suspicious text to search for: %s\n" % name.text
+            output += "warning: Article may contain incorrect markup for a " \
+                      "collaborative author. Suspicious text to search for: " \
+                      "%s\n" % name.text
 
     return root
+
 
 #@register_groom
 def check_on_behalf_of_markup(root):
     global output
-    
+
     suspicious_words = ['for', 'on behalf of']
     for collab in root.xpath('//contrib-group/contrib/collab'):
         for word in suspicious_words:
             if re.match(word, collab.text, re.IGNORECASE):
-                output += "warning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\n" % collab.text
+                output += "warning: <collab> tag with value: %s.  " \
+                          "There may be a missing <on-behalf-of>.\n" % collab.text
                 break
-    
-    return root 
+
+    return root
+
 
 @register_groom
 def check_sec_ack_title(root):
     global output
 
     for fake_ack in root.xpath('//sec/title[text()="Acknowledgements"]'):
-        output += "warning: there is a <sec> titled \'Acknowledgements\' rather than the use of an <ack> tag.\n"
+        output += "warning: there is a <sec> titled \'Acknowledgements\' " \
+                  "rather than the use of an <ack> tag.\n"
 
     return root
+
 
 @register_groom
 def check_improper_children_in_funding_statement(root):
@@ -629,10 +734,13 @@ def check_improper_children_in_funding_statement(root):
 
     return root
 
+
 @register_groom
 def check_nlm_ta(root):
     global output
-    nlm_tas = ["PLoS Biol", "PLoS Comput Biol", "PLoS Clin Trials", "PLoS Genet", "PLoS Med", "PLoS Negl Trop Dis", "PLoS One", "PLoS ONE", "PLoS Pathog", "PLoS Curr"]
+    nlm_tas = ["PLoS Biol", "PLoS Comput Biol", "PLoS Clin Trials",
+               "PLoS Genet", "PLoS Med", "PLoS Negl Trop Dis", "PLoS One",
+               "PLoS ONE", "PLoS Pathog", "PLoS Curr"]
     nlm_ta = root.xpath("//journal-meta/journal-id[@journal-id-type='nlm-ta']")
     if not nlm_ta:
         output += 'error: missing nlm-ta in metadata\n'
@@ -641,19 +749,24 @@ def check_nlm_ta(root):
     return root
 groomers.append(check_nlm_ta)
 
+
 @register_groom
 def check_valid_journal_title(root):
     global output
 
-    valid_journal_titles = ["PLoS Biology", "PLoS Computational Biology", "PLoS Clinical Trials", "PLoS Genetics", "PLoS Medicine", "PLoS Neglected Tropical Diseases", "PLoS ONE", "PLoS Pathogens", "PLoS Currents"]
+    valid_journal_titles = ["PLoS Biology", "PLoS Computational Biology",
+                            "PLoS Clinical Trials", "PLoS Genetics",
+                            "PLoS Medicine", "PLoS Neglected Tropical Diseases",
+                            "PLoS ONE", "PLoS Pathogens", "PLoS Currents"]
     journal_title = root.xpath('/article/front/journal-meta/journal-title-group/journal-title')
 
     if not journal_title:
         output += "error: missing journal title in metadata\n"
     elif journal_title[0].text not in valid_journal_titles:
         output += "error: invalid journal title in metadata: %s\n" % journal_title[0].text
-        
+
     return root
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser("xmlgroomer.py before.xml after.xml\ndry run: xmlgroomer.py before.xml")
@@ -681,8 +794,8 @@ if __name__ == '__main__':
         for char_stream_groomer in char_stream_groomers:
             char_stream = char_stream_groomer(char_stream)
 
-    try: 
-        parser = etree.XMLParser(recover = True)
+    try:
+        parser = etree.XMLParser(recover=True)
         root = etree.fromstring(char_stream.encode('utf-8'), parser)
     except Exception as ee:
         log.write('** error parsing: '+str(ee)+'\n')
@@ -693,9 +806,9 @@ if __name__ == '__main__':
 
     if args.error_check:
         for groomer in validators:
-            try: 
+            try:
                 root = groomer(root)
-            except Exception as ee: 
+            except Exception as ee:
                 traceback.print_exc()
                 print >>sys.stderr, '** error in '+groomer.__name__+': '+str(ee)+'\n'
                 output += 'error: error in '+groomer.__name__+': '+str(ee)+'\n'
@@ -703,15 +816,15 @@ if __name__ == '__main__':
 
     else:
         for groomer in groomers:
-            try: 
+            try:
                 root = groomer(root)
-            except Exception as ee: 
+            except Exception as ee:
                 traceback.print_exc()
                 print >>sys.stderr, '** error in '+groomer.__name__+': '+str(ee)+'\n'
                 log.write('** error in '+groomer.__name__+': '+str(ee)+'\n')
 
     if not dry_run and not args.error_check:
-        etree.ElementTree(root).write(args.afterxml, xml_declaration = True, encoding = 'UTF-8')
+        etree.ElementTree(root).write(args.afterxml, xml_declaration=True, encoding='UTF-8')
     else:
         output = output.replace('correction:', 'suggested correction:')
 

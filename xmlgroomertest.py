@@ -8,6 +8,7 @@ import xmlgroomer as x
 from lxml import html
 from nose import tools
 
+
 def verify(before, after, groomer, *args):
     goal = normalize(after)
     result = normalize(etree.tostring(groomer(etree.fromstring(before), *args)))
@@ -15,6 +16,7 @@ def verify(before, after, groomer, *args):
         print 'goal: %r' % goal
         print 'result: %r' % result
         assert False
+
 
 def verify_char_stream(before, after, groomer, *args):
     goal = normalize(after)
@@ -24,17 +26,20 @@ def verify_char_stream(before, after, groomer, *args):
         print 'result:\n', result
         assert False
 
+
 def check_char_stream(before, message, groomer):
     x.output = ''
     groomer(before)
     if x.output.strip() != message.strip():
         print 'goal:   %r' % message
         print 'result: %r' % x.output
-        assert False    
+        assert False
+
 
 def normalize(string):
     string = ''.join([line.strip() for line in string.split('\n')])
     return etree.tostring(etree.fromstring(string))
+
 
 def check(before, message, groomer):
     x.output = ''
@@ -44,6 +49,7 @@ def check(before, message, groomer):
         print 'result: %r' % x.output
         assert False
 
+
 def test_get_singular_node():
     article = "<article><title-group><title>Bottlenose Dolphins</title><year>2013</year><year>2014></year></title-group></article>"
     root = etree.fromstring(article)
@@ -52,6 +58,7 @@ def test_get_singular_node():
     tools.eq_(t.tag, "title", "Tag not matching")
     tools.assert_raises(ValueError, x.get_singular_node, root, '//title-group/alt-title')
     tools.assert_raises(ValueError, x.get_singular_node, root, '//title-group/year')
+
 
 def test_fix_article_type():
     before = '''<article>
@@ -70,6 +77,7 @@ def test_fix_article_type():
         </article>'''
     verify(before, after, x.fix_article_type)
 
+
 def test_fix_subject_category():
     before = '''<article><subj-group subj-group-type="heading"><subject>Research Article</subject></subj-group>
         <subj-group subj-group-type="Discipline-v2"><subject>Biology</subject>
@@ -79,15 +87,18 @@ def test_fix_subject_category():
     after = '<article><subj-group subj-group-type="heading"><subject>Research Article</subject></subj-group></article>'
     verify(before, after, x.fix_subject_category)
 
+
 def test_fix_article_title():
     before = '<article><title-group><title>Bottle\rnose Dolp\nhins</title></title-group></article>'
     after = '<article><title-group><title>Bottlenose Dolphins</title></title-group></article>'
     verify(before, after, x.fix_article_title)
 
+
 def test_fix_bad_italic_tags_running_title():
     before = '<article><title-group><alt-title alt-title-type="running-head">&lt;I&gt;Vibrio cholerae&lt;/I&gt; in Kenya</alt-title></title-group></article>'
     after = '<article><title-group><alt-title alt-title-type="running-head"><italic>Vibrio cholerae</italic> in Kenya</alt-title></title-group></article>'
     verify(before, after, x.fix_bad_italic_tags_running_title)
+
 
 def test_fix_affiliation():
     before = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -108,6 +119,7 @@ def test_fix_affiliation():
         <aff id="aff1"><label>1</label><addr-line>Institute</addr-line></aff></article>"""
     verify(before, after, x.fix_affiliation)
 
+
 def test_fix_addrline():
     before = """<aff id="aff1"><label>1</label> <addr-line>Institute</addr-line>,</aff>"""
     after = """<aff id="aff1"><label>1</label> <addr-line>Institute</addr-line></aff>"""
@@ -123,6 +135,7 @@ def test_fix_corresp_email():
         <email xlink:type="simple">you@example.org</email> (you)</corresp></article>"""
     verify(before, after, x.fix_corresp_email)
 
+
 def test_fix_pubdate():
     before = '''<article><article-meta>
     	<article-id pub-id-type="doi">10.1371/journal.pone.0058162</article-id>
@@ -134,37 +147,55 @@ def test_fix_pubdate():
         </article-meta></article>'''
     verify(before, after, x.fix_pubdate)
 
-def test_fix_collection():
-    #  PONE should NOT have a <month> in <collection>
-    before = '''<article><article-meta><journal-title-group><journal-title>PLoS ONE</journal-title></journal-title-group>
+
+def test_fix_pub_date_elements():
+    #test to check and remove month tag in 'collection' if article is PLoS ONE
+    before = '''<article><article-meta>
+        <journal-title-group><journal-title>PLoS ONE</journal-title></journal-title-group>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
         <pub-date pub-type="collection"><month>5</month><year>2009</year></pub-date>
         </article-meta></article>'''
-    after = '''<article><article-meta><journal-title-group><journal-title>PLoS ONE</journal-title></journal-title-group>
+    after = '''<article><article-meta>
+        <journal-title-group><journal-title>PLoS ONE</journal-title></journal-title-group>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
         <pub-date pub-type="collection"><year>2013</year></pub-date>
         </article-meta></article>'''
+    verify(before, after, x.fix_pub_date_elements)
 
-    before = '''<article><article-meta><journal-title-group><journal-title>PLoS Genetics</journal-title></journal-title-group>
+    #leave month tag in if journal other than PLoS ONE
+    before = '''<article><article-meta>
+        <journal-title-group><journal-title>PLoS Genetics</journal-title></journal-title-group>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
         <pub-date pub-type="collection"><month>5</month><year>2009</year></pub-date>
         </article-meta></article>'''
-    after = '''<article><article-meta><journal-title-group><journal-title>PLoS Genetics</journal-title></journal-title-group>
+    after = '''<article><article-meta>
+        <journal-title-group><journal-title>PLoS Genetics</journal-title></journal-title-group>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
         <pub-date pub-type="collection"><month>5</month><year>2013</year></pub-date>
         </article-meta></article>'''
-    verify(before, after, x.fix_collection)
+    verify(before, after, x.fix_pub_date_elements)
 
-    #  Non-PONE should have a <month> in collection>
-    before = '''<article><article-meta><journal-title-group><journal-title>PLoS Genetics</journal-title></journal-title-group>
+    #test to check for 'collection', if not found, it builds
+    before = '''<article><article-meta><author-notes>blah</author-notes>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
-        <pub-date pub-type="collection"><month>5</month><year>2009</year></pub-date>
         </article-meta></article>'''
-    after = '''<article><article-meta><journal-title-group><journal-title>PLoS Genetics</journal-title></journal-title-group>
+    after = '''<article><article-meta><author-notes>blah</author-notes>
+        <pub-date pub-type="collection"><year>2013</year></pub-date>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
-        <pub-date pub-type="collection"><month>5</month><year>2013</year></pub-date>
         </article-meta></article>'''
-    verify(before, after, x.fix_collection)
+    verify(before, after, x.fix_pub_date_elements)
+
+    #test to check for 'ppub', if found, it removes after building 'collection'
+    before = '''<article><article-meta><author-notes>blah</author-notes>
+        <pub-date pub-type="ppub"><day>13</day><month>3</month><year>2013</year></pub-date>
+        <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
+        </article-meta></article>'''
+    after = '''<article><article-meta><author-notes>blah</author-notes>
+        <pub-date pub-type="collection"><year>2013</year></pub-date>
+        <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
+        </article-meta></article>'''
+    verify(before, after, x.fix_pub_date_elements)
+
 
 def test_fix_volume():
     before = '''<article>
@@ -183,6 +214,7 @@ def test_fix_volume():
         </article>'''
     verify(before, after, x.fix_volume)
 
+
 def test_fix_issue():
     before = '''<article><article-meta>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
@@ -194,6 +226,7 @@ def test_fix_issue():
         </article-meta></article>'''
     verify(before, after, x.fix_issue)
 
+
 def test_fix_copyright():
     before = '''<article><article-meta>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
@@ -204,6 +237,7 @@ def test_fix_copyright():
         <copyright-year>2013</copyright-year>
         </article-meta></article>'''
     verify(before, after, x.fix_copyright)
+
 
 def test_add_creative_commons_copyright_link():
     # Adds CC0 4.0 link
@@ -221,7 +255,7 @@ def test_add_creative_commons_copyright_link():
         </license-p></license></permissions></article-meta></article>'''
     verify(before, after, x.add_creative_commons_copyright_link)
 
-    
+
     #Adds no link to CC0 Zero
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink"><article-meta><permissions><copyright-year>2013</copyright-year>
         <license><license-p>This is an open-access article, free of all copyright, and may be freely 
@@ -233,9 +267,9 @@ def test_add_creative_commons_copyright_link():
         reproduced, distributed, transmitted, modified, built upon, or otherwise used by anyone for any 
         lawful purpose. The work is made available under the Creative Commons CC0 public domain dedication.
         </license-p></license></permissions></article-meta></article>'''
-    verify(before, after, x.add_creative_commons_copyright_link)    
+    verify(before, after, x.add_creative_commons_copyright_link)
 
-    
+
     #CC0 4.0 link present already, groom leaves alone
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink"><article-meta><permissions>
         <copyright-year>2013</copyright-year><copyright-holder>Cheng, Guggino</copyright-holder>
@@ -249,7 +283,8 @@ def test_add_creative_commons_copyright_link():
         This is an open-access article distributed under the terms of the <ext-link ext-link-type="uri" \
         xlink:href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution License</ext-link>, which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited.
         </license-p></license></permissions></article-meta></article>'''
-    verify(before, after, x.add_creative_commons_copyright_link)    
+    verify(before, after, x.add_creative_commons_copyright_link)
+
 
 def test_fix_elocation():
     before = '''<article><article-meta>
@@ -262,6 +297,21 @@ def test_fix_elocation():
     		<elocation-id>e58162</elocation-id>
    			</article-meta></article>'''
     verify(before, after, x.fix_elocation)
+
+
+def test_fix_fpage_lpage_in_meta():
+    before = '<article><article-meta><fpage>000</fpage><lpage>000</lpage></article-meta></article>'
+    after = '<article><article-meta></article-meta></article>'
+    verify(before, after, x.fix_fpage_lpage_in_meta)
+
+    before = '<article><article-meta><lpage>000</lpage></article-meta></article>'
+    after = '<article><article-meta></article-meta></article>'
+    verify(before, after, x.fix_fpage_lpage_in_meta)
+
+    before = '<article><article-meta><fpage>000</fpage></article-meta></article>'
+    after = '<article><article-meta></article-meta></article>'
+    verify(before, after, x.fix_fpage_lpage_in_meta)
+
 
 def test_fix_related_article():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -278,10 +328,12 @@ def test_fix_related_article():
             </article>'''
     verify(before, after, x.fix_related_article)
 
+
 def test_fix_title():
     before = '''<article><title>Lipid <title>storage</title> in bulbils.  </title></article>'''
     after = '''<article><title>Lipid <title>storage</title> in bulbils.</title></article>'''
-    verify(before, after, x.fix_title)    
+    verify(before, after, x.fix_title)
+
 
 def test_fix_headed_title():
     before = '''<sec sec-type="headed">
@@ -292,7 +344,7 @@ def test_fix_headed_title():
         <title>Purpose</title>
         <p>To compare the efficacy of extracorporeal shock.</p>
         </sec>'''
-    verify(before, after, x.fix_headed_title)    
+    verify(before, after, x.fix_headed_title)
 
 
 def test_fix_formula():
@@ -320,7 +372,8 @@ def test_fix_formula():
         </inline-formula>
         </table>
         </article>'''
-    verify(before, after, x.fix_formula)   
+    verify(before, after, x.fix_formula)
+
 
 def test_fix_formula_label():
     before = '''<article>
@@ -334,6 +387,7 @@ def test_fix_formula_label():
         <disp-formula id="eqn3"><label>(3)</label></disp-formula>
         </article>'''
     verify(before, after, x.fix_formula_label)
+
 
 def test_fix_label():
     before = '''<ref><label><italic>13</italic></label></ref>'''
@@ -354,6 +408,7 @@ def test_fix_url():
         </article>'''
     verify(before, after, x.fix_url)
 
+
 def test_fix_page_range():
     before = '''<ref id="B1"><label>1</label>
         <mixed-citation publication-type="book"><source>Radiobiology for radiobiologists</source>. 
@@ -363,10 +418,12 @@ def test_fix_page_range():
         pp. <fpage>129</fpage>-<lpage>326</lpage>. </mixed-citation></ref>'''
     verify(before, after, x.fix_page_range)
 
+
 def test_fix_comment():
     before = '<article><ref><label>2</label><mixed-citation><comment></comment>.</mixed-citation></ref></article>'
     after = '<article><ref><label>2</label><mixed-citation><comment></comment></mixed-citation></ref></article>'
     verify(before, after, x.fix_comment)
+
 
 def test_fix_provenance():
     before = '''<article>
@@ -413,6 +470,7 @@ def test_fix_remove_si_label_punctuation():
         <caption><p><bold>Colocalization.</bold></p></caption></supplementary-material>
         </article>'''
 
+
 def test_fix_extension():
     before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
         <supplementary-material id="pone.0063011.s001" xlink:href="pone.0063011.s001" mimetype="image/tiff">
@@ -426,24 +484,26 @@ def test_fix_extension():
         </supplementary-material></article>'''
     verify(before, after, x.fix_extension)
 
+
 def test_fix_mimetype():
-	before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+    before = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
 		<supplementary-material id="pone.0063011.s001" xlink:href="pone.0063011.s001.tiff">
 		<label>Figure S1</label>
 		<caption><p>(TIFF)</p></caption>
 		</supplementary-material></article>'''
-	after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
+    after = '''<article xmlns:xlink="http://www.w3.org/1999/xlink">
 		<supplementary-material id="pone.0063011.s001" xlink:href="pone.0063011.s001.tiff" mimetype="image/tiff">
 		<label>Figure S1</label>
 		<caption><p>(TIFF)</p></caption>
 		</supplementary-material></article>'''
-	verify(before, after, x.fix_mimetype)
+    verify(before, after, x.fix_mimetype)
 
 
 def test_remove_pua_set():
     before = u'''<p>estrogen stimuli </p>'''
     after = u'''<p>estrogen stimuli </p>'''
     verify_char_stream(before, after, x.remove_pua_set)
+
 
 def test_check_article_type():
     before = '''<article>
@@ -456,10 +516,12 @@ def test_check_article_type():
     message = 'error: Romantic Comedy is not a valid article type'
     check(before, message, x.check_article_type)
 
+
 def test_check_nlm_ta():
     before = '''<journal-meta><journal-id journal-id-type="nlm-ta">plosone</journal-id></journal-meta>'''
     message = 'error: invalid nlm-ta in metadata: plosone'
     check(before, message, x.check_nlm_ta)
+
 
 def test_check_misplaced_pullquotes():
     before = '''<body><sec><p><named-content content-type="pullquote">lalala</named-content></p></sec></body>'''
@@ -473,6 +535,7 @@ def test_check_misplaced_pullquotes():
     before = '''<body><sec><p><named-content content-type="pullquote">lalala</named-content></p><p></p></sec></body>'''
     message = ''
     check(before, message, x.check_misplaced_pullquotes)
+
 
 def test_check_missing_blurbs():
     before = '''
@@ -515,6 +578,7 @@ def test_check_missing_blurbs():
 </article>'''
     message = "error: article xml is missing 'blurb'\n"
     check(before, message, x.check_missing_blurb)
+
 
 def test_check_SI_attributes():
     before = '''
@@ -589,6 +653,7 @@ def test_check_SI_attributes():
     message = 'error: supp info pone.0011111.s001.docx does not match doi: pone.0012345\n'
     check(before, message, x.check_SI_attributes)
 
+
 def test_check_lowercase_extensions():
     href = 'lalalal'
     before = '''
@@ -616,6 +681,7 @@ def test_check_lowercase_extensions():
 ''' % href
     message = 'error: bad or missing file extension: %s\n' % href
     check(before, message, x.check_lowercase_extensions)
+
 
 def test_check_collab_markup():
     name = "James"
@@ -653,6 +719,7 @@ def test_check_collab_markup():
 
     message = "warning: Article may contain incorrect markup for a collaborative author. Suspicious text to search for: %s\n" % name
     check(before, message, x.check_collab_markup)
+
 
 def test_on_behalf_of_markup():
     collab = "for"
@@ -692,8 +759,10 @@ def test_on_behalf_of_markup():
   </contrib-group>
 </article>
 ''' % (collab, collab)
-    message = "warning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\nwarning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\n" % (collab, collab)
+    message = "warning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\nwarning: <collab> tag with value: %s.  There may be a missing <on-behalf-of>.\n" % (
+        collab, collab)
     check(before, message, x.check_on_behalf_of_markup)
+
 
 def test_sec_ack_title():
     before = '''
@@ -770,6 +839,7 @@ def test_on_behalf_of_markup():
     message = "error: funding-statement has illegal child node: inline-formula\n"
     check(before, message, x.check_improper_children_in_funding_statement)
 
+
 def test_check_valid_journal_title():
     before = '''
 <article xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -812,6 +882,7 @@ def test_check_valid_journal_title():
 ''' % bad_journal_name
     message = "error: invalid journal title in metadata: %s" % bad_journal_name
     check(before, message, x.check_valid_journal_title)
+
 
 def test_alert_merops_validator_error():
     before = """\
