@@ -237,16 +237,16 @@ def fix_pub_date_elements(root):
     year = get_singular_node(root, "//pub-date[@pub-type='epub']/year")
     if root.xpath("//pub-date[@pub-type='collection']"):
         for coll in root.xpath("//pub-date[@pub-type='collection']"):
-            if root.xpath("//journal-title-group/journal-title")[0].text == "PLoS ONE":
+            if get_singular_node(root, '//journal-title-group/journal-title').text == "PLoS ONE":
                 if coll.xpath('month'):
                     mo = get_singular_node(coll, 'month')
                     mo.getparent().remove(mo)
                     output += "correction: removed month from collection tag\n"
             if coll.xpath('year'):
                 pub_val = year.text
-                xml_val = coll.xpath('year')[0].text
+                xml_val = get_singular_node(coll, 'year').text
                 if xml_val != pub_val:
-                    coll.xpath('year')[0].text = pub_val
+                    get_singular_node(coll, 'year').text = pub_val
                     output += 'correction: changed collection year from '\
                               + xml_val + ' to ' + pub_val + '\n'
     else:
