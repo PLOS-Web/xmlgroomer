@@ -138,14 +138,10 @@ def test_fix_corresp_email():
 
 def test_fix_pubdate():
     before = '''<article><article-meta>
-        <article-categories><subj-group subj-group-type="heading">
-        <subject>Research Article</subject></subj-group></article-categories>
     	<article-id pub-id-type="doi">10.1371/journal.pone.0058162</article-id>
         <pub-date pub-type="epub"><day>4</day><month>1</month><year>2012</year></pub-date>
         </article-meta></article>'''
     after = '''<article><article-meta>
-        <article-categories><subj-group subj-group-type="heading">
-        <subject>Research Article</subject></subj-group></article-categories>
     	<article-id pub-id-type="doi">10.1371/journal.pone.0058162</article-id>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
         </article-meta></article>'''
@@ -292,14 +288,10 @@ def test_add_creative_commons_copyright_link():
 
 def test_fix_elocation():
     before = '''<article><article-meta>
-            <article-categories><subj-group subj-group-type="heading">
-            <subject>Research Article</subject></subj-group></article-categories>
     		<article-id pub-id-type="doi">10.1371/journal.pone.0058162</article-id>
     		<issue>3</issue>
     		</article-meta></article>'''
     after = '''<article><article-meta>
-            <article-categories><subj-group subj-group-type="heading">
-            <subject>Research Article</subject></subj-group></article-categories>
     		<article-id pub-id-type="doi">10.1371/journal.pone.0058162</article-id>
     		<issue>3</issue>
     		<elocation-id>e58162</elocation-id>
@@ -616,8 +608,6 @@ def test_check_missing_blurbs():
 def test_check_SI_attributes():
     before = '''
 <article xmlns:xlink="http://www.w3.org/1999/xlink">
-<article-categories><subj-group subj-group-type="heading">
-        <subject>Research Article</subject></subj-group></article-categories>
   <front>
     <article-meta>
       <article-id pub-id-type='doi'>10.1371/journal.pone.0012345</article-id>
@@ -636,8 +626,6 @@ def test_check_SI_attributes():
 
     before = '''
 <article xmlns:xlink="http://www.w3.org/1999/xlink">
-<article-categories><subj-group subj-group-type="heading">
-        <subject>Research Article</subject></subj-group></article-categories>
   <front>
     <article-meta>
       <article-id pub-id-type='doi'>10.1371/journal.pone.0012345</article-id>
@@ -656,8 +644,6 @@ def test_check_SI_attributes():
 
     before = '''
 <article xmlns:xlink="http://www.w3.org/1999/xlink">
-<article-categories><subj-group subj-group-type="heading">
-        <subject>Research Article</subject></subj-group></article-categories>
   <front>
     <article-meta>
       <article-id pub-id-type='doi'>10.1371/journal.pone.0012345</article-id>
@@ -676,8 +662,6 @@ def test_check_SI_attributes():
 
     before = '''
 <article xmlns:xlink="http://www.w3.org/1999/xlink">
-<article-categories><subj-group subj-group-type="heading">
-        <subject>Research Article</subject></subj-group></article-categories>
   <front>
     <article-meta>
       <article-id pub-id-type='doi'>10.1371/journal.pone.0012345</article-id>
