@@ -70,6 +70,19 @@ def fix_article_type(root):
     return root
 groomers.append(fix_article_type)
 
+def check_correction_article(root):
+    global output
+    cxns = ['Correction', 'Retraction', 'Expression of Concern']
+    if get_singular_node(root, "//article-categories//subj-group[@subj-group-type='heading']/subject").text in cxns:
+        try:
+            ra = get_singular_node(root,'//article-meta/related-article')
+            if ra.attrib['related-article-type'] != 'corrected-article':
+                output += "error: related article type is not 'corrected-article'\n"
+        except ValueError:
+            output += 'error: no related article element\n'
+    return root
+groomers.append(check_correction_article)
+
 
 def fix_subject_category(root):
     global output
@@ -645,6 +658,7 @@ def check_missing_blurb(root):
 @register_groom
 def check_SI_attributes(root):
     global output
+
     doi = get_doi(root).split('10.1371/journal.')[1]
 
     for si in root.xpath("//article/body/sec/supplementary-material"):
