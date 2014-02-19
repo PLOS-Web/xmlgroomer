@@ -75,9 +75,21 @@ def check_correction_article(root):
     cxns = ['Correction', 'Retraction', 'Expression of Concern']
     if get_singular_node(root, "//article-categories//subj-group[@subj-group-type='heading']/subject").text in cxns:
         try:
+            subj = get_singular_node(root, "//article-categories//subj-group[@subj-group-type='heading']/subject").text
             ra = get_singular_node(root,'//article-meta/related-article')
-            if ra.attrib['related-article-type'] != 'corrected-article':
-                output += "error: related article type is not 'corrected-article'\n"
+            article = get_singular_node(root, '//article')
+            if subj == 'Correction' and ra.attrib['related-article-type'] != 'corrected-article':
+                output += "error: related-article-type is not 'corrected-article'\n"
+            elif ra.attrib['related-article-type'] == 'corrected-article' and article.attrib['article-type'] != 'correction':
+                output += "error: article element article-type attribute not 'correction'\n"
+            elif subj == 'Retraction' and ra.attrib['related-article-type'] != 'retracted-article':
+                output += "error: related-article-type is not 'retracted-article'\n"
+            elif ra.attrib['related-article-type'] == 'retracted-article' and article.attrib['article-type'] != 'retraction':
+                output += "error: article element article-type attribute not 'retraction'\n"
+            elif subj == 'Expression of Concern' and ra.attrib['related-article-type'] != 'object-of-concern':
+                output += "error: related-article-type is not 'object-of-concern'\n"
+            elif ra.attrib['related-article-type'] == 'object-of-concern' and article.attrib['article-type'] != 'expression-of-concern':
+                output += "error: article element article-type attribute not 'expression-of-concern'\n"
         except ValueError:
             output += 'error: no related article element\n'
     return root
