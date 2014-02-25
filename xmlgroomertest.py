@@ -516,6 +516,101 @@ def test_check_article_type():
     message = 'error: Romantic Comedy is not a valid article type'
     check(before, message, x.check_article_type)
 
+def test_check_correction_article():
+    before = '''<article>
+        <article-categories>
+        <subj-group subj-group-type="heading">
+        <subject>Correction</subject>
+        </subj-group>
+        </article-categories>
+        </article>'''
+    message = 'error: no related article element'
+    check(before, message, x.check_correction_article)
+
+    before = '''<article article-type='correction'>
+        <article-categories>
+        <subj-group subj-group-type="heading">
+        <subject>Correction</subject>
+        </subj-group>
+        </article-categories>
+        <article-meta>
+        <related-article related-article-type="article">
+        <article-title>Glutamine Supplementation Stimulates Protein-Synthetic</article-title>
+        </related-article></article-meta>
+        </article>'''
+    message = "error: related-article-type is not 'corrected-article'"
+    check(before, message, x.check_correction_article)
+
+    before = '''<article article-type="research-article">
+        <article-categories>
+        <subj-group subj-group-type="heading">
+        <subject>Correction</subject>
+        </subj-group>
+        </article-categories>
+        <article-meta>
+        <related-article related-article-type="corrected-article">
+        <article-title>Glutamine Supplementation Stimulates Protein-Synthetic</article-title>
+        </related-article></article-meta>
+        </article>'''
+    message = "error: article element article-type attribute not 'correction'"
+    check(before, message, x.check_correction_article)
+
+    before = '''<article article-type='retraction'>
+        <article-categories>
+        <subj-group subj-group-type="heading">
+        <subject>Retraction</subject>
+        </subj-group>
+        </article-categories>
+        <article-meta>
+        <related-article related-article-type="article">
+        <article-title>Glutamine Supplementation Stimulates Protein-Synthetic</article-title>
+        </related-article></article-meta>
+        </article>'''
+    message = "error: related-article-type is not 'retracted-article'"
+    check(before, message, x.check_correction_article)
+
+    before = '''<article article-type="research-article">
+        <article-categories>
+        <subj-group subj-group-type="heading">
+        <subject>Retraction</subject>
+        </subj-group>
+        </article-categories>
+        <article-meta>
+        <related-article related-article-type="retracted-article">
+        <article-title>Glutamine Supplementation Stimulates Protein-Synthetic</article-title>
+        </related-article></article-meta>
+        </article>'''
+    message = "error: article element article-type attribute not 'retraction'"
+    check(before, message, x.check_correction_article)
+
+    before = '''<article article-type='expression-of-concern'>
+        <article-categories>
+        <subj-group subj-group-type="heading">
+        <subject>Expression of Concern</subject>
+        </subj-group>
+        </article-categories>
+        <article-meta>
+        <related-article related-article-type="article">
+        <article-title>Glutamine Supplementation Stimulates Protein-Synthetic</article-title>
+        </related-article></article-meta>
+        </article>'''
+    message = "error: related-article-type is not 'object-of-concern'"
+    check(before, message, x.check_correction_article)
+
+    before = '''<article article-type="research-article">
+        <article-categories>
+        <subj-group subj-group-type="heading">
+        <subject>Expression of Concern</subject>
+        </subj-group>
+        </article-categories>
+        <article-meta>
+        <related-article related-article-type="object-of-concern">
+        <article-title>Glutamine Supplementation Stimulates Protein-Synthetic</article-title>
+        </related-article></article-meta>
+        </article>'''
+    message = "error: article element article-type attribute not 'expression-of-concern'"
+    check(before, message, x.check_correction_article)
+
 
 def test_check_nlm_ta():
     before = '''<journal-meta><journal-id journal-id-type="nlm-ta">plosone</journal-id></journal-meta>'''

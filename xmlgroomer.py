@@ -70,6 +70,31 @@ def fix_article_type(root):
     return root
 groomers.append(fix_article_type)
 
+def check_correction_article(root):
+    global output
+    cxns = ['Correction', 'Retraction', 'Expression of Concern']
+    if get_singular_node(root, "//article-categories//subj-group[@subj-group-type='heading']/subject").text in cxns:
+        try:
+            subj = get_singular_node(root, "//article-categories//subj-group[@subj-group-type='heading']/subject").text
+            ra = get_singular_node(root,'//article-meta/related-article')
+            article = get_singular_node(root, '//article')
+            if subj == 'Correction' and ra.attrib['related-article-type'] != 'corrected-article':
+                output += "error: related-article-type is not 'corrected-article'\n"
+            elif ra.attrib['related-article-type'] == 'corrected-article' and article.attrib['article-type'] != 'correction':
+                output += "error: article element article-type attribute not 'correction'\n"
+            elif subj == 'Retraction' and ra.attrib['related-article-type'] != 'retracted-article':
+                output += "error: related-article-type is not 'retracted-article'\n"
+            elif ra.attrib['related-article-type'] == 'retracted-article' and article.attrib['article-type'] != 'retraction':
+                output += "error: article element article-type attribute not 'retraction'\n"
+            elif subj == 'Expression of Concern' and ra.attrib['related-article-type'] != 'object-of-concern':
+                output += "error: related-article-type is not 'object-of-concern'\n"
+            elif ra.attrib['related-article-type'] == 'object-of-concern' and article.attrib['article-type'] != 'expression-of-concern':
+                output += "error: article element article-type attribute not 'expression-of-concern'\n"
+        except ValueError:
+            output += 'error: no related article element\n'
+    return root
+groomers.append(check_correction_article)
+
 
 def fix_subject_category(root):
     global output
@@ -645,6 +670,7 @@ def check_missing_blurb(root):
 @register_groom
 def check_SI_attributes(root):
     global output
+
     doi = get_doi(root).split('10.1371/journal.')[1]
 
     for si in root.xpath("//article/body/sec/supplementary-material"):
