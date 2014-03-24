@@ -77,6 +77,22 @@ def test_fix_article_type():
         </article>'''
     verify(before, after, x.fix_article_type)
 
+    before = '''<article>
+        <article-categories>
+        <subj-group subj-group-type="heading">
+        <subject>Research article</subject>
+        </subj-group>
+        </article-categories>
+        </article>'''
+    after = '''<article>
+        <article-categories>
+        <subj-group subj-group-type="heading">
+        <subject>Research Article</subject>
+        </subj-group>
+        </article-categories>
+        </article>'''
+    verify(before, after, x.fix_article_type)
+
 
 def test_fix_subject_category():
     before = '''<article><subj-group subj-group-type="heading"><subject>Research Article</subject></subj-group>
