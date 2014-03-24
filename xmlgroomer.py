@@ -61,14 +61,15 @@ def get_singular_node(elmnt, path):
 
 def fix_article_type(root):
     global output
-    for typ in (root.xpath("//article-categories//"
-                           "subj-group[@subj-group-type='heading']/subject")):
-        if typ.text == 'Clinical Trial':
-            typ.text = 'Research Article'
-            output += 'correction: changed article type from' \
-                      ' Clinical Trial to Research Article\n'
+    atitle = get_singular_node(root, "//article-categories//subj-group[@subj-group-type='heading']/subject")
+    bad = ['Clinical Trial', 'Research article']
+    if atitle.text in bad:
+        old = atitle.text
+        atitle.text = 'Research Article'
+        output += 'correction: changed article type from "%s" to "Research Article"\n' % old
     return root
 groomers.append(fix_article_type)
+
 
 def check_correction_article(root):
     global output
