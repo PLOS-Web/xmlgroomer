@@ -200,6 +200,7 @@ def fix_pubdate(root):
                 if xml_val != em[field]:
                     date.xpath(field)[0].text = em[field]
                     output += 'correction: changed pub '+field+' from '+xml_val+' to '+em[field]+'\n'
+                    output += 'warning: Pub date has been changed, make sure PDF pub date info matches XML\n'
     return root
 groomers.append(fix_pubdate)
 
@@ -261,13 +262,22 @@ def fix_pub_date_elements(root):
     '''
     global output
     year = get_singular_node(root, "//pub-date[@pub-type='epub']/year")
+    month = get_singular_node(root, "//pub-date[@pub-type='epub']/month")
     if root.xpath("//pub-date[@pub-type='collection']"):
         for coll in root.xpath("//pub-date[@pub-type='collection']"):
             if get_singular_node(root, '//journal-title-group/journal-title').text == "PLoS ONE":
                 if coll.xpath('month'):
                     mo = get_singular_node(coll, 'month')
                     mo.getparent().remove(mo)
-                    output += "correction: removed month from collection tag\n"
+                    output += 'correction: removed month from collection tag\n'
+            else:
+                pub_val = month.text
+                xml_val = get_singular_node(coll, 'month').text
+                if xml_val != pub_val:
+                    get_singular_node(coll, 'month').text = pub_val
+                    output += 'correction: changed collection month from '\
+                              + xml_val + ' to ' + pub_val + '\n'
+
             if coll.xpath('year'):
                 pub_val = year.text
                 xml_val = get_singular_node(coll, 'year').text
