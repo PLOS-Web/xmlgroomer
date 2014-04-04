@@ -187,7 +187,20 @@ def test_fix_pub_date_elements():
     after = '''<article><article-meta>
         <journal-title-group><journal-title>PLoS Genetics</journal-title></journal-title-group>
         <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
-        <pub-date pub-type="collection"><month>5</month><year>2013</year></pub-date>
+        <pub-date pub-type="collection"><month>3</month><year>2013</year></pub-date>
+        </article-meta></article>'''
+    verify(before, after, x.fix_pub_date_elements)
+
+    #fix month tag if journal other than PLoS ONE
+    before = '''<article><article-meta>
+        <journal-title-group><journal-title>PLoS Genetics</journal-title></journal-title-group>
+        <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
+        <pub-date pub-type="collection"><month>5</month><year>2009</year></pub-date>
+        </article-meta></article>'''
+    after = '''<article><article-meta>
+        <journal-title-group><journal-title>PLoS Genetics</journal-title></journal-title-group>
+        <pub-date pub-type="epub"><day>13</day><month>3</month><year>2013</year></pub-date>
+        <pub-date pub-type="collection"><month>3</month><year>2013</year></pub-date>
         </article-meta></article>'''
     verify(before, after, x.fix_pub_date_elements)
 
