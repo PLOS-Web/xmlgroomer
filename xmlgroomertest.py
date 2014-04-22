@@ -595,8 +595,18 @@ def test_check_correction_article():
         <article-title>Glutamine Supplementation Stimulates Protein-Synthetic</article-title>
         </related-article></article-meta>
         </article>'''
-    message = "error: related-article-type is not 'retracted-article'"
-    check(before, message, x.check_correction_article)
+    after = '''<article article-type='retraction'>
+        <article-categories>
+        <subj-group subj-group-type="heading">
+        <subject>Retraction</subject>
+        </subj-group>
+        </article-categories>
+        <article-meta>
+        <related-article related-article-type="retracted-article">
+        <article-title>Glutamine Supplementation Stimulates Protein-Synthetic</article-title>
+        </related-article></article-meta>
+        </article>'''
+    verify(before, after, x.check_correction_article)
 
     before = '''<article article-type="research-article">
         <article-categories>
@@ -609,8 +619,42 @@ def test_check_correction_article():
         <article-title>Glutamine Supplementation Stimulates Protein-Synthetic</article-title>
         </related-article></article-meta>
         </article>'''
-    message = "error: article element article-type attribute not 'retraction'"
-    check(before, message, x.check_correction_article)
+    after = '''<article article-type="retraction">
+        <article-categories>
+        <subj-group subj-group-type="heading">
+        <subject>Retraction</subject>
+        </subj-group>
+        </article-categories>
+        <article-meta>
+        <related-article related-article-type="retracted-article">
+        <article-title>Glutamine Supplementation Stimulates Protein-Synthetic</article-title>
+        </related-article></article-meta>
+        </article>'''
+    verify(before, after, x.check_correction_article)
+
+    before = '''<article article-type="research-article">
+        <article-categories>
+        <subj-group subj-group-type="heading">
+        <subject>Retraction</subject>
+        </subj-group>
+        </article-categories>
+        <article-meta>
+        <related-article related-article-type="companion">
+        <article-title>Glutamine Supplementation Stimulates Protein-Synthetic</article-title>
+        </related-article></article-meta>
+        </article>'''
+    after = '''<article article-type="retraction">
+        <article-categories>
+        <subj-group subj-group-type="heading">
+        <subject>Retraction</subject>
+        </subj-group>
+        </article-categories>
+        <article-meta>
+        <related-article related-article-type="retracted-article">
+        <article-title>Glutamine Supplementation Stimulates Protein-Synthetic</article-title>
+        </related-article></article-meta>
+        </article>'''
+    verify(before, after, x.check_correction_article)
 
     before = '''<article article-type='expression-of-concern'>
         <article-categories>

@@ -62,7 +62,7 @@ def get_singular_node(elmnt, path):
 def fix_article_type(root):
     global output
     atitle = get_singular_node(root, "//article-categories//subj-group[@subj-group-type='heading']/subject")
-    bad = ['Clinical Trial', 'Research article']
+    bad = ['Clinical Trial', 'Research article', 'Research Articles']
     if atitle.text in bad:
         old = atitle.text
         atitle.text = 'Research Article'
@@ -83,10 +83,15 @@ def check_correction_article(root):
                 output += "error: related-article-type is not 'corrected-article'\n"
             elif ra.attrib['related-article-type'] == 'corrected-article' and article.attrib['article-type'] != 'correction':
                 output += "error: article element article-type attribute not 'correction'\n"
-            elif subj == 'Retraction' and ra.attrib['related-article-type'] != 'retracted-article':
-                output += "error: related-article-type is not 'retracted-article'\n"
-            elif ra.attrib['related-article-type'] == 'retracted-article' and article.attrib['article-type'] != 'retraction':
-                output += "error: article element article-type attribute not 'retraction'\n"
+            elif subj == 'Retraction':
+                if ra.attrib['related-article-type'] != 'retracted-article':
+                    oldratype = ra.attrib['related-article-type']
+                    ra.attrib['related-article-type'] = 'retracted-article'
+                    output += "correction: related-article-type changed from "+oldratype+" to 'retracted-article'\n"
+                if article.attrib['article-type'] != 'retraction':
+                    oldaatype = article.attrib['article-type']
+                    article.attrib['article-type'] = 'retraction'
+                    output += "correction: article element article-type attribute changed from "+oldaatype+" to 'retraction'\n"
             elif subj == 'Expression of Concern' and ra.attrib['related-article-type'] != 'object-of-concern':
                 output += "error: related-article-type is not 'object-of-concern'\n"
             elif ra.attrib['related-article-type'] == 'object-of-concern' and article.attrib['article-type'] != 'expression-of-concern':
