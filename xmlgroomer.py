@@ -319,6 +319,7 @@ def fix_volume(root):
             old_volume = volume.text
             volume.text = correct_volume
             output += 'correction: changed volume from '+old_volume+' to '+volume.text+'\n'
+            output += 'warning: Volume has been changed, make sure PDF citation and footer info matches XML\n'
     return root
 groomers.append(fix_volume)
 
@@ -331,6 +332,7 @@ def fix_issue(root):
             old_issue = issue.text
             issue.text = month
             output += 'correction: changed issue from '+old_issue+' to '+issue.text+'\n'
+            output += 'warning: Issue has been changed, make sure PDF citation and footer info matches XML\n'
     return root
 groomers.append(fix_issue)
 
