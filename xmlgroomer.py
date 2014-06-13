@@ -681,7 +681,7 @@ def check_missing_blurb(root):
     if journal in blurb_journals:
         abstract_toc = root.xpath('//article/front/article-meta/abstract[@abstract-type="toc"]')
         if not abstract_toc:
-            output += "error: article xml is missing 'blurb'\n"
+            output += "warning: article xml is missing 'blurb'\n"
     return root
 
 

@@ -744,7 +744,7 @@ def test_check_missing_blurbs():
     </article-meta>
   </front>
 </article>'''
-    message = "error: article xml is missing 'blurb'\n"
+    message = "warning: article xml is missing 'blurb'\n"
     check(before, message, x.check_missing_blurb)
 
 
