@@ -1051,6 +1051,16 @@ def test_check_valid_journal_title():
     message = "error: invalid journal title in metadata: %s" % bad_journal_name
     check(before, message, x.check_valid_journal_title)
 
+def test_check_editor_affiliation():
+    before = """\
+    <article xmlns:xlink="http://www.w3.org/1999/xlink">
+       <front>
+            <aff id="edit1"><addr-line>The University of Wherever, Taiwan, Province of China</addr-line></aff>
+        </front>
+    </article>"""
+    message = "error: Remove 'Province of China' from Editor address in XML and PDF\n"
+
+    check(before, message, x.check_editor_affiliation)
 
 def test_alert_merops_validator_error():
     before = """\
