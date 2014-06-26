@@ -811,6 +811,17 @@ def check_valid_journal_title(root):
 
     return root
 
+@register_groom
+def check_editor_affiliation(root):
+    global output
+    aff = get_singular_node(root, "//aff[@id='edit1']/addr-line")
+
+    regex = "taiwan, province of china"
+    if re.search(regex, aff.text.lower()):
+        output += "error: Remove 'Province of China' from Editor address in XML and PDF\n"
+
+    return root
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser("xmlgroomer.py before.xml after.xml\ndry run: xmlgroomer.py before.xml")
