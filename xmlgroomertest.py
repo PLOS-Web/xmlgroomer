@@ -135,6 +135,22 @@ def test_fix_affiliation():
         <aff id="aff1"><label>1</label><addr-line>Institute</addr-line></aff></article>"""
     verify(before, after, x.fix_affiliation)
 
+    before = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <contrib xlink:type="simple" contrib-type="author">
+        <collab>CCPMOH Study Group</collab></contrib>
+        <contrib xlink:type="simple" contrib-type="author">
+        <name><surname>Winawer</surname><given-names>Jonathan</given-names></name>
+        <xref ref-type="corresp" rid="cor1"/></contrib>
+        <aff id="aff1"><label>1</label><addr-line>Institute</addr-line></aff></article>"""
+    after = """<article xmlns:xlink="http://www.w3.org/1999/xlink">
+        <contrib xlink:type="simple" contrib-type="author">
+        <collab>CCPMOH Study Group</collab></contrib>
+        <contrib xlink:type="simple" contrib-type="author">
+        <name><surname>Winawer</surname><given-names>Jonathan</given-names></name>
+        <xref ref-type="aff" rid="aff1"/><xref ref-type="corresp" rid="cor1"/></contrib>
+        <aff id="aff1"><label>1</label><addr-line>Institute</addr-line></aff></article>"""
+    verify(before, after, x.fix_affiliation)
+
 
 def test_fix_addrline():
     before = """<aff id="aff1"><label>1</label> <addr-line>Institute</addr-line>,</aff>"""

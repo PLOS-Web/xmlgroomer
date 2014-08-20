@@ -150,18 +150,19 @@ groomers.append(fix_bad_italic_tags_running_title)
 def fix_affiliation(root):
     global output
     for author in root.xpath("//contrib[@contrib-type='author']"):
-        aff = author.xpath("xref[@ref-type='aff']")
-        name = (author.xpath("name/surname")[0].text
-                if author.xpath("name/surname")
-                else author.xpath("collab")[0].text)
-        aff_count = len(root.xpath("//aff[starts-with(@id, 'aff')]"))
-        if not aff:
-            if aff_count == 1:
-                author.insert(1, etree.fromstring("""<xref ref-type='aff' rid='aff1'/>"""))
+        if not author.xpath("collab"):
+            aff = author.xpath("xref[@ref-type='aff']")
+            name = (author.xpath("name/surname")[0].text
+                    if author.xpath("name/surname")
+                    else author.xpath("collab")[0].text)
+            aff_count = len(root.xpath("//aff[starts-with(@id, 'aff')]"))
+            if not aff:
+                if aff_count == 1:
+                    author.insert(1, etree.fromstring("""<xref ref-type='aff' rid='aff1'/>"""))
+                    output += 'correction: set rid=aff1 for '+name+'\n'
+            elif aff[0].attrib['rid'] == 'aff':
+                aff[0].attrib['rid'] = 'aff1'
                 output += 'correction: set rid=aff1 for '+name+'\n'
-        elif aff[0].attrib['rid'] == 'aff':
-            aff[0].attrib['rid'] = 'aff1'
-            output += 'correction: set rid=aff1 for '+name+'\n'
     return root
 groomers.append(fix_affiliation)
 
@@ -656,7 +657,7 @@ def check_article_type(root):
                      "Overview","Perspective","Pearls","Photo Quiz","Policy Forum","Policy Platform","Primer","Reader Poll",
                      "Research Article","Research in Translation","Review","Special Report","Symposium","Synopsis",
                      "Technical Report","The PLoS Medicine Debate","Unsolved Mystery","Viewpoints", "Correction", "Retraction",
-                     "Formal Comment", "Collection Review"]
+                     "Formal Comment"]
     for typ in root.xpath("//article-categories//subj-group[@subj-group-type='heading']/subject"):
         if typ.text not in article_types:
             output += 'error: '+typ.text+' is not a valid article type\n'
