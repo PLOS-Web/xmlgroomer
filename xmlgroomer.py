@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # usage: xmlgroomer.py before.xml after.xml
 
 import sys
@@ -146,6 +147,22 @@ def fix_bad_italic_tags_running_title(root):
     return root
 groomers.append(fix_bad_italic_tags_running_title)
 
+def check_au_names_for_beta(root):
+    global output
+    regex = u"\u03B2"  # "β"
+    german = u"\u00DF" # "ß"
+    for author in root.xpath("//contrib[@contrib-type='author']"):
+        if not author.xpath("collab"):
+            first = get_singular_node(author, "name/given-names").text
+            last = get_singular_node(author, "name/surname").text
+            if re.search(regex, first) or re.search(regex, last):
+                output += 'warning: "%s %s" contains a beta which might be incorrect. Consult manuscript to confirm whether beta was meant to be a German s-set character "%s"\n' % (first, last, german)
+        else:
+            group = get_singular_node(author, 'collab').text
+            if re.search(regex, group):
+                output += 'warning: "%s" contains a beta which might be incorrect. Consult manuscript to confirm whether beta was meant to be a German s-set character "%s"\n' % (group, german)
+    return root
+groomers.append(check_au_names_for_beta)
 
 def fix_affiliation(root):
     global output
@@ -816,7 +833,6 @@ def check_valid_journal_title(root):
 def check_editor_affiliation(root):
     global output
     aff = get_singular_node(root, "//aff[@id='edit1']/addr-line")
-
     regex = "taiwan, province of china"
     if re.search(regex, aff.text.lower()):
         output += "error: Remove 'Province of China' from Editor address in XML and PDF\n"
