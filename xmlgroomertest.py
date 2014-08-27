@@ -550,6 +550,18 @@ def test_remove_pua_set():
     verify_char_stream(before, after, x.remove_pua_set)
 
 
+def test_check_au_names_for_beta():
+    before = u'''<contrib contrib-type="author"><name><surname>Okadaβ</surname>
+    <given-names>Kazunori</given-names></name><xref ref-type="aff" rid="aff2">
+    <sup>2</sup></xref></contrib>'''
+    message = u'warning: "Kazunori Okadaβ" contains a beta which might be incorrect. Consult manuscript to confirm whether beta was meant to be a German s-set character "ß"'
+    check(before, message, x.check_au_names_for_beta)
+
+    before = u'''<contrib contrib-type="author"><collab>The PLOS ONE Staffβ</collab></contrib>'''
+    message = u'warning: "The PLOS ONE Staffβ" contains a beta which might be incorrect. Consult manuscript to confirm whether beta was meant to be a German s-set character "ß"'
+    check(before, message, x.check_au_names_for_beta)
+
+
 def test_check_article_type():
     before = '''<article>
         <article-categories>
