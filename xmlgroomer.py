@@ -674,7 +674,7 @@ def check_article_type(root):
                      "Overview","Perspective","Pearls","Photo Quiz","Policy Forum","Policy Platform","Primer","Reader Poll",
                      "Research Article","Research in Translation","Review","Special Report","Symposium","Synopsis",
                      "Technical Report","The PLoS Medicine Debate","Unsolved Mystery","Viewpoints", "Correction", "Retraction",
-                     "Formal Comment"]
+                     "Formal Comment", "Collection Review"]
     for typ in root.xpath("//article-categories//subj-group[@subj-group-type='heading']/subject"):
         if typ.text not in article_types:
             output += 'error: '+typ.text+' is not a valid article type\n'
