@@ -917,6 +917,32 @@ def test_check_collab_markup():
     check(before, message, x.check_collab_markup)
 
 
+def test_check_collab_children():
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <contrib-group>
+    <contrib>
+       <collab>blah<contrib-group></contrib-group></collab>
+    </contrib>
+  </contrib-group>
+</article>
+'''
+    message = 'warning: Collab "blah" includes a nested contrib-group. This may be causing erroneous authors to appear after the collab in the rendered byline.\n'
+    check(before, message, x.check_collab_children)
+
+    collab = "lalala"
+    before = '''
+<article xmlns:xlink="http://www.w3.org/1999/xlink">
+  <contrib-group>
+    <contrib>
+       <collab>%s</collab>
+    </contrib>
+  </contrib-group>
+</article>
+''' % collab
+    message = ""
+    check(before, message, x.check_collab_children)
+
 def test_on_behalf_of_markup():
     collab = "for"
     before = '''

@@ -758,6 +758,18 @@ def check_collab_markup(root):
     return root
 
 
+@register_groom
+def check_collab_children(root):
+    global output
+
+    for collab in root.xpath('//contrib-group/contrib/collab'):
+        if collab.xpath('contrib-group'):
+            output+= 'warning: Collab "%s" includes a nested contrib-group. ' \
+                      'This may be causing erroneous authors to appear after the ' \
+                      'collab in the rendered byline.\n' % collab.text
+    return root
+
+
 #@register_groom
 def check_on_behalf_of_markup(root):
     global output
